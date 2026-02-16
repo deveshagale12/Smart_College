@@ -1,4 +1,4 @@
-package com.smartCollege;
+package com.SmartCollege;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,4 +36,5 @@ public class AcademicController {
         academicService.deleteRecord(recordId);
         return ResponseEntity.ok("Academic record deleted successfully");
     }
+
 }
