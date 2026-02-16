@@ -1,4 +1,4 @@
-package com.example.smartCollege;
+package com.smartCollege;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,4 +1,4 @@
-package com.example.smartCollege;
+package com.smartCollege;
 
 import jakarta.persistence.*;
 

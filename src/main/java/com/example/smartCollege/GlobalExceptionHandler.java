@@ -1,4 +1,4 @@
-package com.example.smartCollege;
+package com.smartCollege;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

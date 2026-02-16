@@ -1,4 +1,4 @@
-package com.example.smartCollege;
+package com.smartCollege;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

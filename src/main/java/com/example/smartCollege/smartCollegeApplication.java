@@ -1,5 +1,5 @@
 
-package com.example.smartCollege;
+package com.smartCollege;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

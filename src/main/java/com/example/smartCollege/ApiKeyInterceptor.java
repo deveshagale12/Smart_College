@@ -1,4 +1,4 @@
-package com.example.smartCollege;
+package com.smartCollege;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
