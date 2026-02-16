@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass w-full max-auto max-w-lg rounded-2xl shadow-2xl p-8">
+        <div class="flex border-b mb-6">
+            <button id="loginTab" class="flex-1 pb-2 font-bold text-blue-600 border-b-2 border-blue-600" onclick="showForm('login')">Login</button>
+            <button id="regTab" class="flex-1 pb-2 font-bold text-gray-400" onclick="showForm('register')">Register</button>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
+            <input type="email" id="loginEmail" placeholder="Email" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" required>
+            <input type="password" id="loginPassword" placeholder="Password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" required>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300">Sign In</button>
+        </form>
+
+        <form id="regForm" class="space-y-3 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Join Our Portal</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" id="fullName" placeholder="Full Name" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="date" id="dob" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="email" id="email" placeholder="Email Address" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="password" id="password" placeholder="Password" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="text" id="phoneNo" placeholder="Phone Number" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="text" id="course" placeholder="Course Name" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="number" id="year" placeholder="Enrollment Year" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+                <input type="text" id="address" placeholder="Address" class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400" required>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition mt-4">Create Account</button>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8080/college/students";
+        const API_KEY = "StudentApiKey123"; // Replace with your key
+
+        function showForm(type) {
+            const loginForm = document.getElementById('loginForm');
+            const regForm = document.getElementById('regForm');
+            const loginTab = document.getElementById('loginTab');
+            const regTab = document.getElementById('regTab');
+
+            if (type === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                loginTab.className = "flex-1 pb-2 font-bold text-blue-600 border-b-2 border-blue-600";
+                regTab.className = "flex-1 pb-2 font-bold text-gray-400";
+            } else {
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+                regTab.className = "flex-1 pb-2 font-bold text-purple-600 border-b-2 border-purple-600";
+                loginTab.className = "flex-1 pb-2 font-bold text-gray-400";
+            }
+        }
+
+        // Handle Registration
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const studentData = {
+                fullName: document.getElementById('fullName').value,
+                dob: document.getElementById('dob').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                phoneNo: document.getElementById('phoneNo').value,
+                address: document.getElementById('address').value,
+                course: document.getElementById('course').value,
+                year: parseInt(document.getElementById('year').value)
+            };
+
+            const response = await fetch(`${API_BASE}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+                body: JSON.stringify(studentData)
+            });
+
+            if (response.ok) {
+                alert("Registration Successful! Please Login.");
+                showForm('login');
+            } else {
+                const err = await response.text();
+                alert("Error: " + err);
+            }
+        });
+
+        // Handle Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const loginData = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            const response = await fetch(`${API_BASE}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+                body: JSON.stringify(loginData)
+            });
+
+            if (response.ok) {
+                const student = await response.json();
+                localStorage.setItem('student', JSON.stringify(student)); // Save session
+                window.location.href = "studdashboard.html";
+            } else {
+                alert("Invalid Login Credentials!");
+            }
+        });
+    </script>
+</body>
+</html>

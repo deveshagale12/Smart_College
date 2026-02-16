@@ -1,25 +1,31 @@
 package com.example.smartCollege;
 
+import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
-import jakarta.persistence.*;
-
 @Entity
+@Table(name = "attendance")
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long attendId;
-    
+
     private LocalDate date;
     private LocalTime time;
-    private String status; // "PRESENT", "ABSENT", "LATE"
+    
+    // Status can be: PRESENT, ABSENT, LATE
+    private String status;
+
+    // Location fields
+    private Double latitude;
+    private Double longitude;
+    private String address; // Optional: Store a readable address string
 
     @ManyToOne
     @JoinColumn(name = "stud_id")
+    @JsonIgnore
     private Student student;
-
-    private Long facultyId; // Assuming faculty is handled by a simple ID for now
 
 	public Long getAttendId() {
 		return attendId;
@@ -53,6 +59,30 @@ public class Attendance {
 		this.status = status;
 	}
 
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
 	public Student getStudent() {
 		return student;
 	}
@@ -61,15 +91,7 @@ public class Attendance {
 		this.student = student;
 	}
 
-	public Long getFacultyId() {
-		return facultyId;
-	}
-
-	public void setFacultyId(Long facultyId) {
-		this.facultyId = facultyId;
-	}
-
-    // Getters and Setters
+    // Standard Getters and Setters
     
     
     

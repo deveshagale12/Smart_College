@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Pro-Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        .loader { border-top-color: transparent; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .nav-active { color: #4f46e5; border-top: 3px solid #4f46e5; }
+        @media (min-width: 768px) { .nav-active { border-top: none; border-left: 4px solid #4f46e5; background: #f5f3ff; } }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen pb-20 md:pb-0">
+
+    <aside class="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 flex-col z-20">
+        <div class="p-8">
+            <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">COLLEGE PRO</h1>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <button onclick="showSection('profile', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition nav-active">
+                <i class="fas fa-user-circle mr-3 text-lg"></i> My Profile
+            </button>
+            <button onclick="showSection('academic', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+                <i class="fas fa-graduation-cap mr-3 text-lg"></i> Academics
+            </button>
+            <button onclick="showSection('parent', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+    <i class="fas fa-users mr-3 text-lg"></i> Parents
+</button>
+<button onclick="showSection('marks', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+    <i class="fas fa-poll mr-3 text-lg"></i> Marks Entry
+</button>
+<button onclick="showSection('fees', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+    <i class="fas fa-wallet mr-3 text-lg"></i> Fee Status
+</button>
+<button onclick="showSection('attendance', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+    <i class="fas fa-calendar-check mr-3 text-lg"></i> Attendance
+</button>
+        </nav>
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="logout()" class="w-full flex items-center p-4 text-red-500 hover:bg-red-50 rounded-xl transition">
+                <i class="fas fa-sign-out-alt mr-3"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around items-center h-16 z-50 px-2">
+        <button onclick="showSection('profile', this)" class="nav-item-mobile flex flex-col items-center text-indigo-600">
+            <i class="fas fa-user text-xl"></i><span class="text-[10px] font-bold">Profile</span>
+        </button>
+        <button onclick="showSection('academic', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+            <i class="fas fa-graduation-cap text-xl"></i><span class="text-[10px] font-bold">Academics</span>
+        </button>
+        <button onclick="showSection('parent', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+    <i class="fas fa-users text-xl"></i><span class="text-[10px] font-bold">Parents</span>
+</button>
+        <button onclick="showSection('marks', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+    <i class="fas fa-file-invoice text-xl"></i><span class="text-[10px] font-bold">Marks</span>
+</button>
+<button onclick="showSection('fees', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+    <i class="fas fa-wallet text-xl"></i><span class="text-[10px] font-bold">Fees</span>
+</button>
+<button onclick="showSection('attendance', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+        <i class="fas fa-calendar-check text-xl"></i>
+        <span class="text-[10px] font-bold mt-1">Attendance</span>
+    </button>
+        <button onclick="logout()" class="flex flex-col items-center text-red-400">
+            <i class="fas fa-sign-out-alt text-xl"></i><span class="text-[10px] font-bold">Logout</span>
+        </button>
+    </nav>
+
+    <main class="md:ml-64 p-4 md:p-10">
+        
+        <header class="mb-8">
+            <h2 id="pageTitle" class="text-3xl font-extrabold text-slate-800">My Profile</h2>
+            <p class="text-slate-500">Manage your information and academic history</p>
+        </header>
+
+        <section id="profileSection" class="animate-in fade-in duration-500">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="h-32 bg-gradient-to-r from-indigo-500 to-violet-600"></div>
+                <div class="px-8 pb-8">
+                    <div class="relative -mt-16 flex flex-col md:flex-row md:items-end md:space-x-6 mb-8">
+                        <div class="relative inline-block mx-auto md:mx-0">
+                            <img id="profileImg" src="https://via.placeholder.com/150" class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-xl bg-white">
+                            <button onclick="document.getElementById('photoInput').click()" class="absolute -bottom-2 -right-2 bg-white p-2 rounded-xl shadow-lg text-indigo-600 border border-slate-100 hover:scale-110 transition">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <input type="file" id="photoInput" class="hidden" onchange="uploadPhoto()">
+                        </div>
+                        <div class="mt-4 text-center md:text-left">
+                            <h3 id="display_name" class="text-2xl font-bold text-slate-800">Loading...</h3>
+                            <p id="display_email" class="text-slate-500 uppercase text-xs font-bold tracking-widest">EMAIL@EXAMPLE.COM</p>
+                        </div>
+                        <button onclick="deletePhoto()" class="mt-4 md:mt-0 text-xs text-red-500 font-semibold hover:underline">Remove Photo</button>
+                    </div>
+
+                 <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Full Name</label>
+        <input type="text" id="edit_fullName" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Date of Birth</label>
+        <input type="date" id="edit_dob" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Phone Number</label>
+        <input type="text" id="edit_phoneNo" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Current Course</label>
+        <input type="text" id="edit_course" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Enrollment Year</label>
+        <input type="number" id="edit_year" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="space-y-2">
+        <label class="text-sm font-semibold text-slate-700 ml-1">Home Address</label>
+        <input type="text" id="edit_address" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    </div>
+    <div class="md:col-span-2 pt-4">
+        <button type="submit" id="saveProfileBtn" class="w-full md:w-max px-10 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition flex items-center justify-center">
+            <span class="btn-text">Save Profile Changes</span>
+            <div class="hidden ml-2 w-4 h-4 border-2 border-white loader rounded-full"></div>
+        </button>
+    </div>
+</form>
+                </div>
+            </div>
+        </section>
+
+        <section id="academicSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h3 class="text-xl font-bold">Records</h3>
+                        <p class="text-sm text-slate-500">Your yearly performance history</p>
+                    </div>
+                    <button onclick="openAddRecordModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">
+                        + Add Year
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="pb-4 px-2">Course</th>
+                                <th class="pb-4 px-2">Academic Year</th>
+                                <th class="pb-4 px-2">Status</th>
+                                <th class="pb-4 px-2 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="academicTableBody" class="text-sm border-t border-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section id="parentSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h3 class="text-xl font-bold">Parent Details</h3>
+                <p class="text-sm text-slate-500">Manage guardian information</p>
+            </div>
+            <button onclick="openParentModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
+                + Add Parent
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="pb-4 px-2">Name</th>
+                        <th class="pb-4 px-2">Phone</th>
+                        <th class="pb-4 px-2">Occupation</th>
+                        <th class="pb-4 px-2 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="parentTableBody" class="text-sm border-t border-slate-100"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div id="parentModal" class="modal fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none z-[100] p-4 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleParentModal(false)"></div>
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl z-10 p-8 transform scale-95 transition-transform">
+        <h4 id="parentModalTitle" class="text-2xl font-bold mb-6">Add Parent</h4>
+        <form id="parentForm" class="space-y-4">
+            <input type="text" id="p_name" placeholder="Parent Full Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+            <input type="text" id="p_phone" placeholder="Phone Number" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+            <input type="text" id="p_occupation" placeholder="Occupation" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+            
+            <button type="submit" id="saveParentBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                <span class="btn-text">Save Details</span>
+                <div class="hidden ml-2 w-5 h-5 border-2 border-white loader rounded-full"></div>
+            </button>
+        </form>
+    </div>
+</div>
+<section id="marksSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-200">
+            <p class="opacity-80 text-sm font-semibold">Average Score</p>
+            <h4 id="avgScore" class="text-3xl font-bold">0%</h4>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="text-xl font-bold text-slate-800">Exam Results</h3>
+            <button onclick="openMarksModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
+                + Add Marks
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="pb-4 px-2">Subject</th>
+                        <th class="pb-4 px-2">Test Type</th>
+                        <th class="pb-4 px-2">Score</th>
+                        <th class="pb-4 px-2">Percentage</th>
+                        <th class="pb-4 px-2 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="marksTableBody" class="text-sm border-t border-slate-100"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<section id="feesSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+<div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+            <h4 class="text-indigo-900 font-bold text-lg">Set Course Pricing</h4>
+            <p class="text-indigo-600 text-sm">Manually define the total tuition and exam fees for this student.</p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openUpdateBillingModal()" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                <i class="fas fa-edit mr-2"></i> Set Manual Fees
+            </button>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                <h3 class="text-lg font-bold mb-6 flex items-center">
+                    <i class="fas fa-calculator text-indigo-500 mr-2"></i> Billing Summary
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span class="text-slate-500">Total Course Fee</span>
+                        <span id="view_total" class="font-bold text-slate-800">₹0</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-slate-50 rounded-xl">
+                        <span class="text-slate-500">Exam Fees</span>
+                        <span id="view_exam" class="font-bold text-slate-800">₹0</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-green-50">
+                        <span class="text-green-600">Total Paid</span>
+                        <span id="view_paid" class="font-bold text-green-700">₹0</span>
+                    </div>
+                    <div class="pt-4 border-t border-dashed">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-bold text-slate-400">BALANCE DUE</span>
+                            <span id="view_due" class="text-2xl font-black text-red-500">₹0</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="openPaymentModal()" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition">
+                    Add New Payment
+                </button>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h4 class="font-bold text-slate-800">Payment Ledger</h4>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">All Records</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Amount Paid</th>
+                                <th class="p-6 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentHistoryBody" class="text-sm border-t border-slate-50">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="attendanceSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 text-center">
+                <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Daily Check-in</h3>
+                <p class="text-slate-500 text-sm mb-8">Mark your presence for today. Your GPS location will be recorded.</p>
+                
+                <div class="space-y-3">
+                    <button id="markPresentBtn" onclick="handleMarkAttendance('PRESENT')" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                        <span class="btn-text">Mark Present</span>
+                        <div class="loader hidden ml-2 w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+                    </button>
+                    <button onclick="handleMarkAttendance('LATE')" class="w-full py-4 bg-amber-50 text-amber-600 font-bold rounded-2xl hover:bg-amber-100 transition">
+                        Mark Late
+                    </button>
+                </div>
+                <p id="locationStatus" class="mt-4 text-xs text-slate-400"></p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h4 class="font-bold text-slate-800">Attendance History</h4>
+                    <span class="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-bold rounded-full uppercase tracking-widest">Recent Records</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="p-6">Date & Time</th>
+                                <th class="p-6">Status</th>
+                                <th class="p-6">Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceHistoryBody" class="text-sm border-t border-slate-50">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    </main>
+
+    <div id="recordModal" class="modal fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none z-[100] p-4 transition-all duration-300">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal(false)"></div>
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl z-10 overflow-hidden transform scale-95 transition-transform">
+            <div class="p-8">
+                <h4 id="modalTitle" class="text-2xl font-bold mb-6">Add Record</h4>
+                <form id="recordForm" class="space-y-4">
+                    <input type="text" id="rec_course" placeholder="Course Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" required>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="rec_year" placeholder="Year (2024)" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+                        <input type="number" id="rec_current" placeholder="Semester" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+                    </div>
+                    <select id="rec_status" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none">
+                        <option value="Pass">Pass</option>
+                        <option value="Fail">Fail</option>
+                    </select>
+                    <button type="submit" id="saveRecordBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                        <span class="btn-text">Confirm Save</span>
+                        <div class="hidden ml-2 w-5 h-5 border-2 border-white loader rounded-full"></div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="marksModal" class="modal fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none z-[100] p-4 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleMarksModal(false)"></div>
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl z-10 p-8 transform scale-95 transition-transform">
+        <h4 id="marksModalTitle" class="text-2xl font-bold mb-6">Enter Marks</h4>
+        <form id="marksForm" class="space-y-4">
+            <input type="text" id="m_subject" placeholder="Subject Name" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+            <select id="m_testType" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none">
+                <option value="Midterm">Midterm</option>
+                <option value="Final Exam">Final Exam</option>
+                <option value="Unit Test">Unit Test</option>
+            </select>
+            <div class="grid grid-cols-2 gap-4">
+                <input type="number" id="m_obtained" placeholder="Obtained" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+                <input type="number" id="m_outOf" placeholder="Out Of" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+            </div>
+            <button type="submit" id="saveMarksBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                <span class="btn-text">Save Marks</span>
+                <div class="hidden ml-2 w-5 h-5 border-2 border-white loader rounded-full"></div>
+            </button>
+        </form>
+    </div>
+</div>
+   <div id="paymentModal" class="modal fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none z-[100] p-4 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="togglePaymentModal(false)"></div>
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl z-10 p-8 transform scale-95 transition-transform">
+        <h4 class="text-2xl font-bold mb-6">Make a Payment</h4>
+        <form id="paymentForm" class="space-y-4">
+            <div class="p-4 bg-indigo-50 rounded-2xl mb-4">
+                <p class="text-xs text-indigo-600 font-bold uppercase">Payment Amount</p>
+                <input type="number" id="pay_amount" class="w-full bg-transparent text-2xl font-bold outline-none" placeholder="0.00">
+            </div>
+            <button type="submit" id="payBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                <span class="btn-text">Confirm Payment</span>
+                <div class="hidden ml-2 w-5 h-5 border-2 border-white loader rounded-full"></div>
+            </button>
+        </form>
+    </div>
+</div>
+<div id="updateBillingModal" class="modal fixed inset-0 flex items-center justify-center opacity-0 pointer-events-none z-[100] p-4 transition-all duration-300">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleBillingModal(false)"></div>
+    <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl z-10 p-8 transform scale-95 transition-transform">
+        <h4 class="text-2xl font-bold mb-6 text-slate-800">Manual Fee Setup</h4>
+        
+        <form id="manualBillingForm" class="space-y-5">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Total Course Fee</label>
+                <input type="number" id="manual_total" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 transition" required>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Exam Fee</label>
+                <input type="number" id="manual_exam" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-indigo-500 transition" required>
+            </div>
+            
+            <button type="submit" id="saveManualBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl flex items-center justify-center hover:bg-indigo-700 transition">
+                <span class="btn-text">Apply Fee Structure</span>
+                <div class="loader hidden ml-2 w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
+            </button>
+        </form>
+    </div>
+</div>
+    <script>
+        const API_KEY = "StudentApiKey123";
+        const BASE_URL = "http://localhost:8080/college";
+        const student = JSON.parse(localStorage.getItem('student'));
+        let currentEditId = null;
+
+        if (!student) window.location.href = "stud-auth.html";
+
+        function showSection(id, btn) {
+            // 1. CLEAR ALL MODALS (Added confirmDeleteModal and any others)
+            const modals = ['recordModal', 'marksModal', 'paymentModal', 'updateBillingModal', 'confirmDeleteModal'];
+            modals.forEach(mId => {
+                const modal = document.getElementById(mId);
+                if (modal) {
+                    modal.classList.add('opacity-0', 'pointer-events-none');
+                    const content = modal.querySelector('.transform');
+                    if (content) content.classList.remove('scale-100');
+                }
+            });
+
+            // 2. HIDE ALL SECTIONS
+            document.querySelectorAll('main > section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // 3. SHOW THE SELECTED SECTION
+            const targetSection = document.getElementById(id + 'Section');
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+            }
+
+            // 4. UPDATE PAGE TITLE (Added Attendance)
+            const titles = {
+                'profile': 'My Profile',
+                'academic': 'Academic Records',
+                'fees': 'Fees & Billing',
+                'attendance': 'Attendance Tracker' // <--- Added this
+            };
+            document.getElementById('pageTitle').innerText = titles[id] || 'Dashboard';
+
+            // 5. TRIGGER DATA LOADING
+            if (id === 'fees') {
+                loadFees(); 
+            }
+            // New: Load attendance data when the tab is clicked
+            if (id === 'attendance') {
+                loadAttendance(); // <--- Added this
+            }
+
+            // 6. ACTIVE STATE STYLING
+            document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => {
+                el.classList.remove('nav-active', 'text-indigo-600', 'bg-slate-50');
+                el.classList.add('text-slate-400');
+            });
+
+            if (btn) {
+                btn.classList.add('nav-active', 'text-indigo-600', 'bg-slate-50');
+                btn.classList.remove('text-slate-400');
+            }
+        }
+        function toggleModal(show) {
+            const modal = document.getElementById('recordModal');
+            if(show) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.children[1].classList.add('scale-100');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.children[1].classList.remove('scale-100');
+            }
+        }
+
+        // --- LOADING SPINNER HELPER ---
+        function setBtnLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const text = btn.querySelector('.btn-text');
+            const loader = btn.querySelector('.loader');
+            btn.disabled = isLoading;
+            if(isLoading) {
+                text.classList.add('opacity-50');
+                loader.classList.remove('hidden');
+            } else {
+                text.classList.remove('opacity-50');
+                loader.classList.add('hidden');
+            }
+        }
+
+        // --- CORE LOGIC ---
+       // 1. Fill fields when page loads
+// --- UPDATED CORE LOGIC ---
+async function loadProfile() {
+    try {
+        const res = await fetch(`${BASE_URL}/students/${student.studId}`, { 
+            headers: { 'X-API-KEY': API_KEY } 
+        });
+        const data = await res.json();
+        
+        // Fill Profile Fields
+        document.getElementById('edit_fullName').value = data.fullName || '';
+        document.getElementById('edit_dob').value = data.dob || ''; 
+        document.getElementById('edit_phoneNo').value = data.phoneNo || '';
+        document.getElementById('edit_address').value = data.address || '';
+        document.getElementById('edit_course').value = data.course || '';
+        document.getElementById('edit_year').value = data.year || '';
+        
+        document.getElementById('display_name').innerText = data.fullName;
+        document.getElementById('display_email').innerText = data.email.toUpperCase();
+        
+        // --- PHOTO LOADING LOGIC ---
+        const photoRes = await fetch(`${BASE_URL}/students/${student.studId}/photo`, { 
+            headers: { 'X-API-KEY': API_KEY } 
+        });
+        
+        if (photoRes.ok) {
+            const photoData = await photoRes.json();
+            // Added ?t= timestamp to bypass browser cache
+            document.getElementById('profileImg').src = `http://localhost:8080/user-photos/${photoData.fileName}?t=${new Date().getTime()}`;
+        } else {
+            document.getElementById('profileImg').src = "https://via.placeholder.com/150";
+        }
+    } catch (err) { console.error("Load Error:", err); }
+}
+
+async function uploadPhoto() {
+    const file = document.getElementById('photoInput').files[0];
+    if (!file) return;
+
+    // Show a simple loading state on the image
+    document.getElementById('profileImg').style.opacity = "0.5";
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await fetch(`${BASE_URL}/students/${student.studId}/upload-photo`, {
+            method: 'POST',
+            headers: { 'X-API-KEY': API_KEY },
+            body: formData
+        });
+
+        if (res.ok) {
+            alert("Photo Updated!");
+            loadProfile(); // Refresh image and data
+        } else {
+            alert("Upload failed. Check if file is too large.");
+        }
+    } catch (err) {
+        console.error("Upload Error:", err);
+    } finally {
+        document.getElementById('profileImg').style.opacity = "1";
+    }
+}
+
+async function deletePhoto() {
+    if (!confirm("Remove profile photo?")) return;
+
+    try {
+        const res = await fetch(`${BASE_URL}/students/${student.studId}/photo`, {
+            method: 'DELETE',
+            headers: { 'X-API-KEY': API_KEY }
+        });
+
+        if (res.ok) {
+            alert("Photo Removed");
+            document.getElementById('profileImg').src = "https://via.placeholder.com/150";
+        } else {
+            alert("Failed to delete photo.");
+        }
+    } catch (err) {
+        console.error("Delete Error:", err);
+    }
+}
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setBtnLoading('saveProfileBtn', true);
+
+    const updatedData = {
+        fullName: document.getElementById('edit_fullName').value,
+        dob: document.getElementById('edit_dob').value,
+        phoneNo: document.getElementById('edit_phoneNo').value,
+        address: document.getElementById('edit_address').value,
+        course: document.getElementById('edit_course').value,
+        year: parseInt(document.getElementById('edit_year').value)
+    };
+
+    try {
+        const res = await fetch(`${BASE_URL}/students/${student.studId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-API-KEY': API_KEY 
+            },
+            body: JSON.stringify(updatedData)
+        });
+
+        if (res.ok) {
+            alert("Profile updated successfully!");
+            loadProfile(); // Refresh the display
+        } else {
+            alert("Failed to update profile.");
+        }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setBtnLoading('saveProfileBtn', false);
+    }
+});
+
+        async function uploadPhoto() {
+            const file = document.getElementById('photoInput').files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch(`${BASE_URL}/students/${student.studId}/upload-photo`, {
+                method: 'POST',
+                headers: { 'X-API-KEY': API_KEY },
+                body: formData
+            });
+            if (res.ok) loadProfile();
+        }
+
+        async function loadAcademicRecords() {
+            const res = await fetch(`${BASE_URL}/academic/${student.studId}`, { headers: { 'X-API-KEY': API_KEY } });
+            const records = await res.json();
+            const body = document.getElementById('academicTableBody');
+            body.innerHTML = records.map(r => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="py-5 px-2 font-semibold text-slate-700">${r.courseName}</td>
+                    <td class="py-5 px-2 text-slate-500">${r.academicYear}</td>
+                    <td class="py-5 px-2">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${r.status === 'Pass' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${r.status}</span>
+                    </td>
+                    <td class="py-5 px-2 text-right space-x-3">
+                        <button onclick='openEditModal(${JSON.stringify(r)})' class="text-indigo-400 hover:text-indigo-600"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('recordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            setBtnLoading('saveRecordBtn', true);
+            
+            const data = {
+                courseName: document.getElementById('rec_course').value,
+                academicYear: document.getElementById('rec_year').value,
+                currentYear: parseInt(document.getElementById('rec_current').value),
+                status: document.getElementById('rec_status').value
+            };
+
+            const method = currentEditId ? 'PUT' : 'POST';
+            const url = currentEditId ? `${BASE_URL}/academic/${currentEditId}` : `${BASE_URL}/academic/${student.studId}`;
+
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    toggleModal(false);
+                    loadAcademicRecords();
+                    currentEditId = null;
+                }
+            } finally {
+                setBtnLoading('saveRecordBtn', false);
+            }
+        });
+
+        function openAddRecordModal() {
+            currentEditId = null;
+            document.getElementById('recordForm').reset();
+            document.getElementById('modalTitle').innerText = "Add Record";
+            toggleModal(true);
+        }
+
+        function openEditModal(record) {
+            currentEditId = record.id;
+            document.getElementById('modalTitle').innerText = "Edit Record";
+            document.getElementById('rec_course').value = record.courseName;
+            document.getElementById('rec_year').value = record.academicYear;
+            document.getElementById('rec_current').value = record.currentYear;
+            document.getElementById('rec_status').value = record.status;
+            toggleModal(true);
+        }
+
+        async function deleteRecord(id) {
+            if(confirm("Delete this record?")) {
+                await fetch(`${BASE_URL}/academic/${id}`, { method: 'DELETE', headers: { 'X-API-KEY': API_KEY } });
+                loadAcademicRecords();
+            }
+        }
+        
+        ///Parents let currentParentEditId = null;
+
+function toggleParentModal(show) {
+    const modal = document.getElementById('parentModal');
+    if(show) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.children[1].classList.add('scale-100');
+    } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.children[1].classList.remove('scale-100');
+    }
+}
+
+async function loadParents() {
+    const res = await fetch(`${BASE_URL}/parents/student/${student.studId}`, { 
+        headers: { 'X-API-KEY': API_KEY } 
+    });
+    const parents = await res.json();
+    const body = document.getElementById('parentTableBody');
+    body.innerHTML = parents.map(p => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+            <td class="py-5 px-2 font-semibold text-slate-700">${p.parentName}</td>
+            <td class="py-5 px-2 text-slate-500">${p.phone}</td>
+            <td class="py-5 px-2 text-slate-500">${p.occupation}</td>
+            <td class="py-5 px-2 text-right space-x-3">
+                <button onclick='openParentEditModal(${JSON.stringify(p)})' class="text-indigo-400 hover:text-indigo-600"><i class="fas fa-edit"></i></button>
+                <button onclick="deleteParent(${p.parentId})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+document.getElementById('parentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setBtnLoading('saveParentBtn', true);
+    
+    const data = {
+        parentName: document.getElementById('p_name').value,
+        phone: document.getElementById('p_phone').value,
+        occupation: document.getElementById('p_occupation').value
+    };
+
+    const method = currentParentEditId ? 'PUT' : 'POST';
+    const url = currentParentEditId ? `${BASE_URL}/parents/${currentParentEditId}` : `${BASE_URL}/parents/${student.studId}`;
+
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+            body: JSON.stringify(data)
+        });
+        if(res.ok) {
+            toggleParentModal(false);
+            loadParents();
+            currentParentEditId = null;
+        }
+    } finally {
+        setBtnLoading('saveParentBtn', false);
+    }
+});
+
+function openParentModal() {
+    currentParentEditId = null;
+    document.getElementById('parentForm').reset();
+    document.getElementById('parentModalTitle').innerText = "Add Parent";
+    toggleParentModal(true);
+}
+
+function openParentEditModal(parent) {
+    currentParentEditId = parent.parentId;
+    document.getElementById('parentModalTitle').innerText = "Edit Parent";
+    document.getElementById('p_name').value = parent.parentName;
+    document.getElementById('p_phone').value = parent.phone;
+    document.getElementById('p_occupation').value = parent.occupation;
+    toggleParentModal(true);
+}
+
+async function deleteParent(id) {
+    if(confirm("Delete this parent record?")) {
+        await fetch(`${BASE_URL}/parents/${id}`, { method: 'DELETE', headers: { 'X-API-KEY': API_KEY } });
+        loadParents();
+    }
+}
+
+// Update showSection to handle the new section
+const originalShowSection = showSection;
+showSection = function(id, btn) {
+    document.getElementById('parentSection').classList.add('hidden');
+    originalShowSection(id, btn);
+    if(id === 'parent') {
+        document.getElementById('parentSection').classList.remove('hidden');
+        document.getElementById('pageTitle').innerText = 'Parent Details';
+        loadParents();
+    }
+}
+
+
+
+////Marks session 
+let currentMarksEditId = null;
+
+function toggleMarksModal(show) {
+    const modal = document.getElementById('marksModal');
+    if(show) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.add('scale-100');
+    } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.remove('scale-100');
+    }
+}
+
+async function loadMarks() {
+    const res = await fetch(`${BASE_URL}/marks/student/${student.studId}`, { 
+        headers: { 'X-API-KEY': API_KEY } 
+    });
+    const marks = await res.json();
+    const body = document.getElementById('marksTableBody');
+    
+    let totalPercent = 0;
+    
+    body.innerHTML = marks.map(m => {
+        const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+        totalPercent += parseFloat(percent);
+        const colorClass = percent >= 40 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+
+        return `
+            <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                <td class="py-5 px-2 font-semibold text-slate-700">${m.subject}</td>
+                <td class="py-5 px-2 text-slate-500">${m.testType}</td>
+                <td class="py-5 px-2 text-slate-700 font-medium">${m.obtainedMarks} / ${m.outOf}</td>
+                <td class="py-5 px-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold ${colorClass}">${percent}%</span>
+                </td>
+                <td class="py-5 px-2 text-right space-x-3">
+                    <button onclick='openMarksEditModal(${JSON.stringify(m)})' class="text-indigo-400 hover:text-indigo-600"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteMarks(${m.marksId})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update Average Score Card
+    const avg = marks.length > 0 ? (totalPercent / marks.length).toFixed(1) : 0;
+    document.getElementById('avgScore').innerText = avg + "%";
+}
+
+document.getElementById('marksForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setBtnLoading('saveMarksBtn', true);
+    
+    const data = {
+        subject: document.getElementById('m_subject').value,
+        testType: document.getElementById('m_testType').value,
+        obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
+        outOf: parseFloat(document.getElementById('m_outOf').value)
+    };
+
+    const method = currentMarksEditId ? 'PUT' : 'POST';
+    const url = currentMarksEditId ? `${BASE_URL}/marks/${currentMarksEditId}` : `${BASE_URL}/marks/${student.studId}`;
+
+    await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+        body: JSON.stringify(data)
+    });
+
+    toggleMarksModal(false);
+    loadMarks();
+    setBtnLoading('saveMarksBtn', false);
+});
+
+function openMarksModal() {
+    currentMarksEditId = null;
+    document.getElementById('marksForm').reset();
+    document.getElementById('marksModalTitle').innerText = "Add Marks";
+    toggleMarksModal(true);
+}
+
+function openMarksEditModal(m) {
+    currentMarksEditId = m.marksId;
+    document.getElementById('marksModalTitle').innerText = "Edit Marks";
+    document.getElementById('m_subject').value = m.subject;
+    document.getElementById('m_testType').value = m.testType;
+    document.getElementById('m_obtained').value = m.obtainedMarks;
+    document.getElementById('m_outOf').value = m.outOf;
+    toggleMarksModal(true);
+}
+
+async function deleteMarks(id) {
+    if(confirm("Delete these marks?")) {
+        await fetch(`${BASE_URL}/marks/${id}`, { method: 'DELETE', headers: { 'X-API-KEY': API_KEY } });
+        loadMarks();
+    }
+}
+
+// Update the showSection switcher logic
+const baseShowSection = showSection;
+showSection = function(id, btn) {
+    document.getElementById('marksSection').classList.add('hidden');
+    baseShowSection(id, btn);
+    if(id === 'marks') {
+        document.getElementById('marksSection').classList.remove('hidden');
+        document.getElementById('pageTitle').innerText = 'Student Performance';
+        loadMarks();
+    }
+}
+
+///fees session 
+// --- MODAL CONTROLS ---
+function togglePaymentModal(show) {
+    const modal = document.getElementById('paymentModal');
+    if(show) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.add('scale-100');
+    } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.remove('scale-100');
+    }
+}
+
+function toggleBillingModal(show) {
+    const modal = document.getElementById('updateBillingModal');
+    if(show) {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.add('scale-100');
+    } else {
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.querySelector('.transform').classList.remove('scale-100');
+    }
+}
+
+function openPaymentModal() { togglePaymentModal(true); }
+function openUpdateBillingModal() {
+    // Get current numbers from the dashboard UI
+    const currentTotal = document.getElementById('view_total').innerText.replace(/[₹,]/g, '') || 0;
+    const currentExam = document.getElementById('view_exam').innerText.replace(/[₹,]/g, '') || 0;
+    
+    // Set them into the modal inputs
+    document.getElementById('manual_total').value = parseFloat(currentTotal);
+    document.getElementById('manual_exam').value = parseFloat(currentExam);
+    
+    toggleBillingModal(true);
+}
+// --- CORE FUNCTIONS ---
+
+// 1. LOAD ALL DATA
+async function loadFees() {
+    try {
+        const res = await fetch(`${BASE_URL}/fees/student/${student.studId}`, { 
+            headers: { 'X-API-KEY': API_KEY } 
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            
+            // Populate Summary Cards
+            document.getElementById('view_total').innerText = `₹${data.totalAmount.toLocaleString('en-IN')}`;
+            document.getElementById('view_exam').innerText = `₹${data.examFees.toLocaleString('en-IN')}`;
+            document.getElementById('view_paid').innerText = `₹${data.paidAmount.toLocaleString('en-IN')}`;
+            document.getElementById('view_due').innerText = `₹${data.dueAmount.toLocaleString('en-IN')}`;
+
+            // Populate Ledger Table
+            const historyBody = document.getElementById('paymentHistoryBody');
+            if (data.paymentHistory && data.paymentHistory.length > 0) {
+                historyBody.innerHTML = data.paymentHistory.map(pay => `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                        <td class="p-6 text-slate-600">${new Date(pay.paymentDate).toLocaleDateString('en-IN')}</td>
+                        <td class="p-6 font-bold text-slate-800">₹${pay.amountPaid.toLocaleString('en-IN')}</td>
+                        <td class="p-6 text-right">
+                            <button onclick="deletePayment(${pay.id})" class="text-red-300 hover:text-red-500 transition">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                historyBody.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400 italic">No payment history found.</td></tr>`;
+            }
+        }
+    } catch (err) {
+        console.error("Fee Load Error:", err);
+    }
+}
+
+// 2. ADD PAYMENT (POST TO LIST)
+document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('pay_amount').value;
+    if(!amount || amount <= 0) return alert("Enter valid amount");
+
+    setBtnLoading('payBtn', true);
+    try {
+        // Matches @PostMapping("/{studId}/pay")
+        const res = await fetch(`${BASE_URL}/fees/${student.studId}/pay?amount=${amount}`, {
+            method: 'POST',
+            headers: { 'X-API-KEY': API_KEY }
+        });
+        if(res.ok) {
+            alert("Payment Recorded!");
+            togglePaymentModal(false);
+            document.getElementById('paymentForm').reset();
+            loadFees(); 
+        }
+    } catch (err) {
+        console.error(err);
+    } finally {
+        setBtnLoading('payBtn', false);
+    }
+});
+
+// 3. MANUAL FEE SETUP (PUT UPDATE)
+document.getElementById('manualBillingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setBtnLoading('saveManualBtn', true);
+
+    // We pull the "Paid Amount" directly from the UI to ensure we don't overwrite it
+    const currentPaid = document.getElementById('view_paid').innerText.replace(/[₹,]/g, '') || 0;
+
+    const payload = {
+        totalAmount: parseFloat(document.getElementById('manual_total').value),
+        examFees: parseFloat(document.getElementById('manual_exam').value),
+        paidAmount: parseFloat(currentPaid)
+    };
+
+    try {
+        const res = await fetch(`${BASE_URL}/fees/update-billing/${student.studId}`, {
+            method: 'PUT',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-API-KEY': API_KEY 
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("Fees updated successfully!");
+            toggleBillingModal(false);
+            loadFees(); // Refresh the summary cards
+        }
+    } catch (err) {
+        alert("Failed to update fees. Check server.");
+    } finally {
+        setBtnLoading('saveManualBtn', false);
+    }
+});
+// 4. DELETE PAYMENT
+async function deletePayment(id) {
+    if(!confirm("Are you sure? This will remove the record and increase the balance due.")) return;
+    
+    try {
+        const res = await fetch(`${BASE_URL}/fees/payment/${id}`, { 
+            method: 'DELETE', 
+            headers: { 'X-API-KEY': API_KEY } 
+        });
+        
+        if(res.ok) {
+            loadFees(); 
+        }
+    } catch (err) {
+        console.error("Delete error:", err);
+    }
+}
+
+///Attendance session 
+// 1. Fetch and Display History
+async function loadAttendance() {
+    try {
+        const res = await fetch(`${BASE_URL}/attendance/history/${student.studId}`, {
+            headers: { 'X-API-KEY': API_KEY }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            const body = document.getElementById('attendanceHistoryBody');
+            
+            if (data.length === 0) {
+                body.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400">No records found.</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = data.map(record => {
+                const statusColor = record.status === 'PRESENT' ? 'bg-green-100 text-green-700' : 
+                                   record.status === 'LATE' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700';
+                
+             // Inside your data.map(record => { ... })
+                return `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="p-6">
+                        <div class="font-bold text-slate-800">${record.date}</div>
+                        <div class="text-xs text-slate-400">${record.time}</div>
+                    </td>
+                    <td class="p-6">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${statusColor}">${record.status}</span>
+                    </td>
+                    <td class="p-6 flex items-center justify-between">
+                        <a href="https://www.google.com/maps?q=${record.latitude},${record.longitude}" target="_blank" class="text-indigo-500 hover:underline">
+                            View Map
+                        </a>
+                        <button onclick="confirmDeleteAttendance(${record.attendId})" class="text-red-300 hover:text-red-500 transition ml-4">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+    } catch (err) { console.error("Load Attendance Error:", err); }
+}
+
+// 2. Mark Attendance with GPS
+async function handleMarkAttendance(status) {
+    if (!navigator.geolocation) return alert("GPS not supported by browser.");
+    
+    setBtnLoading('markPresentBtn', true);
+    document.getElementById('locationStatus').innerText = "Acquiring GPS Signal...";
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const payload = {
+            status: status,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        };
+
+        try {
+            const res = await fetch(`${BASE_URL}/attendance/mark/${student.studId}`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': API_KEY 
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("Attendance recorded successfully!");
+                loadAttendance();
+            }
+        } catch (err) {
+            alert("Connection error.");
+        } finally {
+            setBtnLoading('markPresentBtn', false);
+            document.getElementById('locationStatus').innerText = "";
+        }
+    }, (error) => {
+        setBtnLoading('markPresentBtn', false);
+        document.getElementById('locationStatus').innerText = "";
+        alert("Location access denied. Please enable GPS to mark attendance.");
+    });
+}
+async function confirmDeleteAttendance(id) {
+    if (!confirm("Are you sure you want to remove this attendance record?")) return;
+
+    try {
+        const res = await fetch(`${BASE_URL}/attendance/delete/${id}`, {
+            method: 'DELETE',
+            headers: { 'X-API-KEY': API_KEY }
+        });
+
+        if (res.ok) {
+            // Refresh the table to show it's gone
+            loadAttendance();
+        } else {
+            alert("Failed to delete record.");
+        }
+    } catch (err) {
+        console.error("Delete Error:", err);
+    }
+}
+        function logout() { localStorage.clear(); window.location.href = "stud-auth.html"; }
+
+        loadProfile();
+        
+        
+        
+        loadAcademicRecords();
+    </script>
+</body>
+</html>

@@ -1,20 +1,24 @@
 package com.example.smartCollege;
-
 import jakarta.persistence.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
+@Table(name = "student_marks")
 public class Marks {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long marksId;
-    
-    private String subject;
-    private Integer internalMarks;
-    private Integer externalMarks;
-    private String grade;
 
-    @ManyToOne
+    private String subject;
+    
+    @Column(name = "test_type") // e.g., Midterm, Final, Quiz
+    private String testType;
+    
+    private double outOf;
+    private double obtainedMarks;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stud_id")
+    @JsonIgnore
     private Student student;
 
 	public Long getMarksId() {
@@ -33,28 +37,28 @@ public class Marks {
 		this.subject = subject;
 	}
 
-	public Integer getInternalMarks() {
-		return internalMarks;
+	public String getTestType() {
+		return testType;
 	}
 
-	public void setInternalMarks(Integer internalMarks) {
-		this.internalMarks = internalMarks;
+	public void setTestType(String testType) {
+		this.testType = testType;
 	}
 
-	public Integer getExternalMarks() {
-		return externalMarks;
+	public double getOutOf() {
+		return outOf;
 	}
 
-	public void setExternalMarks(Integer externalMarks) {
-		this.externalMarks = externalMarks;
+	public void setOutOf(double outOf) {
+		this.outOf = outOf;
 	}
 
-	public String getGrade() {
-		return grade;
+	public double getObtainedMarks() {
+		return obtainedMarks;
 	}
 
-	public void setGrade(String grade) {
-		this.grade = grade;
+	public void setObtainedMarks(double obtainedMarks) {
+		this.obtainedMarks = obtainedMarks;
 	}
 
 	public Student getStudent() {
@@ -64,6 +68,9 @@ public class Marks {
 	public void setStudent(Student student) {
 		this.student = student;
 	}
+
+    // Getters and Setters
+    
     
     
 }

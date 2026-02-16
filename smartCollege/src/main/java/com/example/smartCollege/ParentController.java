@@ -1,37 +1,53 @@
 package com.example.smartCollege;
 
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 @RestController
-@RequestMapping("/api/parents")
-@CrossOrigin(origins = "*") // <--- Add this line to ALL Controllers
+@RequestMapping("/college/parents")
+@CrossOrigin(origins = "*")
 public class ParentController {
 
     @Autowired
-    private ParentService parentService;
+    private ParentRepository parentRepository;
 
-    // 1. View Student Progress (Marks & Attendance)
-    @GetMapping("/{parentId}/progress")
-    public ResponseEntity<Map<String, Object>> viewStudentProgress(@PathVariable Long parentId) {
-        return ResponseEntity.ok(parentService.getChildProgress(parentId));
+    @Autowired
+    private StudentRepository studentRepository;
+
+    // 1. ADD Parent to a Student
+    @PostMapping("/{studId}")
+    public ResponseEntity<Parent> addParent(@PathVariable Long studId, @RequestBody Parent parent) {
+        return studentRepository.findById(studId).map(student -> {
+            parent.setStudent(student);
+            return ResponseEntity.ok(parentRepository.save(parent));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
-    // 2. View Fees Status
-    @GetMapping("/{parentId}/fees")
-    public ResponseEntity<Fees> viewFeesStatus(@PathVariable Long parentId) {
-        return ResponseEntity.ok(parentService.getChildFees(parentId));
+    // 2. GET all parents for a specific student
+    @GetMapping("/student/{studId}")
+    public List<Parent> getParentsByStudent(@PathVariable Long studId) {
+        return parentRepository.findByStudentStudId(studId);
     }
 
-    // 3. Communicate with Faculty (Simple Message Simulation)
-    @PostMapping("/{parentId}/communicate")
-    public ResponseEntity<String> communicateFaculty(
-            @PathVariable Long parentId, 
-            @RequestParam Long facultyId, 
-            @RequestBody String message) {
-        return ResponseEntity.ok("Message sent from Parent ID " + parentId + " to Faculty ID " + facultyId);
+    // 3. UPDATE Parent Details
+    @PutMapping("/{parentId}")
+    public ResponseEntity<Parent> updateParent(@PathVariable Long parentId, @RequestBody Parent details) {
+        return parentRepository.findById(parentId).map(parent -> {
+            parent.setParentName(details.getParentName());
+            parent.setPhone(details.getPhone());
+            parent.setOccupation(details.getOccupation());
+            return ResponseEntity.ok(parentRepository.save(parent));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // 4. DELETE Parent
+    @DeleteMapping("/{parentId}")
+    public ResponseEntity<?> deleteParent(@PathVariable Long parentId) {
+        return parentRepository.findById(parentId).map(parent -> {
+            parentRepository.delete(parent);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

@@ -1,78 +1,115 @@
 package com.example.smartCollege;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.Map;
 @RestController
 @RequestMapping("/college/students")
-@CrossOrigin(origins = "*") // Allows frontend to access the API
 public class StudentController {
 
     @Autowired
-    private StudentRepository studentRepository;
-
-    // 1. REGISTER (Create Student)
+    private StudentService service;
+    
+    @Autowired
+    private PhotoService photoService;
+    
     @PostMapping("/register")
-    public ResponseEntity<Student> registerStudent(@RequestBody Student student) {
-        Student savedStudent = studentRepository.save(student);
-        return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
-    }
-
-    // 2. LOGIN (Basic Check)
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String password = credentials.get("password"); // This would be the phone number in your logic
-
-        return studentRepository.findByEmail(email)
-                .filter(student -> student.getPassword().equals(password))
-                .map(student -> ResponseEntity.ok("Login Successful for: " + student.getFullName()))
-                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials"));
-    }
-
-    // 3. GET ALL STUDENTS
-    @GetMapping
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    // 4. GET BY ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-        return studentRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // 5. UPDATE STUDENT
-    @PutMapping("/{id}")
-    public ResponseEntity<Student> updateStudent(@PathVariable Long id, @RequestBody Student studentDetails) {
-        return studentRepository.findById(id).map(student -> {
-            student.setFullName(studentDetails.getFullName());
-            student.setEmail(studentDetails.getEmail());
-            student.setPhoneNo(studentDetails.getPhoneNo());
-            student.setAddress(studentDetails.getAddress());
-            student.setCourse(studentDetails.getCourse());
-            student.setYear(studentDetails.getYear());
-         
-            
-            Student updatedStudent = studentRepository.save(student);
-            return ResponseEntity.ok(updatedStudent);
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    // 6. DELETE STUDENT
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
-        if (studentRepository.existsById(id)) {
-            studentRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<?> createStudent(@RequestBody Student student) {
+        try {
+            Student savedStudent = service.registerStudent(student);
+            // Returns 201 Created status, which is more REST-compliant for registration
+            return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
+        } catch (EmailAlreadyExistsException e) {
+            // Returns 409 Conflict with the custom error message
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e) {
+            // Catches any other unexpected errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
-        return ResponseEntity.notFound().build();
+    }
+    public class EmailAlreadyExistsException extends RuntimeException {
+        public EmailAlreadyExistsException(String message) {
+            super(message);
+        }
+    }
+ // 1. LOGIN
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
+        try {
+            Student student = service.login(loginData.get("email"), loginData.get("password"));
+            return ResponseEntity.ok(student);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    // 2. GET ALL
+    @GetMapping
+    public List<Student> getAll() {
+        return service.getAllStudents();
+    }
+
+    // 3. GET BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Student> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getStudentById(id));
+    }
+
+    // 4. UPDATE
+    @PutMapping("/{id}")
+    public ResponseEntity<Student> update(@PathVariable Long id, @RequestBody Student student) {
+        return ResponseEntity.ok(service.updateStudent(id, student));
+    }
+
+    // 5. DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        service.deleteStudent(id);
+        return ResponseEntity.ok("Student deleted successfully");
+    }
+    
+    //6. photo upload
+    
+    @PostMapping("/{id}/upload-photo")
+    public ResponseEntity<?> uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            StudentPhoto savedPhoto = photoService.uploadPhoto(id, file);
+            return ResponseEntity.ok("Photo linked to Student ID " + id + " successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    
+ // FETCH PHOTO DATA
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<StudentPhoto> getPhotoDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(photoService.getPhotoByStudentId(id));
+    }
+
+    // UPDATE PHOTO
+    @PutMapping("/{id}/upload-photo") // Using PUT for updates
+    public ResponseEntity<?> updateStudentPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        try {
+            StudentPhoto updated = photoService.updatePhoto(id, file);
+            return ResponseEntity.ok("Photo updated successfully: " + updated.getFileName());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/{id}/photo")
+    public ResponseEntity<String> removePhoto(@PathVariable Long id) {
+        try {
+            photoService.deletePhoto(id);
+            return ResponseEntity.ok("Profile photo deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error deleting photo: " + e.getMessage());
+        }
     }
 }

@@ -1,19 +1,21 @@
 package com.example.smartCollege;
 
 import jakarta.persistence.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
+@Table(name = "parents")
 public class Parent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long parentId;
-    
-    private String name;
+
+    private String parentName;
     private String phone;
     private String occupation;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stud_id")
+    @JsonIgnore // Prevents infinite recursion during JSON serialization
     private Student student;
 
 	public Long getParentId() {
@@ -24,12 +26,12 @@ public class Parent {
 		this.parentId = parentId;
 	}
 
-	public String getName() {
-		return name;
+	public String getParentName() {
+		return parentName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
 	}
 
 	public String getPhone() {
@@ -56,7 +58,7 @@ public class Parent {
 		this.student = student;
 	}
 
-    
-    
     // Getters and Setters
+    
+    
 }

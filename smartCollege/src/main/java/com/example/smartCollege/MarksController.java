@@ -1,28 +1,55 @@
 package com.example.smartCollege;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 @RestController
-@RequestMapping("/college/students/marks")
-@CrossOrigin(origins = "*") // <--- Add this line to ALL Controllers
+@RequestMapping("/college/marks")
+@CrossOrigin(origins = "*")
 public class MarksController {
 
     @Autowired
-    private MarksService marksService;
+    private MarksRepository marksRepository;
 
-    // Add new marks and automatically calculate grade
-    @PostMapping("/add")
-    public ResponseEntity<Marks> addMarks(@RequestBody Marks marks) {
-        return ResponseEntity.ok(marksService.saveMarks(marks));
+    @Autowired
+    private StudentRepository studentRepository;
+
+    // 1. ADD Marks for a Student
+    @PostMapping("/{studId}")
+    public ResponseEntity<Marks> addMarks(@PathVariable Long studId, @RequestBody Marks marks) {
+        return studentRepository.findById(studId).map(student -> {
+            marks.setStudent(student);
+            return ResponseEntity.ok(marksRepository.save(marks));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
-    // View marks for a specific student (Shows subjects and grades)
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<Marks>> getMarksByStudent(@PathVariable Long studentId) {
-        return ResponseEntity.ok(marksService.getMarksByStudentId(studentId));
+    // 2. GET all marks for a specific student
+    @GetMapping("/student/{studId}")
+    public List<Marks> getMarksByStudent(@PathVariable Long studId) {
+        return marksRepository.findByStudentStudId(studId);
+    }
+
+    // 3. DELETE Marks
+    @DeleteMapping("/{marksId}")
+    public ResponseEntity<?> deleteMarks(@PathVariable Long marksId) {
+        return marksRepository.findById(marksId).map(m -> {
+            marksRepository.delete(m);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+    @PutMapping("/{marksId}")
+    public ResponseEntity<Marks> updateMarks(@PathVariable Long marksId, @RequestBody Marks marksDetails) {
+        return marksRepository.findById(marksId).map(existingMarks -> {
+            // Update fields
+            existingMarks.setSubject(marksDetails.getSubject());
+            existingMarks.setTestType(marksDetails.getTestType());
+            existingMarks.setOutOf(marksDetails.getOutOf());
+            existingMarks.setObtainedMarks(marksDetails.getObtainedMarks());
+            
+            Marks updatedMarks = marksRepository.save(existingMarks);
+            return ResponseEntity.ok(updatedMarks);
+        }).orElse(ResponseEntity.notFound().build());
     }
 }
