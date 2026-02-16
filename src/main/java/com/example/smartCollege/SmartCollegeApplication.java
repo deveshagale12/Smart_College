@@ -9,8 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SmartCollegeApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SmartCollege2Application.class, args);
+		SpringApplication.run(SmartCollegeApplication.class, args);
 	}
 
 }
+
 
