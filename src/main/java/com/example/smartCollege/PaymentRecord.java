@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 @Entity
 @Table(name = "payment_records")
 public class PaymentRecord {
