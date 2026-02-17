@@ -11,27 +11,40 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background: #0f172a;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.15) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.1) 0px, transparent 50%);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
         }
 
-        .glass-container {
+        .main-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 95vh; /* Prevents card from going off screen */
+            display: flex;
+            flex-direction: column;
         }
 
-        .input-style {
-            @apply w-full p-3.5 bg-white/5 border border-white/10 rounded-2xl text-white outline-none transition-all duration-300 placeholder:text-gray-500 text-[16px];
+        /* Smooth scroll for the form area */
+        .form-container {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
         }
 
-        .input-style:focus {
-            @apply border-indigo-500 ring-4 ring-indigo-500/20 bg-white/10;
+        .form-container::-webkit-scrollbar { width: 6px; }
+        .form-container::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 10px; }
+
+        .input-field {
+            @apply w-full p-3.5 bg-white/5 border border-white/10 rounded-2xl text-white outline-none transition-all duration-300 placeholder:text-gray-500 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10;
         }
 
-        /* Loader Animation */
-        .spinner {
+        /* Loader Styles */
+        .loader {
             display: none;
             width: 20px;
             height: 20px;
@@ -42,90 +55,89 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .btn-loading .spinner { display: block; }
+        .btn-loading .loader { display: block; }
         .btn-loading .btn-text { display: none; }
 
         .hidden { display: none; }
-
-        /* Custom scrollbar for the registration form on desktop */
-        #regForm::-webkit-scrollbar { width: 5px; }
-        #regForm::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 sm:p-6">
+<body class="p-4">
 
-    <div class="glass-container w-full max-w-[600px] rounded-[2.5rem] shadow-2xl overflow-hidden">
-        <div class="pt-10 pb-6 px-8 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-xl mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+    <div class="main-card w-full max-w-[650px] rounded-[2.5rem] shadow-2xl">
+        
+        <div class="p-6 text-center border-b border-white/5">
+            <div class="inline-flex p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-3 shadow-lg">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Student Portal</h1>
-            <p class="text-gray-400 mt-2 text-sm">Secure Authentication System</p>
+            <h1 class="text-2xl font-bold text-white tracking-tight">University Portal</h1>
+            <p class="text-gray-400 text-sm mt-1">Manage your academic journey</p>
         </div>
 
-        <div class="px-8 pb-4">
-            <div class="flex bg-black/30 p-1.5 rounded-2xl">
-                <button id="loginTab" onclick="showForm('login')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 bg-indigo-600 text-white shadow-lg">Login</button>
-                <button id="regTab" onclick="showForm('register')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 text-gray-400">Register</button>
+        <div class="px-8 pt-6">
+            <div class="flex bg-black/20 p-1.5 rounded-2xl">
+                <button id="loginTab" onclick="showForm('login')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 bg-indigo-600 text-white shadow-lg">Sign In</button>
+                <button id="regTab" onclick="showForm('register')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all duration-300 text-gray-400 hover:text-white">New Account</button>
             </div>
         </div>
 
-        <div class="p-8">
-            <form id="loginForm" class="space-y-5">
+        <div class="form-container p-8">
+            
+            <form id="loginForm" class="space-y-6">
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold text-indigo-400 uppercase tracking-widest ml-1">Email Address</label>
-                    <input type="email" id="loginEmail" placeholder="student@university.edu" class="input-style" required>
+                    <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest ml-1">Student Email</label>
+                    <input type="email" id="loginEmail" placeholder="name@college.edu" class="input-field" required>
                 </div>
                 <div class="space-y-2">
-                    <label class="text-xs font-semibold text-indigo-400 uppercase tracking-widest ml-1">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="input-style" required>
+                    <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest ml-1">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" class="input-field" required>
                 </div>
-                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-indigo-500/20 mt-4">
-                    <span class="btn-text">Sign In to Portal</span>
-                    <div class="spinner"></div>
+                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-indigo-500/20">
+                    <span class="btn-text">Access Portal</span>
+                    <div class="loader"></div>
                 </button>
             </form>
 
-            <form id="regForm" class="space-y-5 hidden max-h-[60vh] overflow-y-auto px-1">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-1.5 md:col-span-2">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Full Name</label>
-                        <input type="text" id="fullName" placeholder="John Doe" class="input-style" required>
+            <form id="regForm" class="space-y-5 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Date of Birth</label>
-                        <input type="date" id="dob" class="input-style" required>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Date of Birth</label>
+                        <input type="date" id="dob" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Phone Number</label>
-                        <input type="text" id="phoneNo" placeholder="+123456789" class="input-style" required>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Phone Number</label>
+                        <input type="text" id="phoneNo" placeholder="Mobile No" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5 md:col-span-2">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Official Email</label>
-                        <input type="email" id="email" placeholder="john@university.edu" class="input-style" required>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input type="email" id="email" placeholder="student@college.edu" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Set Password</label>
-                        <input type="password" id="password" placeholder="••••••••" class="input-style" required>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Password</label>
+                        <input type="password" id="password" placeholder="Min 8 chars" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Enrollment Year</label>
-                        <input type="number" id="year" placeholder="2026" class="input-style" required>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Enrollment Year</label>
+                        <input type="number" id="year" placeholder="2024" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5 md:col-span-2">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Course Name</label>
-                        <input type="text" id="course" placeholder="B.Sc. Computer Science" class="input-style" required>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Course Name</label>
+                        <input type="text" id="course" placeholder="e.g. Computer Science" class="input-field" required>
                     </div>
-                    <div class="space-y-1.5 md:col-span-2">
-                        <label class="text-xs font-semibold text-purple-400 uppercase tracking-widest ml-1">Residential Address</label>
-                        <input type="text" id="address" placeholder="Full Address" class="input-style" required>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest ml-1">Residential Address</label>
+                        <input type="text" id="address" placeholder="Full Home Address" class="input-field" required>
                     </div>
                 </div>
-                <button type="submit" id="regBtn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-purple-500/20 sticky bottom-0 mt-6">
-                    <span class="btn-text">Create Account</span>
-                    <div class="spinner"></div>
+                <button type="submit" id="regBtn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-xl shadow-purple-500/20 mt-4">
+                    <span class="btn-text">Complete Registration</span>
+                    <div class="loader"></div>
                 </button>
             </form>
         </div>
@@ -154,211 +166,7 @@
             }
         }
 
-        // Helper function for Loader
-        function toggleLoading(btnId, isLoading) {
-            const btn = document.getElementById(btnId);
-            if (isLoading) {
-                btn.classList.add('btn-loading');
-                btn.disabled = true;
-            } else {
-                btn.classList.remove('btn-loading');
-                btn.disabled = false;
-            }
-        }
-
-        // Handle Registration
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            toggleLoading('regBtn', true);
-
-            const studentData = {
-                fullName: document.getElementById('fullName').value,
-                dob: document.getElementById('dob').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                phoneNo: document.getElementById('phoneNo').value,
-                address: document.getElementById('address').value,
-                course: document.getElementById('course').value,
-                year: parseInt(document.getElementById('year').value)
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
-                    body: JSON.stringify(studentData)
-                });
-
-                if (response.ok) {
-                    alert("Registration Successful! Please Login.");
-                    showForm('login');
-                } else {
-                    const err = await response.text();
-                    alert("Error: " + err);
-                }
-            } catch (error) {
-                alert("Network failure. Check your connection.");
-            } finally {
-                toggleLoading('regBtn', false);
-            }
-        });
-
-        // Handle Login
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            toggleLoading('loginBtn', true);
-
-            const loginData = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-
-            try {
-                const response = await fetch(`${API_BASE}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
-                    body: JSON.stringify(loginData)
-                });
-
-                if (response.ok) {
-                    const student = await response.json();
-                    localStorage.setItem('student', JSON.stringify(student));
-                    window.location.href = "studdashboard.html";
-                } else {
-                    alert("Invalid Login Credentials!");
-                }
-            } catch (error) {
-                alert("Server error. Please try again later.");
-            } finally {
-                toggleLoading('loginBtn', false);
-            }
-        });
-    </script>
-</body>
-</html>
-        .input-field:focus {
-            @apply border-indigo-500 ring-4 ring-indigo-500/20 bg-white/10;
-        }
-
-        /* Loader Animation */
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 0.8s ease-in-out infinite;
-            display: none;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        .btn-loading .loader { display: inline-block; }
-        .btn-loading .btn-text { display: none; }
-
-        .hidden { display: none; }
-    </style>
-</head>
-<body class="p-4 sm:p-8">
-
-    <div class="glass-card w-full max-w-[600px] rounded-[2rem] overflow-hidden">
-        <div class="p-8 text-center border-b border-white/10">
-            <div class="inline-block p-3 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 mb-4 shadow-lg">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3v8h8a10.003 10.003 0 00-4.082 8.532"></path>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-extrabold text-white tracking-tight">Student Portal</h1>
-            <p class="text-gray-400 mt-2">Manage your academic journey with ease</p>
-        </div>
-
-        <div class="p-6 sm:p-10">
-            <div class="flex p-1 bg-white/5 rounded-2xl mb-10">
-                <button id="loginTab" onclick="showForm('login')" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">Sign In</button>
-                <button id="regTab" onclick="showForm('register')" class="flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 text-gray-400 hover:text-white">Register</button>
-            </div>
-
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 ml-1">Student Email</label>
-                    <input type="email" id="loginEmail" placeholder="name@college.edu" class="input-field" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="input-field" required>
-                </div>
-                <button type="submit" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
-                    <span class="btn-text">Access Dashboard</span>
-                    <div class="loader"></div>
-                </button>
-            </form>
-
-            <form id="regForm" class="space-y-4 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Full Name</label>
-                        <input type="text" id="fullName" placeholder="Enter full name" class="input-field" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Date of Birth</label>
-                        <input type="date" id="dob" class="input-field" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Phone Number</label>
-                        <input type="text" id="phoneNo" placeholder="Phone" class="input-field" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Email Address</label>
-                        <input type="email" id="email" placeholder="email@college.edu" class="input-field" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Password</label>
-                        <input type="password" id="password" placeholder="Min 8 chars" class="input-field" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Enrollment Year</label>
-                        <input type="number" id="year" placeholder="2024" class="input-field" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Course Name</label>
-                        <input type="text" id="course" placeholder="e.g. B.Tech Computer Science" class="input-field" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-2 ml-1">Address</label>
-                        <input type="text" id="address" placeholder="Residential Address" class="input-field" required>
-                    </div>
-                </div>
-                <button type="submit" id="regBtn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3 mt-6">
-                    <span class="btn-text">Create Student Profile</span>
-                    <div class="loader"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        const API_BASE = "https://smart-college.onrender.com/college/students";
-        const API_KEY = "StudentApiKey123";
-
-        function showForm(type) {
-            const loginForm = document.getElementById('loginForm');
-            const regForm = document.getElementById('regForm');
-            const loginTab = document.getElementById('loginTab');
-            const regTab = document.getElementById('regTab');
-
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                regForm.classList.add('hidden');
-                loginTab.className = "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-500/20";
-                regTab.className = "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 text-gray-400 hover:text-white";
-            } else {
-                regForm.classList.remove('hidden');
-                loginForm.classList.add('hidden');
-                regTab.className = "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 bg-purple-600 text-white shadow-lg shadow-purple-500/20";
-                loginTab.className = "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300 text-gray-400 hover:text-white";
-            }
-        }
-
+        // Loader helper function
         function setLoader(btnId, isLoading) {
             const btn = document.getElementById(btnId);
             if (isLoading) {
@@ -394,14 +202,14 @@
                 });
 
                 if (response.ok) {
-                    alert("Registration Successful! Please Login.");
+                    alert("Registration Successful!");
                     showForm('login');
                 } else {
                     const err = await response.text();
                     alert("Error: " + err);
                 }
             } catch (error) {
-                alert("Connection error. Try again.");
+                alert("Connection failed. Check your internet.");
             } finally {
                 setLoader('regBtn', false);
             }
@@ -429,166 +237,17 @@
                     localStorage.setItem('student', JSON.stringify(student));
                     window.location.href = "studdashboard.html";
                 } else {
-                    alert("Invalid Login Credentials!");
+                    alert("Invalid Credentials!");
                 }
             } catch (error) {
-                alert("Connection error. Try again.");
+                alert("Server error. Try again.");
             } finally {
                 setLoader('loginBtn', false);
             }
         });
     </script>
 </body>
-</html>                    <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                </svg>
-            </div>
-            <h1 class="text-xl font-bold tracking-tight">University Student Portal</h1>
-            <p class="text-gray-400 text-sm mt-1">Secure Academic Access</p>
-        </div>
-
-        <div class="p-6 sm:p-8">
-            <div class="flex bg-gray-100 p-1.5 rounded-2xl mb-8">
-                <button id="loginTab" class="flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition bg-white text-indigo-600 shadow-sm" onclick="showForm('login')">Login</button>
-                <button id="regTab" class="flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition text-gray-500 hover:text-gray-700" onclick="showForm('register')">Register</button>
-            </div>
-
-            <form id="loginForm" class="space-y-5">
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
-                    <p class="text-gray-500 text-sm">Please enter your credentials</p>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Email Address</label>
-                    <input type="email" id="loginEmail" placeholder="e.g. name@university.edu" class="input-style" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" class="input-style" required>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] mt-2">Sign In</button>
-            </form>
-
-            <form id="regForm" class="space-y-4 hidden">
-                <div class="text-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
-                    <p class="text-gray-500 text-sm">Fill in your student details</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Full Name</label>
-                        <input type="text" id="fullName" placeholder="John Doe" class="input-style" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Date of Birth</label>
-                        <input type="date" id="dob" class="input-style text-gray-500" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Phone Number</label>
-                        <input type="text" id="phoneNo" placeholder="+1..." class="input-style" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Email</label>
-                        <input type="email" id="email" placeholder="student@edu.com" class="input-style" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Password</label>
-                        <input type="password" id="password" placeholder="Min 8 chars" class="input-style" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Enrollment Year</label>
-                        <input type="number" id="year" placeholder="2024" class="input-style" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Course Name</label>
-                        <input type="text" id="course" placeholder="Computer Science" class="input-style" required>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">Residential Address</label>
-                        <input type="text" id="address" placeholder="123 University Ave" class="input-style" required>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-violet-200 transition-all active:scale-[0.98] mt-4">Confirm Registration</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        const API_BASE = "https://smart-college.onrender.com/college/students";
-        const API_KEY = "StudentApiKey123";
-
-        function showForm(type) {
-            const loginForm = document.getElementById('loginForm');
-            const regForm = document.getElementById('regForm');
-            const loginTab = document.getElementById('loginTab');
-            const regTab = document.getElementById('regTab');
-
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                regForm.classList.add('hidden');
-                loginTab.className = "flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition bg-white text-indigo-600 shadow-sm";
-                regTab.className = "flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition text-gray-500 hover:text-gray-700";
-            } else {
-                regForm.classList.remove('hidden');
-                loginForm.classList.add('hidden');
-                regTab.className = "flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition bg-white text-violet-600 shadow-sm";
-                loginTab.className = "flex-1 py-2.5 rounded-xl font-semibold text-sm tab-transition text-gray-500 hover:text-gray-700";
-            }
-        }
-
-        // Handle Registration (Logic preserved)
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const studentData = {
-                fullName: document.getElementById('fullName').value,
-                dob: document.getElementById('dob').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                phoneNo: document.getElementById('phoneNo').value,
-                address: document.getElementById('address').value,
-                course: document.getElementById('course').value,
-                year: parseInt(document.getElementById('year').value)
-            };
-
-            const response = await fetch(`${API_BASE}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
-                body: JSON.stringify(studentData)
-            });
-
-            if (response.ok) {
-                alert("Registration Successful! Please Login.");
-                showForm('login');
-            } else {
-                const err = await response.text();
-                alert("Error: " + err);
-            }
-        });
-
-        // Handle Login (Logic preserved)
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const loginData = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-
-            const response = await fetch(`${API_BASE}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
-                body: JSON.stringify(loginData)
-            });
-
-            if (response.ok) {
-                const student = await response.json();
-                localStorage.setItem('student', JSON.stringify(student));
-                window.location.href = "studdashboard.html";
-            } else {
-                alert("Invalid Login Credentials!");
-            }
-        });
-    </script>
-</body>
 </html>
+
 
 
