@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import jakarta.persistence.*; // Covers @Entity, @Id, @ManyToOne, etc.
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 @Entity
 public class Student {
     @Id
