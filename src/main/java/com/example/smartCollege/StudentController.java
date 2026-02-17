@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 @RestController
 @RequestMapping("/college/students")
+@CrossOrigin(origins = "*") // Add this line!
 public class StudentController {
 
     @Autowired
@@ -111,5 +112,10 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body("Error deleting photo: " + e.getMessage());
         }
+    }
+    @GetMapping("/assigned-to/{facultyId}")
+    public ResponseEntity<List<Student>> getStudentsByFaculty(@PathVariable Long facultyId) {
+        List<Student> students = service.getStudentsByFacultyId(facultyId);
+        return ResponseEntity.ok(students);
     }
 }

@@ -19,6 +19,19 @@ public class Student {
     private String address;
     private String course;
     private Integer year;
+    
+    @ManyToOne
+    @JoinColumn(name = "faculty_id")
+    @JsonIgnoreProperties("students") // This stops the faculty from trying to re-serialize this student list
+    private Faculty faculty;
+    
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AcademicRecord> academicRecords;
+
+    // 2. Link to Student Photo (since you have PhotoService)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private StudentPhoto photo;
+    
 	public Long getStudId() {
 		return studId;
 	}
@@ -72,6 +85,12 @@ public class Student {
 	}
 	public void setYear(Integer year) {
 		this.year = year;
+	}
+	public Faculty getFaculty() {
+		return faculty;
+	}
+	public void setFaculty(Faculty faculty) {
+		this.faculty = faculty;
 	}
     
     

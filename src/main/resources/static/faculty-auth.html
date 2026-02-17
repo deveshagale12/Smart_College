@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Portal | Login & Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .hidden { display: none; }
+
+        /* Advanced Spinner Overlay */
+        #loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        #loader-overlay.active { display: flex; }
+
+        .success-checkmark {
+            font-size: 5rem;
+            color: #198754;
+            display: none;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-primary { background: #667eea; border: none; }
+        .btn-primary:hover { background: #764ba2; }
+
+        /* Mobile Adjustments */
+        @media (max-width: 576px) {
+            .auth-card { width: 95%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader-overlay">
+        <div id="spinner-icon" class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;"></div>
+        <div id="success-icon" class="success-checkmark">✓</div>
+        <h4 id="loader-text" class="mt-4 text-primary">Processing...</h4>
+    </div>
+
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <h2 id="form-title" class="fw-bold text-dark">Faculty Login</h2>
+            <p class="text-muted" id="form-subtitle">Please enter your credentials to access your dashboard.</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleAuth(event, 'login')">
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="login-email" placeholder="name@example.com" required>
+                <label for="login-email">Email Address</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" id="login-pass" placeholder="Password" required>
+                <label for="login-pass">Password</label>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">Login</button>
+            <p class="text-center mt-4">Don't have an account? <a href="javascript:void(0)" onclick="toggleAuth()" class="text-decoration-none fw-bold">Register</a></p>
+        </form>
+
+        <form id="register-form" class="hidden" onsubmit="handleAuth(event, 'register')">
+            <div class="row g-2">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-bold">Faculty ID</label>
+                    <input type="text" id="reg-id" class="form-control" placeholder="FAC-001" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-bold">Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="John Doe" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Email Address</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="email@university.edu" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Password</label>
+                <input type="password" id="reg-pass" class="form-control" placeholder="Minimum 6 characters" required>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-bold">Subject</label>
+                    <input type="text" id="reg-subject" class="form-control" placeholder="Physics">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label small fw-bold">Salary</label>
+                    <input type="number" id="reg-salary" class="form-control" placeholder="50000">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Occupation</label>
+                <input type="text" id="reg-occupation" class="form-control" placeholder="Professor">
+            </div>
+            <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">Register Faculty</button>
+            <p class="text-center mt-4">Already have an account? <a href="javascript:void(0)" onclick="toggleAuth()" class="text-decoration-none fw-bold">Login</a></p>
+        </form>
+    </div>
+
+    <script>
+        function toggleAuth() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const title = document.getElementById('form-title');
+            const subtitle = document.getElementById('form-subtitle');
+
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+
+            if (loginForm.classList.contains('hidden')) {
+                title.innerText = "Faculty Registration";
+                subtitle.innerText = "Join our faculty network by filling in the details.";
+            } else {
+                title.innerText = "Faculty Login";
+                subtitle.innerText = "Please enter your credentials to access your dashboard.";
+            }
+        }
+
+        async function handleAuth(event, type) {
+            event.preventDefault();
+            
+            const loader = document.getElementById('loader-overlay');
+            const spinner = document.getElementById('spinner-icon');
+            const successIcon = document.getElementById('success-icon');
+            const statusText = document.getElementById('loader-text');
+            
+
+            // 1. Show Loader
+            loader.classList.add('active');
+            spinner.classList.remove('d-none');
+            successIcon.classList.add('d-none');
+            statusText.style.color = "#0d6efd";
+            statusText.innerText = (type === 'login') ? "Verifying Credentials..." : "Creating Faculty Account...";
+
+            // 2. Prepare Data
+            let url = (type === 'login') ? '/api/faculty/login' : '/api/faculty/register';
+            let payload = {};
+
+            if (type === 'login') {
+                payload = {
+                    email: document.getElementById('login-email').value,
+                    password: document.getElementById('login-pass').value
+                };
+            } else {
+                payload = {
+                    facultyId: document.getElementById('reg-id').value,
+                    name: document.getElementById('reg-name').value,
+                    email: document.getElementById('reg-email').value,
+                    password: document.getElementById('reg-pass').value,
+                    subject: document.getElementById('reg-subject').value,
+                    salary: document.getElementById('reg-salary').value,
+                    occupation: document.getElementById('reg-occupation').value
+                };
+            }
+
+            try {
+            	// ... inside your handleAuth try block ...
+
+            	const response = await fetch(url, {
+            	    method: 'POST',
+            	    headers: { 'Content-Type': 'application/json' },
+            	    body: JSON.stringify(payload)
+            	});
+
+            	if (response.ok) {
+            	    // We expect a JSON object now, not just text
+            	    const faculty = await response.json(); 
+
+            	    // --- CREATE THE SESSION ---
+            	    // This allows facultydashboard.html to know who is logged in
+            	    localStorage.setItem('facultyId', faculty.id);
+            	    localStorage.setItem('facultyName', faculty.name);
+            	    localStorage.setItem('facultyEmail', faculty.email);
+            	    localStorage.setItem('facultySubject', faculty.subject);
+
+            	    // --- ANIMATION ---
+            	    spinner.classList.add('d-none');
+            	    successIcon.classList.remove('d-none');
+            	    statusText.innerText = "Welcome back, " + faculty.name + "!";
+            	    statusText.style.color = "#198754";
+
+            	    setTimeout(() => {
+            	        window.location.href = "facultydashboard.html";
+            	    }, 1800);
+
+            	} else {
+            	    const errorText = await response.text();
+            	    throw new Error(errorText || "Login Failed");
+            	}
+
+            } catch (error) {
+                loader.classList.remove('active');
+                alert("Action Failed: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

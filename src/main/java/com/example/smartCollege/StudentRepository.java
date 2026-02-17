@@ -9,4 +9,5 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     // Custom method to find a student by email for login
 	Optional<Student> findByEmailIgnoreCase(String email);
 	Optional<Student> findByEmail(String email);
+	List<Student> findByFacultyId(Long facultyId);
 }

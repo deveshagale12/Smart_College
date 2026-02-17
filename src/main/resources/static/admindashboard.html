@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Smart College</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --admin-theme: #0f172a; 
+            --accent: #4f46e5; 
+            --sidebar-width: 260px;
+            --glass: rgba(255, 255, 255, 0.98);
+            --bg-body: #f8fafc;
+        }
+        
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden; 
+            color: #1e293b;
+        }
+
+        /* Sidebar Design */
+        .sidebar { 
+            width: var(--sidebar-width); 
+            height: 100vh; 
+            position: fixed; 
+            background: var(--admin-theme); 
+            color: white; 
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1050;
+            left: 0;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .main-content { 
+            margin-left: var(--sidebar-width); 
+            padding: 30px; 
+            transition: all 0.35s ease; 
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 992px) {
+            .sidebar { left: calc(-1 * var(--sidebar-width)); }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .overlay { display: none; position: fixed; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1040; }
+            .overlay.active { display: block; }
+        }
+
+        /* Card & UI Refinement */
+        .card { 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            border-radius: 16px; 
+            background: var(--glass);
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-link { 
+            color: #94a3b8; 
+            padding: 12px 20px; 
+            border-radius: 12px; 
+            margin: 4px 15px; 
+            transition: 0.3s; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+        }
+        .nav-link:hover { color: #f8fafc; background: rgba(255,255,255,0.05); }
+        .nav-link.active { 
+            color: white !important; 
+            background: var(--accent) !important; 
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); 
+        }
+
+        .stat-icon { 
+            width: 54px; height: 54px; 
+            border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 26px; 
+        }
+
+        /* Table Styling */
+        .table { border-collapse: separate; border-spacing: 0 8px; }
+        .table thead th { border: none; font-weight: 600; color: #64748b; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+        .table tbody tr { background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s; }
+        .table tbody tr:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .table td { border: none; padding: 16px 12px; }
+        .table td:first-child { border-radius: 12px 0 0 12px; }
+        .table td:last-child { border-radius: 0 12px 12px 0; }
+
+        /* Custom Section Transitions */
+        .section-fade { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-primary { background-color: var(--accent); border: none; padding: 10px 24px; border-radius: 10px; }
+        .btn-primary:hover { background-color: #4338ca; transform: translateY(-1px); }
+
+        .hidden { display: none !important; }
+
+        /* Marks Modal Custom Style (Fixing Tailwind conflicts) */
+        .custom-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <button class="btn btn-primary d-lg-none position-fixed bottom-0 end-0 m-4 rounded-circle shadow-lg z-3" 
+            style="width: 60px; height: 60px;" onclick="toggleSidebar()">
+        <i class="bi bi-list fs-3"></i>
+    </button>
+
+    <div class="sidebar d-flex flex-column" id="sidebar">
+        <div class="text-center py-5">
+            <div class="bg-primary d-inline-block p-2 rounded-3 mb-2 shadow-lg">
+                <i class="bi bi-mortarboard-fill text-white fs-4"></i>
+            </div>
+            <h4 class="fw-bold text-white mb-0">Smart College</h4>
+            <small class="text-secondary text-uppercase tracking-widest" style="font-size: 0.65rem;">Administrator</small>
+        </div>
+
+        <div class="px-3 mb-4">
+            <p class="text-secondary small fw-bold px-3 mb-2">MENU</p>
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item"><a id="nav-overview" class="nav-link active" onclick="showSection('overview')"><i class="bi bi-grid-1x2 me-3"></i> Dashboard</a></li>
+                <li class="nav-item"><a id="nav-assign" class="nav-link" onclick="showSection('assign')"><i class="bi bi-person-plus me-3"></i> Assign Mentors</a></li>
+                <li class="nav-item"><a id="nav-students" class="nav-link" onclick="showSection('students')"><i class="bi bi-people me-3"></i> Student Database</a></li>
+            </ul>
+        </div>
+
+        <div class="mt-auto p-4">
+            <button class="btn btn-outline-danger w-100 rounded-3 border-0 bg-dark-subtle" onclick="logout()">
+                <i class="bi bi-box-arrow-left me-2"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-1" id="pageTitle">Dashboard</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="#" class="text-decoration-none text-muted small">Admin</a></li>
+                        <li class="breadcrumb-item active small text-primary" aria-current="page" id="breadcrumb-current">Overview</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="d-flex align-items-center bg-white p-2 rounded-4 shadow-sm">
+                <div class="me-3 text-end d-none d-sm-block">
+                    <p class="mb-0 fw-bold small" id="admin-name">Admin User</p>
+                    <span class="text-muted" style="font-size: 0.7rem;">Chief Administrator</span>
+                </div>
+                <div class="bg-primary-subtle text-primary rounded-3 p-2">
+                    <i class="bi bi-person-vcard fs-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="overview-section" class="section-fade">
+            <div class="row g-4 mb-5">
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card p-4 border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon bg-primary-subtle text-primary me-3">
+                                <i class="bi bi-person-workspace"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted small fw-semibold mb-1">Active Faculty</p>
+                                <h2 id="total-faculty" class="fw-bold mb-0">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card p-4 border-0">
+                        <div class="d-flex align-items-center">
+                            <div class="stat-icon bg-success-subtle text-success me-3">
+                                <i class="bi bi-mortarboard"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted small fw-semibold mb-1">Enrolled Students</p>
+                                <h2 id="total-students" class="fw-bold mb-0">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="assign-section" class="d-none section-fade">
+            <div class="row g-4">
+                <div class="col-lg-5 col-xl-4">
+                    <div class="card p-4 h-100 border-0 shadow-sm">
+                        <div class="text-center mb-4">
+                            <div class="stat-icon bg-indigo text-white mx-auto mb-3" style="background: var(--accent);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <h5 class="fw-bold">Select Mentor</h5>
+                            <p class="text-muted small px-3">Assign a designated faculty member for guidance and marking.</p>
+                        </div>
+                        <label class="small fw-bold mb-2 text-muted uppercase">Faculty Member</label>
+                        <select id="faculty-dropdown" class="form-select border-0 bg-light p-3 rounded-3 shadow-none">
+                            <option value="">Fetching faculty list...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-7 col-xl-8">
+                    <div class="card p-4 border-0 shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5 class="fw-bold mb-0">Select Students</h5>
+                                <p class="text-muted small mb-0">Link multiple students to the chosen faculty</p>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">Multi-select enabled</span>
+                        </div>
+                        
+                        <div class="input-group mb-3 bg-light rounded-4 overflow-hidden border">
+                            <span class="input-group-text border-0 bg-transparent ps-3 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="studentFilter" class="form-control border-0 bg-transparent p-3 shadow-none" 
+                                   placeholder="Quick search by name or email..." onkeyup="filterStudents()">
+                        </div>
+
+                        <select id="student-multiselect" class="form-select border-0 bg-light rounded-4 p-3" 
+                                multiple style="height: 300px; font-size: 0.95rem;">
+                        </select>
+
+                        <div class="mt-4">
+                            <button class="btn btn-primary btn-lg w-100 rounded-3 shadow-lg" onclick="processAssignment()">
+                                <i class="bi bi-check2-all me-2"></i> Update Mentorship Links
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="manage-students-section" class="d-none section-fade">
+            <div class="card p-4 border-0 shadow-sm">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-1">Student Database</h4>
+                        <p class="text-muted small mb-0">Profiles, records, and mentorship status</p>
+                    </div>
+                    <button class="btn btn-primary rounded-3 px-4 py-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#registrationModal">
+                        <i class="bi bi-plus-circle me-2"></i> Register New Student
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Student Details</th>
+                                <th>Course</th>
+                                <th>Mentorship</th>
+                                <th class="text-center">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-student-table">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <section id="marksSection" class="hidden section-fade">
+            <div class="row mb-4 align-items-center">
+                <div class="col">
+                    <button onclick="showSection('students')" class="btn btn-link text-primary fw-bold text-decoration-none ps-0">
+    <i class="bi bi-arrow-left me-2"></i> Back to Database
+</button>
+                </div>
+                <div class="col-auto">
+                    <div class="bg-primary rounded-4 px-4 py-3 text-white shadow-lg d-flex align-items-center">
+                        <div class="me-3"><small class="d-block opacity-75">Average Score</small><h4 id="avgScore" class="fw-bold mb-0">0%</h4></div>
+                        <i class="bi bi-graph-up fs-3"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-5 border-0 shadow-sm rounded-5">
+                <div class="row align-items-center mb-5">
+                    <div class="col">
+                        <h3 class="fw-bold mb-1" id="currentStudentName">Student Name</h3>
+                        <p class="text-muted mb-0"><i class="bi bi-journal-text me-2"></i>Detailed Academic Transcript</p>
+                    </div>
+                    <div class="col-auto">
+                        <button onclick="openAddMarksModal()" class="btn btn-primary rounded-3 fw-bold px-4">
+                            <i class="bi bi-plus-lg me-2"></i> Add Record
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table w-100">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Exam Type</th>
+                                <th>Obtained Score</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Options</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marksTableBody" class="small">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="marksModal" class="custom-modal-overlay hidden">
+        <div class="bg-white w-100 mx-3 rounded-5 shadow-2xl p-4 p-md-5" style="max-width: 500px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 id="marksModalTitle" class="fw-bold mb-0">Enter Grade</h4>
+                <button class="btn-close" onclick="toggleMarksModal(false)"></button>
+            </div>
+            <form id="marksForm" class="row g-4">
+                <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">SUBJECT NAME</label>
+                    <input type="text" id="m_subject" placeholder="e.g. Computer Science" class="form-control p-3 bg-light border-0 rounded-4" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-bold text-muted">EXAMINATION CATEGORY</label>
+                    <select id="m_testType" class="form-select p-3 bg-light border-0 rounded-4">
+                        <option value="Midterm">Midterm</option>
+                        <option value="Final Exam">Final Exam</option>
+                        <option value="Unit Test">Unit Test</option>
+                        <option value="Assignment">Assignment</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">OBTAINED</label>
+                    <input type="number" id="m_obtained" placeholder="Score" class="form-control p-3 bg-light border-0 rounded-4" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-bold text-muted">OUT OF</label>
+                    <input type="number" id="m_outOf" placeholder="Max" class="form-control p-3 bg-light border-0 rounded-4" required>
+                </div>
+                <div class="col-12 pt-3">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-4 shadow-lg fw-bold">
+                        Confirm Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Register Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="regForm" onsubmit="handleRegistration(event)" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Full Name</label>
+                            <input type="text" id="reg-name" class="form-control p-3 bg-light border-0 rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Email Address</label>
+                            <input type="email" id="reg-email" class="form-control p-3 bg-light border-0 rounded-3" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" id="reg-phone" class="form-control p-3 bg-light border-0 rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Date of Birth</label>
+                            <input type="date" id="reg-dob" class="form-control p-3 bg-light border-0 rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Course/Major</label>
+                            <input type="text" id="reg-course" class="form-control p-3 bg-light border-0 rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Current Year</label>
+                            <select id="reg-year" class="form-select p-3 bg-light border-0 rounded-3">
+                                <option value="1">Year 1</option>
+                                <option value="2">Year 2</option>
+                                <option value="3">Year 3</option>
+                                <option value="4">Year 4</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" id="passField">
+                            <label class="form-label small fw-bold">Set Password</label>
+                            <input type="password" id="reg-pass" class="form-control p-3 bg-light border-0 rounded-3">
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary w-100 p-3 fw-bold rounded-3">Process Student Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CONFIGURATION
+        const BASE_URL = 'https://smart-college.onrender.com';
+        const HEADERS = {
+            'X-API-KEY': 'StudentApiKey123', // MATCH YOUR INTERCEPTOR KEY
+            'Content-Type': 'application/json'
+        };
+        let allStudents = [];
+        let editMode = false;
+        let currentEditId = null;
+        let activeStudentId = null;
+        let currentMarksEditId = null;
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminName = localStorage.getItem('adminName');
+            if(!adminName) window.location.href = "admin-auth.html";
+            document.getElementById('admin-name').innerText = adminName;
+            loadAssignmentData();
+        });
+
+        /**
+         * Handles navigation between dashboard sections.
+         * Optimized to handle both Bootstrap 'd-none' and custom 'hidden' classes.
+         */
+        function showSection(section) {
+            // 1. List all main sections
+            const sections = ['overview-section', 'assign-section', 'manage-students-section', 'marksSection'];
+            
+            // 2. Hide EVERY section completely
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden'); // Custom hide
+                    el.classList.add('d-none'); // Bootstrap hide
+                }
+            });
+
+            // 3. Deactivate all nav links
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            // 4. Show the specific requested section
+            if(section === 'overview') {
+                const el = document.getElementById('overview-section');
+                el.classList.remove('hidden', 'd-none');
+                document.getElementById('nav-overview').classList.add('active');
+                document.getElementById('pageTitle').innerText = 'Dashboard';
+                document.getElementById('breadcrumb-current').innerText = 'Overview';
+            } 
+            else if(section === 'assign') {
+                const el = document.getElementById('assign-section');
+                el.classList.remove('hidden', 'd-none');
+                document.getElementById('nav-assign').classList.add('active');
+                document.getElementById('pageTitle').innerText = 'Assign Mentors';
+                document.getElementById('breadcrumb-current').innerText = 'Assignments';
+            } 
+            else if(section === 'students') {
+                const el = document.getElementById('manage-students-section');
+                el.classList.remove('hidden', 'd-none');
+                document.getElementById('nav-students').classList.add('active');
+                document.getElementById('pageTitle').innerText = 'Student Database';
+                document.getElementById('breadcrumb-current').innerText = 'Database';
+                fetchAllStudents(); // Refresh data
+            }
+        }
+
+        // LOAD COUNTS AND DROPDOWNS
+      async function loadAssignmentData() {
+    try {
+        // 1. Fetch Faculty (Needed for the dropdown)
+        const fRes = await fetch(`${BASE_URL}/api/faculty`, { headers: HEADERS });
+        const faculties = await fRes.json();
+        const fDrop = document.getElementById('faculty-dropdown');
+        fDrop.innerHTML = '<option value="">Select Professor...</option>';
+        faculties.forEach(f => {
+            fDrop.innerHTML += `<option value="${f.id}">${f.name} - ${f.subject}</option>`;
+        });
+        document.getElementById('total-faculty').innerText = faculties.length;
+
+        // 2. Fetch Students
+        const sRes = await fetch(`${BASE_URL}/college/students`, { headers: HEADERS });
+        const students = await sRes.json();
+        const sMulti = document.getElementById('student-multiselect');
+        sMulti.innerHTML = '';
+
+        students.forEach(s => {
+            // FIXED: Using s.studId to match your Java @Id field
+            const actualId = s.studId; 
+            const name = s.fullName || "Unnamed Student";
+
+            if (actualId) {
+                sMulti.innerHTML += `<option value="${actualId}">${name} (${s.email})</option>`;
+            }
+        });
+        document.getElementById('total-students').innerText = students.length;
+
+    } catch (err) {
+        console.error("Data Load Error:", err);
+    }
+}
+
+        // FETCH ALL STUDENTS FOR TABLE
+   // FETCH STUDENTS (INCLUDING FACULTY_ID)
+async function fetchAllStudents() {
+    try {
+        const res = await fetch(`${BASE_URL}/college/students`, { headers: HEADERS });
+        const students = await res.json();
+        allStudents = students; // Store globally for editing
+        
+        const tableBody = document.getElementById('admin-student-table');
+        tableBody.innerHTML = '';
+
+        students.forEach((s, index) => {
+            const facultyId = s.faculty ? (s.faculty.id || s.faculty.facultyId) : 'Unassigned';
+            
+            tableBody.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold text-muted">#${s.studId}</td>
+                    <td class="fw-bold">${s.fullName}</td>
+                    <td class="small">${s.email}</td>
+                    <td>${s.phoneNo || '-'}</td>
+                    <td><span class="badge bg-light text-dark border">${s.course}</span></td>
+                    <td>
+                        <span class="badge ${facultyId !== 'Unassigned' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">
+                            ${facultyId !== 'Unassigned' ? 'FID: ' + facultyId : 'Unassigned'}
+                        </span>
+                    </td>
+                    <td class="pe-4 text-center">
+                        <div class="btn-group">
+                        <button onclick="openMarksManagement(${s.studId}, '${s.fullName}')" class="btn btn-sm btn-outline-success me-2" title="Academic Performance">
+                        <i class="fas fa-poll"></i>
+                    </button>
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="openEditModal(${index})">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${s.studId})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+    } catch (err) { console.error("Fetch Error:", err); }
+}
+//Global variables to track state
+
+
+function openEditModal(index) {
+    const student = allStudents[index];
+    editMode = true;
+    currentEditId = student.studId;
+
+    const modalTitle = document.querySelector('#registrationModal h5');
+    const submitBtn = document.querySelector('#registrationModal button[type="submit"]');
+    const passInput = document.getElementById('reg-pass');
+    const passField = passInput.closest('.col-md-6');
+
+    // UI Updates
+    modalTitle.innerText = "Update Academic Profile";
+    submitBtn.innerText = "Update Student Data";
+    
+    // FIX FOR "NOT FOCUSABLE" ERROR:
+    // Hide the field AND remove 'required' so the browser allows submission
+    passField.classList.add('d-none');
+    passInput.removeAttribute('required');
+
+    // Fill Data
+    document.getElementById('reg-name').value = student.fullName || "";
+    document.getElementById('reg-email').value = student.email || "";
+    document.getElementById('reg-email').disabled = true; 
+    document.getElementById('reg-phone').value = student.phoneNo || "";
+    document.getElementById('reg-dob').value = student.dob || "";
+    document.getElementById('reg-course').value = student.course || "";
+    document.getElementById('reg-year').value = student.year || 1;
+
+    const modal = new bootstrap.Modal(document.getElementById('registrationModal'));
+    modal.show();
+}
+
+async function handleRegistration(event) {
+    event.preventDefault();
+
+    // Collect data
+    const data = {
+        fullName: document.getElementById('reg-name').value,
+        phoneNo: document.getElementById('reg-phone').value,
+        dob: document.getElementById('reg-dob').value,
+        course: document.getElementById('reg-course').value,
+        year: parseInt(document.getElementById('reg-year').value) || 1
+    };
+
+    if (!editMode) {
+        data.email = document.getElementById('reg-email').value;
+        data.password = document.getElementById('reg-pass').value;
+    }
+
+    const url = editMode 
+        ? `${BASE_URL}/college/students/${currentEditId}` 
+        : `${BASE_URL}/college/students/register`;
+    
+    const method = editMode ? 'PUT' : 'POST';
+
+    try {
+        const res = await fetch(url, {
+            method: method,
+            headers: HEADERS,
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert(editMode ? "✅ Updated Successfully!" : "✅ Registered Successfully!");
+            // Instead of reload, just close and refresh table to avoid storage issues
+            bootstrap.Modal.getInstance(document.getElementById('registrationModal')).hide();
+            fetchAllStudents(); 
+        } else {
+            const errText = await res.text();
+            alert("❌ Server Error: " + errText);
+        }
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert("❌ Failed to connect to server.");
+    }
+}
+        async function processAssignment() {
+            const facultyId = document.getElementById('faculty-dropdown').value;
+            const selectEl = document.getElementById('student-multiselect');
+            
+            // Extract highlighted values
+            const selectedIds = Array.from(selectEl.selectedOptions)
+                                     .map(option => parseInt(option.value)) // Ensure numbers
+                                     .filter(id => !isNaN(id));
+
+            if (!facultyId) return alert("⚠️ Please select a Faculty member first.");
+            if (selectedIds.length === 0) return alert("⚠️ Please highlight at least one student from the list.");
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/faculty/${facultyId}/assign-students`, {
+                    method: 'POST',
+                    headers: HEADERS,
+                    body: JSON.stringify(selectedIds) 
+                });
+
+                if (response.ok) {
+                    alert("✅ Students successfully linked to Faculty!");
+                    showSection('overview'); // Go back to dashboard
+                } else {
+                    alert("❌ Server Error: " + await response.text());
+                }
+            } catch (err) {
+                alert("❌ Connection failed. Is the backend running?");
+            }
+        }
+        function filterStudents() {
+            const searchTerm = document.getElementById('studentFilter').value.toLowerCase();
+            const options = document.getElementById('student-multiselect').options;
+            for (let opt of options) {
+                opt.style.display = opt.text.toLowerCase().includes(searchTerm) ? "" : "none";
+            }
+        }
+
+        async function deleteStudent(studId) {
+            // 1. Double check the ID exists
+            if (!studId) {
+                console.error("Delete failed: No Student ID provided");
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete Student #${studId}?`)) {
+                try {
+                    const res = await fetch(`${BASE_URL}/college/students/${studId}`, { 
+                        method: 'DELETE',
+                        headers: HEADERS // Important: Your Interceptor needs the API Key
+                    });
+
+                    if (res.ok) {
+                        alert("✅ Student deleted successfully");
+                        fetchAllStudents(); // Refresh the table
+                    } else {
+                        const errorMsg = await res.text();
+                        alert("❌ Delete failed: " + errorMsg);
+                    }
+                } catch (err) {
+                    console.error("Delete Error:", err);
+                    alert("❌ Connection error. Is the server running?");
+                }
+            }
+        }
+       
+        // Reset modal when it's closed
+      // Reset everything when closing the modal
+document.getElementById('registrationModal').addEventListener('hidden.bs.modal', function () {
+    editMode = false;
+    currentEditId = null;
+    const passInput = document.getElementById('reg-pass');
+    
+    document.getElementById('regForm').reset();
+    document.getElementById('reg-email').disabled = false;
+    
+    // Restore required attribute for new registrations
+    passInput.setAttribute('required', ''); 
+    document.getElementById('reg-pass').closest('.col-md-6').classList.remove('d-none');
+    document.querySelector('#registrationModal h5').innerText = "Create Academic Profile";
+});
+        
+       /// ///marks
+
+
+
+// 1. Switch to the Marks View
+function openMarksManagement(studId, name) {
+    activeStudentId = studId;
+    document.getElementById('currentStudentName').innerText = name;
+    
+    // Hide the Student List
+    const studentList = document.getElementById('manage-students-section');
+    studentList.classList.add('hidden');
+    studentList.classList.add('d-none');
+    
+    // Show the Marks Section
+    const marksSec = document.getElementById('marksSection');
+    marksSec.classList.remove('hidden');
+    marksSec.classList.remove('d-none');
+    
+    document.getElementById('pageTitle').innerText = 'Academic Performance';
+    document.getElementById('breadcrumb-current').innerText = 'Student Marks';
+
+    loadStudentMarks(studId);
+}
+
+// 2. Load Marks for Active Student
+async function loadStudentMarks(studId) {
+    try {
+        const res = await fetch(`${BASE_URL}/college/marks/student/${studId}`, { 
+            headers: HEADERS 
+        });
+        const marks = await res.json();
+        const body = document.getElementById('marksTableBody');
+        
+        let totalPercent = 0;
+        body.innerHTML = marks.length > 0 ? '' : '<tr><td colspan="5" class="py-10 text-center text-slate-400">No marks found for this student.</td></tr>';
+
+        marks.forEach(m => {
+            const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+            totalPercent += parseFloat(percent);
+            const colorClass = percent >= 40 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+
+            body.innerHTML += `
+                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                    <td class="py-5 px-2 font-semibold text-slate-700">${m.subject}</td>
+                    <td class="py-5 px-2 text-slate-500">${m.testType}</td>
+                    <td class="py-5 px-2 text-slate-700 font-medium">${m.obtainedMarks} / ${m.outOf}</td>
+                    <td class="py-5 px-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold ${colorClass}">${percent}%</span>
+                    </td>
+                    <td class="py-5 px-2 text-right">
+                        <button onclick='editMarkRecord(${JSON.stringify(m)})' class="text-indigo-400 hover:text-indigo-600 mr-3"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteMarkRecord(${m.marksId})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+
+        const avg = marks.length > 0 ? (totalPercent / marks.length).toFixed(1) : 0;
+        document.getElementById('avgScore').innerText = avg + "%";
+    } catch (err) { console.error("Error loading marks:", err); }
+}
+
+// 3. Save Marks (POST/PUT)
+// 3. Save Marks (POST/PUT)
+document.getElementById('marksForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Collect data from the improved HTML IDs
+    const data = {
+        subject: document.getElementById('m_subject').value,
+        testType: document.getElementById('m_testType').value,
+        obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
+        outOf: parseFloat(document.getElementById('m_outOf').value)
+    };
+
+    // Determine if we are updating or creating
+    const method = currentMarksEditId ? 'PUT' : 'POST';
+    const url = currentMarksEditId 
+        ? `${BASE_URL}/college/marks/${currentMarksEditId}` 
+        : `${BASE_URL}/college/marks/${activeStudentId}`;
+
+    try {
+        const res = await fetch(url, {
+            method: method,
+            headers: HEADERS,
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            toggleMarksModal(false); // Close the modal
+            loadStudentMarks(activeStudentId); // Refresh the list
+            alert("✅ Academic record saved!");
+        } else {
+            alert("❌ Failed to save: " + await res.text());
+        }
+    } catch (err) {
+        console.error("Save Error:", err);
+    }
+});
+
+// Modal Helpers
+function toggleMarksModal(show) {
+    const modal = document.getElementById('marksModal');
+    if(show) {
+        modal.classList.remove('hidden'); // Remove the 'hidden' class we added in CSS
+        // Small timeout to allow the transition/fade effect to trigger
+        setTimeout(() => modal.style.opacity = "1", 10);
+    } else {
+        modal.style.opacity = "0";
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+}
+
+function openAddMarksModal() {
+    currentMarksEditId = null;
+    document.getElementById('marksForm').reset();
+    document.getElementById('marksModalTitle').innerText = "Add New Record";
+    toggleMarksModal(true);
+}
+
+function editMarkRecord(m) {
+    currentMarksEditId = m.marksId;
+    document.getElementById('marksModalTitle').innerText = "Update Record";
+    document.getElementById('m_subject').value = m.subject;
+    document.getElementById('m_testType').value = m.testType;
+    document.getElementById('m_obtained').value = m.obtainedMarks;
+    document.getElementById('m_outOf').value = m.outOf;
+    toggleMarksModal(true);
+}
+
+async function deleteMarkRecord(id) {
+    if(confirm("Delete this academic record?")) {
+        await fetch(`${BASE_URL}/college/marks/${id}`, { method: 'DELETE', headers: HEADERS });
+        loadStudentMarks(activeStudentId);
+    }
+}
+        function logout() {
+            localStorage.clear();
+            window.location.href = "admin-auth.html";
+        }
+    </script>
+</body>
+</html>

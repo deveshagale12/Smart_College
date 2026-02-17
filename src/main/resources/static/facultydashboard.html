@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Professional Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #4e73df; 
+            --secondary: #6e707e;
+            --success: #1cc88a;
+            --info: #36b9cc;
+            --warning: #f6c23e;
+            --danger: #e74a3b;
+            --dark: #5a5c69;
+            --sidebar-width: 260px; 
+            --bg-body: #f4f7fc;
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            font-family: 'Inter', sans-serif; 
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* Desktop Sidebar Styles */
+        #sidebar { 
+            width: var(--sidebar-width); 
+            height: 100vh; 
+            position: fixed; 
+            background: #fff; 
+            border-right: 1px solid #e3e6f0;
+            transition: 0.3s; 
+            z-index: 1000;
+        }
+
+        #sidebar .nav-link {
+            color: var(--secondary);
+            padding: 12px 20px;
+            margin: 4px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        #sidebar .nav-link:hover, #sidebar .nav-link.active {
+            background-color: #f8f9fc;
+            color: var(--primary);
+        }
+
+        #sidebar .nav-link i { font-size: 1.1rem; margin-right: 12px; }
+
+        #content { 
+            margin-left: var(--sidebar-width); 
+            padding: 30px; 
+            transition: 0.3s; 
+        }
+
+        /* Mobile Responsive Bottom Nav */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.08);
+            z-index: 1050;
+            padding: 10px 5px;
+            border-top: 1px solid #e3e6f0;
+        }
+
+        .mobile-nav-item {
+            flex: 1;
+            text-align: center;
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .mobile-nav-item i { font-size: 1.4rem; display: block; margin-bottom: 2px; }
+        .mobile-nav-item.active { color: var(--primary); }
+
+        /* Card Customization */
+        .card { 
+            border: none; 
+            border-radius: 12px; 
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); 
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e3e6f0;
+            font-weight: 700;
+            color: var(--primary);
+            padding: 15px 20px;
+        }
+
+        .stat-card { border-left: 5px solid var(--primary); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-5px); }
+
+        /* Tables */
+        .table thead th {
+            background-color: #f8f9fc;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--secondary);
+            border-top: none;
+        }
+
+        .table-responsive { border-radius: 10px; }
+
+        /* Section Animations */
+        section, .section-fade { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            #sidebar { display: none !important; }
+            #content { margin-left: 0; padding: 20px; padding-bottom: 100px; }
+            .mobile-nav { display: flex; }
+            .desktop-only { display: none; }
+            .h3 { font-size: 1.3rem; }
+        }
+
+        .btn-primary { background-color: var(--primary); border: none; padding: 10px 20px; font-weight: 600; border-radius: 8px; }
+        .btn-primary:hover { background-color: #2e59d9; }
+        
+        .badge-avg { font-size: 1.1rem; padding: 12px 25px; }
+    </style>
+</head>
+<body>
+
+    <nav id="sidebar" class="d-none d-md-block">
+        <div class="py-4 px-3">
+            <div class="d-flex align-items-center mb-4 px-3">
+                <div class="bg-primary text-white rounded-3 p-2 me-2">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <h5 class="mb-0 fw-bold text-dark">Faculty Hub</h5>
+            </div>
+            <hr class="mx-3 text-muted opacity-25">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="#" id="side-dash" onclick="showSection('dash')" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="#" id="side-students" onclick="showSection('students')" class="nav-link"><i class="bi bi-people-fill"></i> Student Database</a></li>
+                <li class="nav-item"><a href="#" id="side-profile" onclick="showSection('profile')" class="nav-link"><i class="bi bi-person-badge-fill"></i> Profile</a></li>
+            </ul>
+            <div style="position: absolute; bottom: 30px; width: 88%;">
+                <a href="#" onclick="logout()" class="nav-link text-danger"><i class="bi bi-box-arrow-left"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="mobile-nav d-md-none d-flex">
+        <a href="#" onclick="showSection('dash')" class="mobile-nav-item active" id="mob-dash"><i class="bi bi-grid-1x2-fill"></i>Dash</a>
+        <a href="#" onclick="showSection('students')" class="mobile-nav-item" id="mob-students"><i class="bi bi-people-fill"></i>Students</a>
+        <a href="#" onclick="showSection('profile')" class="mobile-nav-item" id="mob-profile"><i class="bi bi-person-badge-fill"></i>Profile</a>
+        <a href="#" onclick="logout()" class="mobile-nav-item text-danger"><i class="bi bi-box-arrow-left"></i>Logout</a>
+    </div>
+
+    <div id="content">
+        <header class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="text-muted small fw-bold">SYSTEM ACCESS</span>
+                <h2 class="h3 fw-bold mb-0">Welcome, <span id="faculty-name-header" class="text-primary">Professor</span></h2>
+            </div>
+            <div class="desktop-only">
+                <div class="bg-white p-2 rounded-circle shadow-sm border">
+                    <img src="https://ui-avatars.com/api/?name=Professor&background=4e73df&color=fff" class="rounded-circle" width="40" alt="Profile">
+                </div>
+            </div>
+        </header>
+
+        <div id="dashboard-main-section" class="section-fade">
+            <div class="row">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card h-100 py-2 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Assigned</div>
+                                    <div class="h4 mb-0 font-weight-bold" id="student-count">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people fs-2 text-gray-300 opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card h-100 py-2 border-0 shadow-sm" style="border-left-color: var(--success);">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Subject</div>
+                                    <div class="h4 mb-0 font-weight-bold" id="faculty-subject">N/A</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-journal-bookmark fs-2 text-gray-300 opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>My Assigned Students</span>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="fetchStudents()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Sync
+                    </button>
+                </div>
+                <div class="p-3 border-bottom bg-light">
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="studentSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by name or email..." onkeyup="filterTable('student-table-body', 'studentSearchInput')">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <button class="btn btn-success btn-sm rounded-pill px-3" onclick="exportTableToExcel('student-table-body')">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body">
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Initialize data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      <div id="profile-section" class="d-none section-fade">
+    <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-person-lines-fill me-2"></i>
+            <h5 class="mb-0">Faculty Profile Settings</h5>
+        </div>
+        <div class="card-body p-4">
+            <form id="profile-edit-form" onsubmit="handleProfileUpdate(event)">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">System Index ID</label>
+                        <input type="text" id="edit-id" class="form-control bg-light-subtle" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Faculty ID Card No.</label>
+                        <input type="text" id="edit-faculty-id-alt" class="form-control bg-light-subtle" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Email (Fixed)</label>
+                        <input type="email" id="edit-email" class="form-control bg-light-subtle" readonly>
+                    </div>
+
+                    <hr class="my-3 opacity-25">
+
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-person text-primary"></i></span>
+                            <input type="text" id="edit-name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Primary Subject</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-book text-primary"></i></span>
+                            <input type="text" id="edit-subject" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Occupation / Designation</label>
+                        <input type="text" id="edit-occupation" class="form-control" placeholder="e.g. Senior Professor">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Salary (Annual/Monthly)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-currency-dollar text-success"></i></span>
+                            <input type="text" id="edit-salary" class="form-control" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light px-4" onclick="showSection('dash')">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1"></i> Update Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+        <div id="student-db-section" class="d-none section-fade">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <span>Master Student Database</span>
+                </div>
+                <div class="p-3 border-bottom bg-light">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="masterSearchInput" class="form-control border-start-0 ps-0" placeholder="Search entire registry..." onkeyup="filterTable('master-table-body', 'masterSearchInput')">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th class="desktop-only">Email</th>
+                                    <th>Course</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="master-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section id="marksSection" class="d-none section-fade">
+            <div class="row mb-4 align-items-center">
+                <div class="col">
+                    <button onclick="showSection('students')" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Registry
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <div class="bg-white rounded-pill px-4 py-3 shadow-sm d-flex align-items-center border border-success">
+                        <div class="me-3">
+                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Cumulative Avg</small>
+                            <h4 id="avgScore" class="fw-bold mb-0 text-success">0%</h4>
+                        </div>
+                        <i class="bi bi-graph-up-arrow text-success fs-4"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm overflow-hidden">
+                <div class="bg-primary p-4 text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-0" id="currentStudentName">Student Name</h3>
+                            <p class="mb-0 opacity-75">Detailed Grade History</p>
+                        </div>
+                        <button onclick="openAddMarksModal()" class="btn btn-white bg-white text-primary fw-bold px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Add Record
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Subject</th>
+                                    <th>Exam</th>
+                                    <th>Raw Score</th>
+                                    <th>Percentage</th>
+                                    <th class="text-end pe-4">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marksTableBody" class="small"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal fade" id="marksModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="marksModalTitle">Grade Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="marksForm">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Course / Subject Name</label>
+                            <input type="text" id="m_subject" class="form-control rounded-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Evaluation Type</label>
+                            <input type="text" id="m_testType" class="form-control rounded-3" placeholder="Midterm, Final, Quiz..." required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Marks Obtained</label>
+                                <input type="number" id="m_obtained" class="form-control rounded-3" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Total Scale</label>
+                                <input type="number" id="m_outOf" class="form-control rounded-3" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm">Commit Record</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // CORE CONFIG & STATE
+        const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
+        const facultyId = localStorage.getItem('facultyId');
+        let activeStudentId = null;
+        let currentMarksEditId = null;
+
+        // AUTH CHECK
+        if (!facultyId) { window.location.href = "faculty-auth.html"; }
+
+        // INITIALIZE
+        window.onload = function() { loadDashboard(); };
+
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS });
+                const faculty = await res.json();
+                document.getElementById('faculty-name-header').innerText = faculty.name;
+                document.getElementById('faculty-subject').innerText = faculty.subject;
+                fetchStudents();
+            } catch (err) { console.error("Session Error:", err); }
+        }
+
+        // FETCH ASSIGNED
+        async function fetchStudents() {
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}/students`, { headers: HEADERS });            
+                if (!res.ok) throw new Error("Failed to fetch");
+                const students = await res.json();
+                document.getElementById('student-count').innerText = students.length;
+                renderTable('student-table-body', students);
+            } catch (err) { console.error("Data Fetch Error:", err); }
+        }
+
+        // RENDER ASSIGNED TABLE
+        function renderTable(targetId, data) {
+            const tableBody = document.getElementById(targetId);
+            tableBody.innerHTML = ''; 
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">No records found.</td></tr>';
+                return;
+            }
+            data.forEach(s => {
+                const displayId = s.studId || s.id || 'N/A';
+                tableBody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">#${displayId}</td>
+                        <td class="fw-semibold text-dark">${s.fullName || s.studentName || 'Unknown'}</td>
+                        <td class="text-muted">${s.email}</td>
+                    </tr>`;
+            });
+        }
+
+        // FETCH ALL (MASTER DB)
+        async function fetchMasterStudents() {
+            const tableBody = document.getElementById('master-table-body');
+            try {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+                const res = await fetch(`/college/students`, { headers: HEADERS }); 
+                const students = await res.json();
+                tableBody.innerHTML = '';
+                students.forEach(s => {
+                    const sId = s.studId || s.id;
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td class="small fw-bold">#${sId}</td>
+                            <td class="fw-bold text-dark">${s.fullName}</td>
+                            <td class="desktop-only text-muted">${s.email}</td>
+                            <td><span class="badge bg-light text-primary border border-primary-subtle">${s.course || 'N/A'}</span></td>
+                            <td class="text-center">
+                                <button onclick="openMarksManagement(${sId}, '${s.fullName}')" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <i class="bi bi-graph-up me-1"></i> Marks
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (err) { console.error("Master List Error:", err); }
+        }
+
+        // NAVIGATION LOGIC
+        function showSection(section) {
+            const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection'];
+            sections.forEach(id => document.getElementById(id).classList.add('d-none'));
+            
+            // Sidebar/Mobile nav active states
+            document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
+
+            if (section === 'profile') {
+                document.getElementById('profile-section').classList.remove('d-none');
+                document.getElementById('side-profile').classList.add('active');
+                document.getElementById('mob-profile').classList.add('active');
+                loadProfileForEditing();
+            } else if (section === 'students') {
+                document.getElementById('student-db-section').classList.remove('d-none');
+                document.getElementById('side-students').classList.add('active');
+                document.getElementById('mob-students').classList.add('active');
+                fetchMasterStudents();
+            } else if (section === 'dash') {
+                document.getElementById('dashboard-main-section').classList.remove('d-none');
+                document.getElementById('side-dash').classList.add('active');
+                document.getElementById('mob-dash').classList.add('active');
+                fetchStudents();
+            }
+        }
+
+        // MARKS MANAGEMENT
+        function openMarksManagement(studId, name) {
+            activeStudentId = studId;
+            document.getElementById('currentStudentName').innerText = name;
+            showSection('none'); 
+            document.getElementById('marksSection').classList.remove('d-none');
+            loadStudentMarks(studId);
+        }
+
+        async function loadStudentMarks(studId) {
+            try {
+                const res = await fetch(`/college/marks/student/${studId}`, { headers: HEADERS });
+                const marks = await res.json();
+                const body = document.getElementById('marksTableBody');
+                let totalPercent = 0;
+                body.innerHTML = marks.length ? '' : '<tr><td colspan="5" class="text-center py-5 text-muted">No academic records available.</td></tr>';
+
+                marks.forEach(m => {
+                    const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+                    totalPercent += parseFloat(percent);
+                    body.innerHTML += `
+                        <tr class="ps-4">
+                            <td class="ps-4 fw-bold text-dark">${m.subject}</td>
+                            <td>${m.testType}</td>
+                            <td class="fw-semibold">${m.obtainedMarks} / ${m.outOf}</td>
+                            <td><span class="badge ${percent >= 40 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3">${percent}%</span></td>
+                            <td class="text-end pe-4">
+                                <button onclick='editMarkRecord(${JSON.stringify(m)})' class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil-square"></i></button>
+                                <button onclick="deleteMarkRecord(${m.marksId})" class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('avgScore').innerText = (marks.length ? (totalPercent / marks.length).toFixed(1) : 0) + "%";
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('marksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                subject: document.getElementById('m_subject').value,
+                testType: document.getElementById('m_testType').value,
+                obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
+                outOf: parseFloat(document.getElementById('m_outOf').value)
+            };
+            const method = currentMarksEditId ? 'PUT' : 'POST';
+            const url = currentMarksEditId ? `/college/marks/${currentMarksEditId}` : `/college/marks/${activeStudentId}`;
+
+            try {
+                const res = await fetch(url, { method: method, headers: HEADERS, body: JSON.stringify(data) });
+                if (res.ok) {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('marksModal')).hide();
+                    document.getElementById('marksForm').reset();
+                    currentMarksEditId = null;
+                    loadStudentMarks(activeStudentId);
+                } else { alert("Operation failed: " + await res.text()); }
+            } catch (err) { console.error("Save Error:", err); }
+        });
+
+        function openAddMarksModal() {
+            currentMarksEditId = null;
+            document.getElementById('marksForm').reset();
+            document.getElementById('marksModalTitle').innerText = "New Grade Record";
+            new bootstrap.Modal(document.getElementById('marksModal')).show();
+        }
+
+        function editMarkRecord(m) {
+            currentMarksEditId = m.marksId;
+            document.getElementById('m_subject').value = m.subject;
+            document.getElementById('m_testType').value = m.testType;
+            document.getElementById('m_obtained').value = m.obtainedMarks;
+            document.getElementById('m_outOf').value = m.outOf;
+            document.getElementById('marksModalTitle').innerText = "Edit Grade Record";
+            new bootstrap.Modal(document.getElementById('marksModal')).show();
+        }
+
+        async function deleteMarkRecord(id) {
+            if(confirm("Permanently delete this record?")) {
+                await fetch(`/college/marks/${id}`, { method: 'DELETE', headers: HEADERS });
+                loadStudentMarks(activeStudentId);
+            }
+        }
+
+        // UTILITY FUNCTIONS
+        function filterTable(tableId, inputId) {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.getElementById(tableId).getElementsByTagName("tr");
+            for (let row of rows) {
+                row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+
+        function exportTableToExcel(tableId) {
+            const table = document.getElementById(tableId).parentElement;
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Students" });
+            XLSX.writeFile(wb, "Faculty_Student_List.xlsx");
+        }
+
+        async function loadProfileForEditing() {
+            try {
+                // Show a spinner or loading state if you have one
+                const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS });
+                if (!res.ok) throw new Error("Could not fetch profile");
+                
+                const faculty = await res.json();
+
+                // Mapping all data to the form fields
+                // Note: Field names (like faculty.salary) must match your Backend API response keys
+                document.getElementById('edit-id').value = faculty.id || 'N/A';
+                document.getElementById('edit-faculty-id-alt').value = faculty.faculty_id || faculty.facultyId || 'N/A';
+                document.getElementById('edit-email').value = faculty.email || '';
+                document.getElementById('edit-name').value = faculty.name || '';
+                document.getElementById('edit-subject').value = faculty.subject || '';
+                document.getElementById('edit-occupation').value = faculty.occupation || '';
+                document.getElementById('edit-salary').value = faculty.salary || '0';
+
+            } catch (err) {
+                console.error("Profile Load Error:", err);
+                alert("Failed to load profile data.");
+            }
+        }
+
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+            
+            // Prepare the payload including the new fields
+            const payload = {
+                name: document.getElementById('edit-name').value,
+                subject: document.getElementById('edit-subject').value,
+                occupation: document.getElementById('edit-occupation').value,
+                salary: document.getElementById('edit-salary').value
+            };
+
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}/update-profile`, {
+                    method: 'PUT',
+                    headers: HEADERS,
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Profile Updated Successfully!");
+                    location.reload(); 
+                } else {
+                    const error = await res.text();
+                    alert("Update failed: " + error);
+                }
+            } catch (err) {
+                console.error("Update Error:", err);
+                alert("Server error during update.");
+            }
+        }
+        function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
+    </script>
+</body>
+</html>
