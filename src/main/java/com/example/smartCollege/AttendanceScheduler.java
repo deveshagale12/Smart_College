@@ -15,7 +15,7 @@ public class AttendanceScheduler {
     @Autowired
     private AttendanceRepository attendanceRepo;
 
-   @Scheduled(cron = "0 59 23 * * *")
+   @Scheduled(cron = "0 30 10 * * MON-FRI")
 public void markAbsentees() {
     LocalDate today = LocalDate.now();
     studentRepo.findAll().forEach(student -> {
@@ -32,4 +32,5 @@ public void markAbsentees() {
         }
     });
 }
+
 }
