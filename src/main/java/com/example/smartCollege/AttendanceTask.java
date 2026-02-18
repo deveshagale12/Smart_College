@@ -16,8 +16,7 @@ public class AttendanceTask {
     private AttendanceRepository attendanceRepo;
 
     // Cron expression: Seconds, Minutes, Hours, Day, Month, Day of Week
-    // "0 59 23 * * *" means: Run at 23:59:00 every single day
-   @Scheduled(cron = "0 59 23 * * *")
+       @Scheduled(cron = "0 30 10 * * MON-FRI")
 public void markAbsentees() {
     LocalDate today = LocalDate.now();
     studentRepo.findAll().forEach(student -> {
@@ -35,3 +34,4 @@ public void markAbsentees() {
     });
 }
 }
+
