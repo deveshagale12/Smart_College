@@ -439,7 +439,7 @@
 </div>
     <script>
         const API_KEY = "StudentApiKey123";
-        const BASE_URL = "http://localhost:8080/college";
+        const BASE_URL = "https://smart-college.onrender.com/college";
         const student = JSON.parse(localStorage.getItem('student'));
         let currentEditId = null;
 
@@ -552,7 +552,7 @@ async function loadProfile() {
         if (photoRes.ok) {
             const photoData = await photoRes.json();
             // Added ?t= timestamp to bypass browser cache
-            document.getElementById('profileImg').src = `http://localhost:8080/user-photos/${photoData.fileName}?t=${new Date().getTime()}`;
+            document.getElementById('profileImg').src = `https://smart-college.onrender.com/user-photos/${photoData.fileName}?t=${new Date().getTime()}`;
         } else {
             document.getElementById('profileImg').src = "https://via.placeholder.com/150";
         }
