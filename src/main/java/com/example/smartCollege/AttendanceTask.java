@@ -17,30 +17,21 @@ public class AttendanceTask {
 
     // Cron expression: Seconds, Minutes, Hours, Day, Month, Day of Week
     // "0 59 23 * * *" means: Run at 23:59:00 every single day
-    @Scheduled(cron = "0 59 23 * * *")
-    public void markAbsentForMissingStudents() {
-        LocalDate today = LocalDate.now();
-        
-        // 1. Get all students
-        studentRepo.findAll().forEach(student -> {
-            
-            // 2. Check if this specific student marked attendance today
-            boolean present = attendanceRepo.existsByStudentStudIdAndDate(student.getStudId(), today);
-            
-            // 3. If no record found, they are absent
-            if (!present) {
-                Attendance absentRecord = new Attendance();
-                absentRecord.setDate(today);
-                absentRecord.setTime(LocalTime.MIDNIGHT); // Standard time for auto-records
-                absentRecord.setStatus("ABSENT");
-                absentRecord.setStudent(student);
-                absentRecord.setLatitude(0.0); // No GPS for absent records
-                absentRecord.setLongitude(0.0);
-                
-                attendanceRepo.save(absentRecord);
-            }
-        });
-        
-        System.out.println("Nightly attendance sweep completed for: " + today);
-    }
+   @Scheduled(cron = "0 59 23 * * *")
+public void markAbsentees() {
+    LocalDate today = LocalDate.now();
+    studentRepo.findAll().forEach(student -> {
+        boolean present = attendanceRepo.existsByStudentStudIdAndDate(student.getStudId(), today);
+        if (!present) {
+            Attendance absentRecord = new Attendance();
+            absentRecord.setDate(today);
+            absentRecord.setTime(LocalTime.MIDNIGHT); // Standardize the time
+            absentRecord.setStatus("ABSENT");
+            absentRecord.setStudent(student);
+            absentRecord.setLatitude(0.0); // Explicitly set to zero
+            absentRecord.setLongitude(0.0);
+            attendanceRepo.save(absentRecord);
+        }
+    });
+}
 }

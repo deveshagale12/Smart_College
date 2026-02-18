@@ -34,26 +34,32 @@ public class AttendanceController {
         return studentRepo.findById(studId).map(student -> {
             LocalDate today = LocalDate.now();
 
-            // 1. Duplicate Check
-            boolean alreadyMarked = attendanceRepo.existsByStudentStudIdAndDate(studId, today);
-            
-            if (alreadyMarked) {
-                // CAST TO OBJECT: Fixes the "Cannot infer type" error
+            // 1. Geofencing Verification
+            double distance = calculateDistance(record.getLatitude(), record.getLongitude(), COLLEGE_LAT, COLLEGE_LON);
+            if (distance > MAX_DISTANCE_METERS) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                     .body((Object) "Out of range. You must be on campus to mark attendance.");
+            }
+
+            // 2. Duplicate Check
+            if (attendanceRepo.existsByStudentStudIdAndDate(studId, today)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                      .body((Object) "Attendance already marked for today.");
             }
 
-            // 2. Setup Meta Data
+            // 3. Status Logic (Auto-Late Check)
+            // If they mark after 9:15 AM, set status to LATE automatically
+            if (LocalTime.now().isAfter(LocalTime.of(9, 15))) {
+                record.setStatus("LATE");
+            } else {
+                record.setStatus("PRESENT");
+            }
+
             record.setDate(today);
             record.setTime(LocalTime.now());
             record.setStudent(student);
             
-            // 3. Save and Return
-            Attendance saved = attendanceRepo.save(record);
-            
-            // CAST TO OBJECT: Ensures both paths return ResponseEntity<Object>
-            return ResponseEntity.ok((Object) saved); 
-            
+            return ResponseEntity.ok((Object) attendanceRepo.save(record)); 
         }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 

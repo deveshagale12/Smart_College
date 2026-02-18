@@ -15,19 +15,21 @@ public class AttendanceScheduler {
     @Autowired
     private AttendanceRepository attendanceRepo;
 
-    // Runs every night at 11:59 PM
-    @Scheduled(cron = "0 59 23 * * *")
-    public void markAbsentees() {
-        LocalDate today = LocalDate.now();
-        studentRepo.findAll().forEach(student -> {
-            boolean present = attendanceRepo.existsByStudentStudIdAndDate(student.getStudId(), today);
-            if (!present) {
-                Attendance absentRecord = new Attendance();
-                absentRecord.setDate(today);
-                absentRecord.setStatus("ABSENT");
-                absentRecord.setStudent(student);
-                attendanceRepo.save(absentRecord);
-            }
-        });
-    }
+   @Scheduled(cron = "0 59 23 * * *")
+public void markAbsentees() {
+    LocalDate today = LocalDate.now();
+    studentRepo.findAll().forEach(student -> {
+        boolean present = attendanceRepo.existsByStudentStudIdAndDate(student.getStudId(), today);
+        if (!present) {
+            Attendance absentRecord = new Attendance();
+            absentRecord.setDate(today);
+            absentRecord.setTime(LocalTime.MIDNIGHT); // Standardize the time
+            absentRecord.setStatus("ABSENT");
+            absentRecord.setStudent(student);
+            absentRecord.setLatitude(0.0); // Explicitly set to zero
+            absentRecord.setLongitude(0.0);
+            attendanceRepo.save(absentRecord);
+        }
+    });
+}
 }
