@@ -138,7 +138,46 @@ body {
     }
     .table th:first-child { background: #f8fafc !important; }
 }
+/* Container to allow swiping left/right */
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
 
+/* On screens smaller than 992px (Tablets/Phones) */
+@media (max-width: 992px) {
+    .table-responsive-custom table {
+        min-width: 800px; /* Forces enough width so columns don't squish */
+    }
+
+    /* Keep "Academic Year" visible while sliding */
+    .sticky-col {
+        position: sticky;
+        left: 0;
+        z-index: 11;
+        background-color: #f8fafc !important; /* Matches bg-light */
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+
+    #academic-table-body td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+        background-color: #ffffff !important;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+}
+
+/* Custom Scrollbar for the table */
+.table-responsive-custom::-webkit-scrollbar {
+    height: 6px;
+}
+.table-responsive-custom::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
 /* ========================================
    5. MOBILE BOTTOM NAV
    ======================================== 
@@ -561,35 +600,40 @@ body {
 </section>
 
 
-<section id="academic-section" class="d-none">
+<section id="academic-section" class="d-none section-fade">
     <div class="p-3">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">Academic History</h2>
-            <div class="d-flex gap-2">
-                <select id="academic-student-select" class="form-select" onchange="loadStudentAcademicRecords()" style="width: 250px;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-0">Academic History</h2>
+                <p class="text-muted mb-0">Track student progress and enrollment records</p>
+            </div>
+            <div class="d-flex gap-2 w-100 w-md-auto">
+                <select id="academic-student-select" class="form-select shadow-sm" onchange="loadStudentAcademicRecords()" style="min-width: 200px;">
                     <option value="">Select a Student...</option>
                 </select>
-                <button class="btn btn-primary" onclick="openAddAcademicModal()">
-                    <i class="bi bi-plus-circle me-2"></i>Add Record
+                <button class="btn btn-primary shadow-sm text-nowrap" onclick="openAddAcademicModal()">
+                    <i class="bi bi-plus-circle me-1"></i> Add
                 </button>
             </div>
         </div>
 
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <table class="table align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4">Academic Year</th>
-                        <th>Year Level</th>
-                        <th>Course</th>
-                        <th>Status</th>
-                        <th class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="academic-table-body">
-                    <tr><td colspan="5" class="text-center py-4 text-muted">Select a student to view records</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive-custom">
+                <table class="table align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 sticky-col">Academic Year</th>
+                            <th>Year Level</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th class="text-center pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="academic-table-body">
+                        <tr><td colspan="5" class="text-center py-4 text-muted">Select a student to view records</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </section>
