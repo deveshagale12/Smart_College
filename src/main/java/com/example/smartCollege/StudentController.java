@@ -19,6 +19,9 @@ public class StudentController {
     @Autowired
     private PhotoService photoService;
     
+    @Autowired
+    private StudentRepository studentRepo;
+    
     @PostMapping("/register")
     public ResponseEntity<?> createStudent(@RequestBody Student student) {
         try {
@@ -118,4 +121,9 @@ public class StudentController {
         List<Student> students = service.getStudentsByFacultyId(facultyId);
         return ResponseEntity.ok(students);
     }
+    @GetMapping("/all")
+    public List<Student> getAllStudents() {
+        return studentRepo.findAll();
+    }
+    
 }

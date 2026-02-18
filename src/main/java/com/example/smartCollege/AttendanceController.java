@@ -89,4 +89,22 @@ public class AttendanceController {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return earthRadius * c;
     }
+    @GetMapping("/all")
+    public ResponseEntity<List<Attendance>> getAllAttendance(@RequestParam(required = false) String date) {
+        if (date != null) {
+            LocalDate localDate = LocalDate.parse(date);
+            return ResponseEntity.ok(attendanceRepo.findByDate(localDate));
+        }
+        return ResponseEntity.ok(attendanceRepo.findAll());
+    }
+    @GetMapping("/report")
+    public ResponseEntity<List<Attendance>> getMonthlyReport(
+            @RequestParam int month, 
+            @RequestParam int year) {
+        
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        
+        return ResponseEntity.ok(attendanceRepo.findByDateBetween(start, end));
+    }
 }

@@ -24,7 +24,7 @@ public class Attendance {
 
     @ManyToOne
     @JoinColumn(name = "stud_id")
-    @JsonIgnore
+    @JsonIgnoreProperties({"fees", "academicRecords", "password"}) // Blocks recursion but keeps name
     private Student student;
 
 	public Long getAttendId() {

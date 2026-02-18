@@ -2,6 +2,7 @@ package com.smartCollege;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
 @Entity
@@ -18,10 +19,12 @@ public class Fees {
     
     
 
-    @OneToOne(fetch = FetchType.LAZY)
+ // Inside Fees.java
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stud_id")
-    @JsonIgnore
+    @JsonIgnoreProperties({"fees", "password", "academicRecords", "faculty", "photo"}) 
     private Student student;
+    
     @OneToMany(mappedBy = "fees", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<PaymentRecord> paymentHistory = new ArrayList<>();
     

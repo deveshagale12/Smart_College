@@ -28,6 +28,10 @@ public class Student {
     @JsonIgnoreProperties("students") // This stops the faculty from trying to re-serialize this student list
     private Faculty faculty;
     
+ // ADD THIS: Link to the Fees entity
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Fees fees;
+    
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AcademicRecord> academicRecords;
 

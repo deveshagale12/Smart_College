@@ -12,30 +12,35 @@ public class AcademicController {
     @Autowired
     private AcademicService academicService;
 
-    // POST: Save a year's data for a student
-    @PostMapping("/{studId}")
-    public ResponseEntity<AcademicRecord> addYearData(@PathVariable Long studId, @RequestBody AcademicRecord record) {
-        return ResponseEntity.ok(academicService.addRecord(studId, record));
-    }
-
-    // GET: Get all yearly records for a student
-    @GetMapping("/{studId}")
+    // GET: Fetch records by Student ID
+    // URL: GET http://localhost:8080/college/academic/student/1
+    @GetMapping("/student/{studId}")
     public ResponseEntity<List<AcademicRecord>> getStudentHistory(@PathVariable Long studId) {
         return ResponseEntity.ok(academicService.getRecordsByStudent(studId));
     }
-    
- // PUT: Update an existing record by its own ID
-    @PutMapping("/{recordId}")
+
+    // POST: Insert record for a Student
+    // URL: POST http://localhost:8080/college/academic/add/1
+    @PostMapping("/add/{studId}")
+    public ResponseEntity<?> addAcademicRecord(@PathVariable Long studId, @RequestBody AcademicRecord record) {
+        try {
+            AcademicRecord savedRecord = academicService.addRecord(studId, record);
+            return ResponseEntity.ok(savedRecord);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    // PUT: Update record by Record ID
+    @PutMapping("/update/{recordId}")
     public ResponseEntity<AcademicRecord> updateYearData(@PathVariable Long recordId, @RequestBody AcademicRecord record) {
         return ResponseEntity.ok(academicService.updateRecord(recordId, record));
     }
 
-    // DELETE: Delete a record by its own ID
-    @DeleteMapping("/{recordId}")
+    // DELETE: Delete record by Record ID
+    @DeleteMapping("/delete/{recordId}")
     public ResponseEntity<String> deleteYearData(@PathVariable Long recordId) {
         academicService.deleteRecord(recordId);
-        return ResponseEntity.ok("Academic record deleted successfully");
+        return ResponseEntity.ok("Deleted successfully");
     }
-
 }
-

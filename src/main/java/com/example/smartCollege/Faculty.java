@@ -24,9 +24,8 @@ public class Faculty {
     private Double salary;
     private String occupation;
 
-    @OneToMany(mappedBy = "faculty")
-    // REMOVE @JsonManagedReference
-    @JsonIgnoreProperties("faculty") // This stops the student from trying to re-serialize this faculty
+    @OneToMany(mappedBy = "faculty", fetch = FetchType.EAGER) // Change to EAGER
+    @JsonIgnoreProperties("faculty") 
     private List<Student> students;
 
 	public Long getId() {

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -71,19 +72,19 @@ public class FacultyController {
     @PutMapping("/{id}/update-profile")
     public ResponseEntity<?> updateProfile(@PathVariable Long id, @RequestBody Faculty updatedData) {
         return facultyRepo.findById(id).map(faculty -> {
-            // Update general info
+            // ONLY update the basic fields. DO NOT touch the students list here.
             faculty.setName(updatedData.getName());
             faculty.setSubject(updatedData.getSubject());
             faculty.setOccupation(updatedData.getOccupation());
             faculty.setSalary(updatedData.getSalary());
+            faculty.setFacultyId(updatedData.getFacultyId()); // Ensure the custom ID is updated
             
-            // Update password only if a new one is provided
             if (updatedData.getPassword() != null && !updatedData.getPassword().isEmpty()) {
                 faculty.setPassword(updatedData.getPassword());
             }
             
-            facultyRepo.save(faculty);
-            return ResponseEntity.ok(faculty);
+            Faculty savedFaculty = facultyRepo.save(faculty);
+            return ResponseEntity.ok(savedFaculty);
         }).orElse(ResponseEntity.notFound().build());
     }
     
@@ -93,8 +94,32 @@ public class FacultyController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+	/*
+	 * @GetMapping public List<Faculty> getAllFaculties() { return
+	 * facultyRepo.findAll(); }
+	 */
     @GetMapping
+    @Transactional(readOnly = true) // Ensures the database session stays open
     public List<Faculty> getAllFaculties() {
-        return facultyRepo.findAll();
+        List<Faculty> faculties = facultyRepo.findAll();
+        // Force initialization of the proxy collection
+        faculties.forEach(f -> {
+            if (f.getStudents() != null) {
+                f.getStudents().size(); // Calling size() forces Hibernate to load the data
+            }
+        });
+        return faculties;
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteFaculty(@PathVariable Long id) {
+        return facultyRepo.findById(id).map(faculty -> {
+            // Optional: Check if faculty has students before deleting
+            if (!faculty.getStudents().isEmpty()) {
+                return ResponseEntity.badRequest().body("Cannot delete faculty with assigned students.");
+            }
+            facultyRepo.delete(faculty);
+            return ResponseEntity.ok().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

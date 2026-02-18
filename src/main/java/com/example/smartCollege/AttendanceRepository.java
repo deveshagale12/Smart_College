@@ -8,4 +8,6 @@ import java.util.List;
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 	boolean existsByStudentStudIdAndDate(Long studId, LocalDate date);
 	List<Attendance> findByStudentStudIdOrderByDateDesc(Long studId);
+	List<Attendance> findByDate(LocalDate date);
+	List<Attendance> findByDateBetween(LocalDate start, LocalDate end);	
 }

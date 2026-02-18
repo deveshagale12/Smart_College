@@ -1,6 +1,7 @@
 package com.smartCollege;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "student_marks")
 public class Marks {
