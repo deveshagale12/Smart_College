@@ -116,37 +116,76 @@
             .mobile-nav { display: flex; }
             .desktop-only { display: none; }
         }
+        
+        #sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: #fff;
+    height: 100vh;
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.nav-link {
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+}
+
+.nav-link:hover {
+    background: #f1f5f9;
+}
     </style>
 </head>
 <body>
 
-    <nav id="sidebar" class="d-none d-md-block">
-        <div class="py-4 px-3">
-            <div class="d-flex align-items-center mb-4 px-3">
-                <div class="bg-primary text-white rounded-3 p-2 me-2">
-                    <i class="bi bi-mortarboard-fill"></i>
-                </div>
-                <h5 class="mb-0 fw-bold text-dark">Faculty Hub</h5>
+    <nav id="sidebar" class="d-none d-md-block" style="height: 100vh; position: sticky; top: 0;">
+    <div class="py-4 px-3 d-flex flex-column h-100">
+        
+        <div class="d-flex align-items-center mb-4 px-3">
+            <div class="bg-primary text-white rounded-3 p-2 me-2">
+                <i class="bi bi-mortarboard-fill"></i>
             </div>
-            <hr class="mx-3 text-muted opacity-25">
-            <ul class="nav flex-column">
-                <li class="nav-item"><a href="#" id="side-dash" onclick="showSection('dash')" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
-                <li class="nav-item"><a href="#" id="side-students" onclick="showSection('students')" class="nav-link"><i class="bi bi-people-fill"></i> Student Database</a></li>
-                <li class="nav-item"><a href="#" id="side-attendance" onclick="showSection('attendance')" class="nav-link"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
-                <li class="nav-item"><a href="#" id="side-profile" onclick="showSection('profile')" class="nav-link"><i class="bi bi-person-badge-fill"></i> Profile</a></li>
-            </ul>
-            <div style="position: absolute; bottom: 30px; width: 88%;">
-                <a href="#" onclick="logout()" class="nav-link text-danger"><i class="bi bi-box-arrow-left"></i> Logout</a>
-            </div>
+            <h5 class="mb-0 fw-bold text-dark">Faculty Hub</h5>
         </div>
-    </nav>
+        
+        <hr class="mx-3 text-muted opacity-25">
+        
+        <ul class="nav flex-column mb-auto"> <li class="nav-item"><a href="#" id="side-dash" onclick="showSection('dash')" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" id="side-students" onclick="showSection('students')" class="nav-link"><i class="bi bi-people-fill"></i> Student Database</a></li>
+            <li class="nav-item"><a href="#" id="side-attendance" onclick="showSection('attendance')" class="nav-link"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
+            <li class="nav-item"><a href="#" id="side-profile" onclick="showSection('profile')" class="nav-link"><i class="bi bi-person-badge-fill"></i> Profile</a></li>
+        </ul>
 
-    <div class="mobile-nav d-md-none d-flex">
-        <a href="#" onclick="showSection('dash')" class="mobile-nav-item active" id="mob-dash"><i class="bi bi-grid-1x2-fill"></i>Dash</a>
-        <a href="#" onclick="showSection('students')" class="mobile-nav-item" id="mob-students"><i class="bi bi-people-fill"></i>Students</a>
-        <a href="#" onclick="showSection('attendance')" class="mobile-nav-item" id="mob-attendance"><i class="bi bi-calendar-check-fill"></i>Attendance</a>
-        <a href="#" onclick="showSection('profile')" class="mobile-nav-item" id="mob-profile"><i class="bi bi-person-badge-fill"></i>Profile</a>
+        <div class="px-3 pt-3 border-t dark:border-slate-700">
+            <a href="#" onclick="handleLogout()" class="nav-link text-danger fw-bold d-flex align-items-center gap-2">
+                <i class="bi bi-box-arrow-left"></i> Logout
+            </a>
+        </div>
+        
     </div>
+</nav>
+
+   <div class="mobile-nav d-md-none d-flex justify-content-around align-items-center bg-white dark:bg-darkCard border-t dark:border-slate-700">
+    <a href="#" onclick="showSection('dash')" class="mobile-nav-item active" id="mob-dash">
+        <i class="bi bi-grid-1x2-fill"></i><span class="text-[10px]">Dash</span>
+    </a>
+    <a href="#" onclick="showSection('students')" class="mobile-nav-item" id="mob-students">
+        <i class="bi bi-people-fill"></i><span class="text-[10px]">Students</span>
+    </a>
+    <a href="#" onclick="showSection('attendance')" class="mobile-nav-item" id="mob-attendance">
+        <i class="bi bi-calendar-check-fill"></i><span class="text-[10px]">Attnd</span>
+    </a>
+    <a href="#" onclick="showSection('profile')" class="mobile-nav-item" id="mob-profile">
+        <i class="bi bi-person-badge-fill"></i><span class="text-[10px]">Profile</span>
+    </a>
+    <a href="#" onclick="handleLogout()" class="mobile-nav-item text-red-500">
+        <i class="bi bi-box-arrow-right"></i><span class="text-[10px]">Exit</span>
+    </a>
+</div>
 
     <div id="content">
         <header class="d-flex justify-content-between align-items-center mb-4">
@@ -550,7 +589,7 @@
     <script>
         // CORE CONFIG & STATE
         
-        const ATTENDANCE_API = `https://smart-college.onrender.com/college/attendance`;
+        const ATTENDANCE_API = `http://localhost:8080/college/attendance`;
         const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
         const facultyId = localStorage.getItem('facultyId');
         let activeStudentId = null;
@@ -672,7 +711,7 @@ async function loadAttendanceHistory(sId) {
     
     try {
         // MATCHED TO YOUR JAVA: @GetMapping("/history/{studId}")
-        const res = await fetch(`https://smart-college.onrender.com/college/attendance/history/${sId}`, { headers: HEADERS });
+        const res = await fetch(`http://localhost:8080/college/attendance/history/${sId}`, { headers: HEADERS });
         
         if (!res.ok) throw new Error("Not Found");
         const data = await res.json();
@@ -727,7 +766,7 @@ async function quickUpdateStatus(attendId, current, sId) {
     if (!newStatus) return;
 
     try {
-        const res = await fetch(`https://smart-college.onrender.com/college/attendance/update/${attendId}?status=${newStatus}`, {
+        const res = await fetch(`http://localhost:8080/college/attendance/update/${attendId}?status=${newStatus}`, {
             method: 'PUT',
             headers: HEADERS
         });
@@ -739,7 +778,7 @@ async function quickUpdateStatus(attendId, current, sId) {
 async function deleteAttendanceRecord(attendId, sId) {
     if (!confirm("Delete this attendance record?")) return;
     try {
-        const res = await fetch(`https://smart-college.onrender.com/college/attendance/delete/${attendId}`, {
+        const res = await fetch(`http://localhost:8080/college/attendance/delete/${attendId}`, {
             method: 'DELETE',
             headers: HEADERS
         });
@@ -1595,6 +1634,30 @@ function getStatusBadge(status) {
         case 'LATE': return 'bg-warning-subtle text-warning';
         case 'ABSENT': return 'bg-danger-subtle text-danger';
         default: return 'bg-secondary-subtle';
+    }
+}
+function handleLogout() {
+    // Confirm with the user first
+    if (confirm("Are you sure you want to logout?")) {
+        // 1. Show the high-tech loading overlay
+        const loader = document.getElementById('loading-overlay');
+        if(loader) {
+            loader.classList.replace('hidden', 'flex');
+            // Update text for logout context
+            const loaderText = loader.querySelector('h2');
+            if(loaderText) loaderText.innerText = "Securing Session & Logging Out...";
+        }
+
+        // 2. Show a toast notification
+        showToast("Logged out successfully!", "success");
+
+        // 3. Clear any session data (Optional)
+        // localStorage.removeItem('userToken'); 
+
+        // 4. Redirect to home.html after a short delay
+        setTimeout(() => {
+            window.location.href = "home.html";
+        }, 1500);
     }
 }
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
