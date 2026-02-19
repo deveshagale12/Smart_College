@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+// If you are also using HashMap, add this too:
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/college/attendance")
