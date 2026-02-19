@@ -589,7 +589,7 @@
     <script>
         // CORE CONFIG & STATE
         
-        const ATTENDANCE_API = `http://localhost:8080/college/attendance`;
+        const ATTENDANCE_API = `https://smart-college.onrender.com/college/attendance`;
         const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
         const facultyId = localStorage.getItem('facultyId');
         let activeStudentId = null;
@@ -711,7 +711,7 @@ async function loadAttendanceHistory(sId) {
     
     try {
         // MATCHED TO YOUR JAVA: @GetMapping("/history/{studId}")
-        const res = await fetch(`http://localhost:8080/college/attendance/history/${sId}`, { headers: HEADERS });
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/history/${sId}`, { headers: HEADERS });
         
         if (!res.ok) throw new Error("Not Found");
         const data = await res.json();
@@ -766,7 +766,7 @@ async function quickUpdateStatus(attendId, current, sId) {
     if (!newStatus) return;
 
     try {
-        const res = await fetch(`http://localhost:8080/college/attendance/update/${attendId}?status=${newStatus}`, {
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/update/${attendId}?status=${newStatus}`, {
             method: 'PUT',
             headers: HEADERS
         });
@@ -778,7 +778,7 @@ async function quickUpdateStatus(attendId, current, sId) {
 async function deleteAttendanceRecord(attendId, sId) {
     if (!confirm("Delete this attendance record?")) return;
     try {
-        const res = await fetch(`http://localhost:8080/college/attendance/delete/${attendId}`, {
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/delete/${attendId}`, {
             method: 'DELETE',
             headers: HEADERS
         });
