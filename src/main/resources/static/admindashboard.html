@@ -282,7 +282,29 @@ body {
     background: #e2e8f0;
     border-radius: 10px;
 }
-
+.success-checkmark {
+    width: 80px; height: 115px; margin: 0 auto;
+}
+.check-icon {
+    width: 80px; height: 80px; position: relative; border-radius: 50%;
+    box-sizing: content-box; border: 4px solid #4CAF50;
+}
+.check-icon::after {
+    content: ''; position: absolute; left: 28px; top: 40px; width: 30px; height: 50px;
+    border-right: 4px solid #4CAF50; border-top: 4px solid #4CAF50;
+    transform-origin: left top; transform: scaleX(-1) rotate(135deg);
+    animation: check-draw 0.8s ease;
+}
+.icon-circle {
+    top: -4px; left: -4px; z-index: 10; width: 80px; height: 80px;
+    border-radius: 50%; position: absolute; border: 4px solid rgba(76, 175, 80, 0.2);
+}
+@keyframes check-draw {
+    0% { height: 0; width: 0; opacity: 1; }
+    20% { height: 0; width: 15px; opacity: 1; }
+    40% { height: 30px; width: 15px; opacity: 1; }
+    100% { height: 30px; width: 15px; opacity: 1; }
+}
 </style>
 </head>
 <body>
@@ -755,19 +777,36 @@ body {
         </section>
     </div>
 
-    <div id="marksModal" class="custom-modal-overlay hidden">
-        <div class="bg-white w-100 mx-3 rounded-5 shadow-2xl p-4 p-md-5" style="max-width: 500px;">
+    <div id="marksModal" class="d-none position-fixed top-0 start-0 w-100 h-100 vh-100" 
+     style="background: rgba(0,0,0,0.5); z-index: 9999; backdrop-filter: blur(4px);">
+    
+    <div class="container h-100 d-flex align-items-center justify-content-center">
+        <div class="bg-white rounded-5 shadow-2xl p-4 p-md-5 w-100" style="max-width: 500px;">
+            
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 id="marksModalTitle" class="fw-bold mb-0">Enter Grade</h4>
-                <button class="btn-close" onclick="toggleMarksModal(false)"></button>
+                <button type="button" class="btn-close" onclick="toggleMarksModal(false)"></button>
             </div>
-            <form id="marksForm" class="row g-4">
+<div id="successAnimation" class="d-none text-center py-4">
+    <div class="success-checkmark">
+        <div class="check-icon">
+            <span class="icon-line line-tip"></span>
+            <span class="icon-line line-long"></span>
+            <div class="icon-circle"></div>
+            <div class="icon-fix"></div>
+        </div>
+    </div>
+    <h5 class="text-success fw-bold mt-3">Grade Recorded!</h5>
+    <p class="text-muted small">The student's record has been updated.</p>
+</div>
+            <form id="marksForm" class="row g-3">
                 <div class="col-12">
-                    <label class="form-label small fw-bold text-muted">SUBJECT NAME</label>
+                    <label class="form-label small fw-bold text-muted mb-1">SUBJECT NAME</label>
                     <input type="text" id="m_subject" placeholder="e.g. Computer Science" class="form-control p-3 bg-light border-0 rounded-4" required>
                 </div>
+                
                 <div class="col-12">
-                    <label class="form-label small fw-bold text-muted">EXAMINATION CATEGORY</label>
+                    <label class="form-label small fw-bold text-muted mb-1">EXAMINATION CATEGORY</label>
                     <select id="m_testType" class="form-select p-3 bg-light border-0 rounded-4">
                         <option value="Midterm">Midterm</option>
                         <option value="Final Exam">Final Exam</option>
@@ -775,22 +814,26 @@ body {
                         <option value="Assignment">Assignment</option>
                     </select>
                 </div>
+
                 <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">OBTAINED</label>
+                    <label class="form-label small fw-bold text-muted mb-1">OBTAINED</label>
                     <input type="number" id="m_obtained" placeholder="Score" class="form-control p-3 bg-light border-0 rounded-4" required>
                 </div>
+                
                 <div class="col-6">
-                    <label class="form-label small fw-bold text-muted">OUT OF</label>
+                    <label class="form-label small fw-bold text-muted mb-1">OUT OF</label>
                     <input type="number" id="m_outOf" placeholder="Max" class="form-control p-3 bg-light border-0 rounded-4" required>
                 </div>
+
                 <div class="col-12 pt-3">
-                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-4 shadow-lg fw-bold">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-4 shadow-lg fw-bold py-3">
                         Confirm Record
                     </button>
                 </div>
             </form>
         </div>
     </div>
+</div>
 
     <div class="modal fade" id="registrationModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1044,6 +1087,7 @@ body {
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -1465,21 +1509,31 @@ async function loadStudentMarks(studId) {
 document.getElementById('marksForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Collect data from the improved HTML IDs
+    const form = e.target;
+    const animation = document.getElementById('successAnimation');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // Data collection
+    const obtained = parseFloat(document.getElementById('m_obtained').value);
+    const outOf = parseFloat(document.getElementById('m_outOf').value);
+    const percentage = (obtained / outOf) * 100;
+
     const data = {
         subject: document.getElementById('m_subject').value,
         testType: document.getElementById('m_testType').value,
-        obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
-        outOf: parseFloat(document.getElementById('m_outOf').value)
+        obtainedMarks: obtained,
+        outOf: outOf
     };
 
-    // Determine if we are updating or creating
     const method = currentMarksEditId ? 'PUT' : 'POST';
     const url = currentMarksEditId 
         ? `${BASE_URL}/college/marks/${currentMarksEditId}` 
         : `${BASE_URL}/college/marks/${activeStudentId}`;
 
     try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
         const res = await fetch(url, {
             method: method,
             headers: HEADERS,
@@ -1487,27 +1541,75 @@ document.getElementById('marksForm').addEventListener('submit', async (e) => {
         });
 
         if (res.ok) {
-            toggleMarksModal(false); // Close the modal
-            loadStudentMarks(activeStudentId); // Refresh the list
-            alert("✅ Academic record saved!");
+            // 1. Hide form and show checkmark animation
+            form.classList.add('d-none');
+            animation.classList.remove('d-none');
+
+            // 2. Trigger Confetti if Grade is Excellent (>= 90%)
+            if (percentage >= 90) {
+                triggerCelebration();
+            }
+
+            // 3. Refresh and Close
+            setTimeout(() => {
+                toggleMarksModal(false); 
+                loadStudentMarks(activeStudentId);
+                
+                // Reset UI for next use
+                form.reset();
+                form.classList.remove('d-none');
+                animation.classList.add('d-none');
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Confirm Record";
+            }, 2000);
+
         } else {
             alert("❌ Failed to save: " + await res.text());
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Confirm Record";
         }
     } catch (err) {
         console.error("Save Error:", err);
+        submitBtn.disabled = false;
     }
 });
+
+// Confetti Effect Function
+function triggerCelebration() {
+    const duration = 3 * 1000;
+    const end = Date.now() + duration;
+
+    (function frame() {
+        confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#22c55e', '#3b82f6', '#f59e0b']
+        });
+        confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#22c55e', '#3b82f6', '#f59e0b']
+        });
+
+        if (Date.now() < end) {
+            requestAnimationFrame(frame);
+        }
+    }());
+}
 
 // Modal Helpers
 function toggleMarksModal(show) {
     const modal = document.getElementById('marksModal');
-    if(show) {
-        modal.classList.remove('hidden'); // Remove the 'hidden' class we added in CSS
-        // Small timeout to allow the transition/fade effect to trigger
-        setTimeout(() => modal.style.opacity = "1", 10);
+    if (show) {
+        modal.classList.remove('d-none');
+        modal.classList.add('d-flex');
     } else {
-        modal.style.opacity = "0";
-        setTimeout(() => modal.classList.add('hidden'), 300);
+        modal.classList.add('d-none');
+        modal.classList.remove('d-flex');
     }
 }
 
@@ -2421,7 +2523,7 @@ async function fetchStudentsForAcademic() {
     if (!select) return;
 
     try {
-        // Double check: Is your BASE_URL defined? Is it "http://localhost:8080"?
+        // Double check: Is your BASE_URL defined? Is it "https://smart-college.onrender.com"?
         const response = await fetch(`${BASE_URL}/college/students/all`, { 
             headers: HEADERS 
         });

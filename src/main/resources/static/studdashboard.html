@@ -136,33 +136,7 @@
             </div>
         </section>
 
-        <section id="academicSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h3 class="text-xl font-bold">Records</h3>
-                        <p class="text-sm text-slate-500">Your yearly performance history</p>
-                    </div>
-                    <button onclick="openAddRecordModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">
-                        + Add Year
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-wider">
-                                <th class="pb-4 px-2">Course</th>
-                                <th class="pb-4 px-2">Academic Year</th>
-                                <th class="pb-4 px-2">Status</th>
-                                <th class="pb-4 px-2 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="academicTableBody" class="text-sm border-t border-slate-100">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+        
         <section id="parentSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
         <div class="flex justify-between items-center mb-8">
@@ -206,6 +180,35 @@
         </form>
     </div>
 </div>
+<section id="academicSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h3 class="text-xl font-bold">Academic Records</h3>
+                <p class="text-sm text-slate-500">Your yearly performance history</p>
+            </div>
+            <button onclick="openAddRecordModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">
+                + Add Year
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-left text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="pb-4 px-2">Course</th>
+                        <th class="pb-4 px-2">Academic Year</th>
+                        <th class="pb-4 px-2">Semester</th>
+                        <th class="pb-4 px-2">Status</th>
+                        <th class="pb-4 px-2 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="academicTableBody" class="text-sm border-t border-slate-100">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
 <section id="marksSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-200">
@@ -215,11 +218,9 @@
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8">
-        <div class="flex justify-between items-center mb-8">
+        <div class="mb-8">
             <h3 class="text-xl font-bold text-slate-800">Exam Results</h3>
-            <button onclick="openMarksModal()" class="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition">
-                + Add Marks
-            </button>
+            <p class="text-sm text-slate-500">Official grades as recorded by faculty</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -229,8 +230,7 @@
                         <th class="pb-4 px-2">Test Type</th>
                         <th class="pb-4 px-2">Score</th>
                         <th class="pb-4 px-2">Percentage</th>
-                        <th class="pb-4 px-2 text-right">Action</th>
-                    </tr>
+                        </tr>
                 </thead>
                 <tbody id="marksTableBody" class="text-sm border-t border-slate-100"></tbody>
             </table>
@@ -238,7 +238,7 @@
     </div>
 </section>
 <section id="feesSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
-<div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+<!-- <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
             <h4 class="text-indigo-900 font-bold text-lg">Set Course Pricing</h4>
             <p class="text-indigo-600 text-sm">Manually define the total tuition and exam fees for this student.</p>
@@ -248,13 +248,13 @@
                 <i class="fas fa-edit mr-2"></i> Set Manual Fees
             </button>
         </div>
-    </div>
+    </div> -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <div class="lg:col-span-1 space-y-6">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
                 <h3 class="text-lg font-bold mb-6 flex items-center">
-                    <i class="fas fa-calculator text-indigo-500 mr-2"></i> Billing Summary
+                    <i class="fas fa-calculator text-indigo-500 mr-2"></i> Billing Summary==DONT DELETE FEES RECORDS
                 </h3>
                 <div class="space-y-4">
                     <div class="flex justify-between p-3 bg-slate-50 rounded-xl">
@@ -276,9 +276,9 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="openPaymentModal()" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition">
+                <!-- <button onclick="openPaymentModal()" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition">
                     Add New Payment
-                </button>
+                </button> -->
             </div>
         </div>
 
@@ -310,22 +310,32 @@
         
         <div class="lg:col-span-1">
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 text-center">
-                <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                    <i class="fas fa-map-marker-alt"></i>
+                <div id="statusIcon" class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    <i class="fas fa-fingerprint"></i>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Daily Check-in</h3>
-                <p class="text-slate-500 text-sm mb-8">Mark your presence for today. Your GPS location will be recorded.</p>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Campus Check-in</h3>
+                <p class="text-slate-500 text-sm mb-8">Click below to mark your attendance. The system will verify your location and time automatically.</p>
                 
                 <div class="space-y-3">
-                    <button id="markPresentBtn" onclick="handleMarkAttendance('PRESENT')" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
-                        <span class="btn-text">Mark Present</span>
+                    <button id="markAttendanceBtn" onclick="handleMarkAttendance()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                        <span class="btn-text">Check-in Now</span>
                         <div class="loader hidden ml-2 w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
                     </button>
-                    <button onclick="handleMarkAttendance('LATE')" class="w-full py-4 bg-amber-50 text-amber-600 font-bold rounded-2xl hover:bg-amber-100 transition">
-                        Mark Late
-                    </button>
                 </div>
-                <p id="locationStatus" class="mt-4 text-xs text-slate-400"></p>
+                
+                <p id="locationStatus" class="mt-4 text-xs font-medium"></p>
+                
+                <div class="mt-6 pt-6 border-t border-slate-100 text-left">
+                    <h5 class="text-xs font-bold text-slate-400 uppercase mb-3">Today's Schedule</h5>
+                    <div class="flex items-center text-sm text-slate-600 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                        <span>8:00 - 10:30 AM (Present)</span>
+                    </div>
+                    <div class="flex items-center text-sm text-slate-600">
+                        <div class="w-2 h-2 rounded-full bg-amber-500 mr-2"></div>
+                        <span>10:30 - 4:00 PM (Late)</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -659,24 +669,50 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         }
 
         async function loadAcademicRecords() {
-            const res = await fetch(`${BASE_URL}/academic/${student.studId}`, { headers: { 'X-API-KEY': API_KEY } });
-            const records = await res.json();
             const body = document.getElementById('academicTableBody');
-            body.innerHTML = records.map(r => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
-                    <td class="py-5 px-2 font-semibold text-slate-700">${r.courseName}</td>
-                    <td class="py-5 px-2 text-slate-500">${r.academicYear}</td>
-                    <td class="py-5 px-2">
-                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${r.status === 'Pass' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${r.status}</span>
-                    </td>
-                    <td class="py-5 px-2 text-right space-x-3">
-                        <button onclick='openEditModal(${JSON.stringify(r)})' class="text-indigo-400 hover:text-indigo-600"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteRecord(${r.id})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
+            body.innerHTML = '<tr><td colspan="4" class="text-center py-10"><div class="loader-sm mx-auto border-2 border-indigo-500 border-t-transparent rounded-full w-6 h-6 animate-spin"></div></td></tr>';
 
+            try {
+                // CHANGE: Verify if your backend expects /academic/student/ or just /academic/
+                const res = await fetch(`${BASE_URL}/academic/student/${student.studId}`, { 
+                    method: 'GET',
+                    headers: { 
+                        'X-API-KEY': API_KEY,
+                        'Content-Type': 'application/json'
+                    } 
+                });
+                
+                if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+                
+                const records = await res.json();
+                
+                if (records.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">No academic history records found.</td></tr>';
+                    return;
+                }
+
+                body.innerHTML = records.map(r => `
+                    <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+                        <td class="py-5 px-2 font-semibold text-slate-700">${r.courseName}</td>
+                        <td class="py-5 px-2 text-slate-500">${r.academicYear}</td>
+                        <td class="py-5 px-2">
+                            <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ${r.status === 'Pass' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                                ${r.status}
+                            </span>
+                        </td>
+                        <td class="py-5 px-2 text-right">
+                           <span class="text-slate-300 text-xs italic"><i class="fas fa-lock me-1"></i>Official</span>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Academic Load Error:", err);
+                body.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400 font-medium">
+                    <i class="fas fa-exclamation-circle mb-2 block text-xl"></i>
+                    Could not sync records.
+                </td></tr>`;
+            }
+        }
         document.getElementById('recordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             setBtnLoading('saveRecordBtn', true);
@@ -688,25 +724,45 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
                 status: document.getElementById('rec_status').value
             };
 
-            const method = currentEditId ? 'PUT' : 'POST';
-            const url = currentEditId ? `${BASE_URL}/academic/${currentEditId}` : `${BASE_URL}/academic/${student.studId}`;
+            let url;
+            let method;
+
+            if (currentEditId) {
+                // Matches @PutMapping("/update/{recordId}")
+                url = `${BASE_URL}/academic/update/${currentEditId}`;
+                method = 'PUT';
+            } else {
+                // Matches @PostMapping("/add/{studId}")
+                url = `${BASE_URL}/academic/add/${student.studId}`;
+                method = 'POST';
+            }
 
             try {
                 const res = await fetch(url, {
-                    method,
-                    headers: { 'Content-Type': 'application/json', 'X-API-KEY': API_KEY },
+                    method: method,
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'X-API-KEY': API_KEY 
+                    },
                     body: JSON.stringify(data)
                 });
-                if(res.ok) {
+
+                if (res.ok) {
+                    alert("Academic record saved successfully!");
                     toggleModal(false);
-                    loadAcademicRecords();
-                    currentEditId = null;
+                    loadAcademicRecords(); // Refresh the table
+                    e.target.reset();
+                } else {
+                    const errorMsg = await res.text();
+                    alert("Save failed: " + errorMsg);
                 }
+            } catch (err) {
+                console.error("Connection Error:", err);
             } finally {
                 setBtnLoading('saveRecordBtn', false);
             }
         });
-
+        
         function openAddRecordModal() {
             currentEditId = null;
             document.getElementById('recordForm').reset();
@@ -826,6 +882,39 @@ showSection = function(id, btn) {
         loadParents();
     }
 }
+function showSection(id, btn) {
+    // 1. Hide all sections
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+
+    // 2. Show target
+    const target = document.getElementById(id + 'Section');
+    if (target) target.classList.remove('hidden');
+
+    // 3. Update Titles
+    const titles = {
+        'profile': 'My Profile',
+        'academic': 'Academic Records',
+        'parent': 'Parent Details',
+        'marks': 'Performance Analysis',
+        'fees': 'Fees & Billing',
+        'attendance': 'Attendance Tracker'
+    };
+    document.getElementById('pageTitle').innerText = titles[id] || 'Dashboard';
+
+    // 4. Data Loading Logic
+    if (id === 'academic') loadAcademicRecords();
+    if (id === 'parent') loadParents();
+    if (id === 'marks') loadMarks();
+    if (id === 'fees') loadFees();
+    if (id === 'attendance') loadAttendance();
+
+    // 5. Active Nav Styling
+    document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => {
+        el.classList.remove('nav-active', 'text-indigo-600', 'bg-slate-50');
+        el.classList.add('text-slate-400');
+    });
+    if (btn) btn.classList.add('nav-active', 'text-indigo-600', 'bg-slate-50');
+}
 
 
 
@@ -844,38 +933,37 @@ function toggleMarksModal(show) {
 }
 
 async function loadMarks() {
-    const res = await fetch(`${BASE_URL}/marks/student/${student.studId}`, { 
-        headers: { 'X-API-KEY': API_KEY } 
-    });
-    const marks = await res.json();
-    const body = document.getElementById('marksTableBody');
-    
-    let totalPercent = 0;
-    
-    body.innerHTML = marks.map(m => {
-        const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
-        totalPercent += parseFloat(percent);
-        const colorClass = percent >= 40 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
+    try {
+        const res = await fetch(`${BASE_URL}/marks/student/${student.studId}`, { 
+            headers: { 'X-API-KEY': API_KEY } 
+        });
+        const marks = await res.json();
+        const body = document.getElementById('marksTableBody');
+        
+        let totalPercent = 0;
+        
+        body.innerHTML = marks.map(m => {
+            const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+            totalPercent += parseFloat(percent);
+            const colorClass = percent >= 40 ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
 
-        return `
-            <tr class="border-b border-slate-50 hover:bg-slate-50 transition">
+            return `
+            <tr class="border-b border-slate-50">
                 <td class="py-5 px-2 font-semibold text-slate-700">${m.subject}</td>
                 <td class="py-5 px-2 text-slate-500">${m.testType}</td>
-                <td class="py-5 px-2 text-slate-700 font-medium">${m.obtainedMarks} / ${m.outOf}</td>
+                <td class="py-5 px-2 font-bold">${m.obtainedMarks} / ${m.outOf}</td>
                 <td class="py-5 px-2">
                     <span class="px-3 py-1 rounded-full text-xs font-bold ${colorClass}">${percent}%</span>
                 </td>
-                <td class="py-5 px-2 text-right space-x-3">
-                    <button onclick='openMarksEditModal(${JSON.stringify(m)})' class="text-indigo-400 hover:text-indigo-600"><i class="fas fa-edit"></i></button>
-                    <button onclick="deleteMarks(${m.marksId})" class="text-slate-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
+                </tr>
         `;
-    }).join('');
+        }).join('');
 
-    // Update Average Score Card
-    const avg = marks.length > 0 ? (totalPercent / marks.length).toFixed(1) : 0;
-    document.getElementById('avgScore').innerText = avg + "%";
+        const avg = marks.length > 0 ? (totalPercent / marks.length).toFixed(1) : 0;
+        document.getElementById('avgScore').innerText = avg + "%";
+    } catch (err) {
+        console.error("Marks Load Error:", err);
+    }
 }
 
 document.getElementById('marksForm').addEventListener('submit', async (e) => {
@@ -1140,15 +1228,18 @@ async function loadAttendance() {
 }
 
 // 2. Mark Attendance with GPS
-async function handleMarkAttendance(status) {
+async function handleMarkAttendance() {
     if (!navigator.geolocation) return alert("GPS not supported by browser.");
     
-    setBtnLoading('markPresentBtn', true);
-    document.getElementById('locationStatus').innerText = "Acquiring GPS Signal...";
+    // UI Feedback
+    setBtnLoading('markAttendanceBtn', true);
+    const statusLabel = document.getElementById('locationStatus');
+    statusLabel.className = "mt-4 text-xs font-medium text-indigo-600";
+    statusLabel.innerText = "Verifying Location...";
 
     navigator.geolocation.getCurrentPosition(async (position) => {
+        // We only send GPS. The Backend sets Date, Time, and Status (Present/Late/Absent)
         const payload = {
-            status: status,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
         };
@@ -1163,20 +1254,29 @@ async function handleMarkAttendance(status) {
                 body: JSON.stringify(payload)
             });
 
+            const result = await res.text();
+
             if (res.ok) {
-                alert("Attendance recorded successfully!");
+                statusLabel.className = "mt-4 text-xs font-medium text-green-600";
+                statusLabel.innerText = "Check-in Successful!";
+                alert("Attendance recorded!");
                 loadAttendance();
+            } else {
+                statusLabel.className = "mt-4 text-xs font-medium text-red-600";
+                statusLabel.innerText = result; // Shows "Out of range" or "Already marked"
+                alert(result);
             }
         } catch (err) {
-            alert("Connection error.");
+            statusLabel.innerText = "Connection failed.";
+            alert("Error connecting to server.");
         } finally {
-            setBtnLoading('markPresentBtn', false);
-            document.getElementById('locationStatus').innerText = "";
+            setBtnLoading('markAttendanceBtn', false);
         }
     }, (error) => {
-        setBtnLoading('markPresentBtn', false);
-        document.getElementById('locationStatus').innerText = "";
-        alert("Location access denied. Please enable GPS to mark attendance.");
+        setBtnLoading('markAttendanceBtn', false);
+        statusLabel.className = "mt-4 text-xs font-medium text-red-600";
+        statusLabel.innerText = "GPS Access Denied.";
+        alert("Please enable GPS/Location permissions in your browser.");
     });
 }
 async function confirmDeleteAttendance(id) {

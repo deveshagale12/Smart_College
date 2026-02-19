@@ -30,11 +30,10 @@
 
         .hidden { display: none; }
 
-        /* Advanced Spinner Overlay */
         #loader-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.95);
-            display: none; /* Hidden by default */
+            display: none; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -58,7 +57,6 @@
         .btn-primary { background: #667eea; border: none; }
         .btn-primary:hover { background: #764ba2; }
 
-        /* Mobile Adjustments */
         @media (max-width: 576px) {
             .auth-card { width: 95%; padding: 20px; }
         }
@@ -110,16 +108,12 @@
                 <label class="form-label small fw-bold">Password</label>
                 <input type="password" id="reg-pass" class="form-control" placeholder="Minimum 6 characters" required>
             </div>
-            <div class="row g-2">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label small fw-bold">Subject</label>
-                    <input type="text" id="reg-subject" class="form-control" placeholder="Physics">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label small fw-bold">Salary</label>
-                    <input type="number" id="reg-salary" class="form-control" placeholder="50000">
-                </div>
+            
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Subject</label>
+                <input type="text" id="reg-subject" class="form-control" placeholder="Physics">
             </div>
+
             <div class="mb-3">
                 <label class="form-label small fw-bold">Occupation</label>
                 <input type="text" id="reg-occupation" class="form-control" placeholder="Professor">
@@ -155,16 +149,13 @@
             const spinner = document.getElementById('spinner-icon');
             const successIcon = document.getElementById('success-icon');
             const statusText = document.getElementById('loader-text');
-            
 
-            // 1. Show Loader
             loader.classList.add('active');
             spinner.classList.remove('d-none');
             successIcon.classList.add('d-none');
             statusText.style.color = "#0d6efd";
             statusText.innerText = (type === 'login') ? "Verifying Credentials..." : "Creating Faculty Account...";
 
-            // 2. Prepare Data
             let url = (type === 'login') ? '/api/faculty/login' : '/api/faculty/register';
             let payload = {};
 
@@ -180,45 +171,39 @@
                     email: document.getElementById('reg-email').value,
                     password: document.getElementById('reg-pass').value,
                     subject: document.getElementById('reg-subject').value,
-                    salary: document.getElementById('reg-salary').value,
+                    // Salary removed from payload
                     occupation: document.getElementById('reg-occupation').value
                 };
             }
 
             try {
-            	// ... inside your handleAuth try block ...
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-            	const response = await fetch(url, {
-            	    method: 'POST',
-            	    headers: { 'Content-Type': 'application/json' },
-            	    body: JSON.stringify(payload)
-            	});
+                if (response.ok) {
+                    const faculty = await response.json(); 
 
-            	if (response.ok) {
-            	    // We expect a JSON object now, not just text
-            	    const faculty = await response.json(); 
+                    localStorage.setItem('facultyId', faculty.id);
+                    localStorage.setItem('facultyName', faculty.name);
+                    localStorage.setItem('facultyEmail', faculty.email);
+                    localStorage.setItem('facultySubject', faculty.subject);
 
-            	    // --- CREATE THE SESSION ---
-            	    // This allows facultydashboard.html to know who is logged in
-            	    localStorage.setItem('facultyId', faculty.id);
-            	    localStorage.setItem('facultyName', faculty.name);
-            	    localStorage.setItem('facultyEmail', faculty.email);
-            	    localStorage.setItem('facultySubject', faculty.subject);
+                    spinner.classList.add('d-none');
+                    successIcon.classList.remove('d-none');
+                    statusText.innerText = "Welcome back, " + faculty.name + "!";
+                    statusText.style.color = "#198754";
 
-            	    // --- ANIMATION ---
-            	    spinner.classList.add('d-none');
-            	    successIcon.classList.remove('d-none');
-            	    statusText.innerText = "Welcome back, " + faculty.name + "!";
-            	    statusText.style.color = "#198754";
+                    setTimeout(() => {
+                        window.location.href = "facultydashboard.html";
+                    }, 1800);
 
-            	    setTimeout(() => {
-            	        window.location.href = "facultydashboard.html";
-            	    }, 1800);
-
-            	} else {
-            	    const errorText = await response.text();
-            	    throw new Error(errorText || "Login Failed");
-            	}
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Login Failed");
+                }
 
             } catch (error) {
                 loader.classList.remove('active');
