@@ -588,12 +588,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
         // CORE CONFIG & STATE
-
+const BASE_URL = "https://smart-college.onrender.com";
         const ATTENDANCE_API = `https://smart-college.onrender.com/college/attendance`;
         const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
         const facultyId = localStorage.getItem('facultyId');
         let activeStudentId = null;
         let currentMarksEditId = null;
+		window.studentCache = {}; 
+let activeStudentId = null;
 
         // AUTH CHECK
         if (!facultyId) { window.location.href = "faculty-auth.html"; }
@@ -1177,126 +1179,103 @@ async function fetchMasterStudents() {
 }
 
         // NAVIGATION LOGIC
-   function showSection(section) {
+function showSection(section) {
     const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection', 'attendance-section'];
 
+    // Hide all sections first
     sections.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.classList.add('d-none');
     });
 
+    // Remove active class from all nav items
     document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
 
-    if (section === 'profile') {
-        document.getElementById('profile-section').classList.remove('d-none');
-        document.getElementById('side-profile').classList.add('active');
-        document.getElementById('mob-profile').classList.add('active');
-        loadProfileForEditing();
-    } else if (section === 'students') {
-        document.getElementById('student-db-section').classList.remove('d-none');
-        document.getElementById('side-students').classList.add('active');
-        document.getElementById('mob-students').classList.add('active');
-        fetchMasterStudents();
-    } else if (section === 'attendance') {
-        document.getElementById('attendance-section').classList.remove('d-none');
-        document.getElementById('side-attendance').classList.add('active');
-        document.getElementById('mob-attendance').classList.add('active');
-        // RE-FETCH DATA ON TAB SWITCH
-        fetchAttendanceAll(); 
-    } else if (section === 'dash') {
-        document.getElementById('dashboard-main-section').classList.remove('d-none');
-        document.getElementById('side-dash').classList.add('active');
-        document.getElementById('mob-dash').classList.add('active');
-        fetchStudents();
+    // Map section names to Element IDs
+    const mapping = {
+        'dash': 'dashboard-main-section',
+        'profile': 'profile-section',
+        'students': 'student-db-section',
+        'attendance': 'attendance-section',
+        'marks': 'marksSection' // Added this mapping
+    };
+
+    const targetId = mapping[section];
+    if (targetId && document.getElementById(targetId)) {
+        document.getElementById(targetId).classList.remove('d-none');
+        
+        // Handle nav highlighting
+        const sideNav = document.getElementById(`side-${section}`);
+        const mobNav = document.getElementById(`mob-${section}`);
+        if(sideNav) sideNav.classList.add('active');
+        if(mobNav) mobNav.classList.add('active');
     }
+
+    // Trigger specific data loads
+    if (section === 'profile') loadProfileForEditing();
+    if (section === 'students') fetchMasterStudents();
+    if (section === 'attendance') fetchAttendanceAll();
+    if (section === 'dash') fetchStudents();
 }
         // MARKS MANAGEMENT
-        function openMarksManagement(studId, name) {
-            activeStudentId = studId;
-            document.getElementById('currentStudentName').innerText = name;
-            showSection('none'); 
-            document.getElementById('marksSection').classList.remove('d-none');
-            loadStudentMarks(studId);
-        }
-        function openAddMarksModal() {
-            currentMarksEditId = null; // Reset edit ID for a fresh entry
-            const form = document.getElementById('marksForm');
-            if (form) form.reset(); // Clear previous inputs
+     // 1. Corrected Modal Opening
+function openAddMarksModal() {
+    currentMarksEditId = null; 
+    const form = document.getElementById('marksForm');
+    if (form) form.reset(); 
 
-            document.getElementById('marksModalTitle').innerText = "New Grade Record";
+    document.getElementById('marksModalTitle').innerText = "New Grade Record";
 
-            // Explicitly initialize and show the modal
-            const modalElement = document.getElementById('marksModal');
-            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modalInstance.show();
-        }
+    const modalElement = document.getElementById('marksModal');
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modalInstance.show();
+}
 
-        async function loadStudentMarks(studId) {
-            try {
-                const res = await fetch(`/college/marks/student/${studId}`, { headers: HEADERS });
-                const marks = await res.json();
-                const body = document.getElementById('marksTableBody');
-                let totalPercent = 0;
-                body.innerHTML = marks.length ? '' : '<tr><td colspan="5" class="text-center py-5 text-muted">No academic records available.</td></tr>';
+// 2. Corrected Table Rendering (Fixes the JSON string error)
+async function loadStudentMarks(studId) {
+    try {
+        const res = await fetch(`/college/marks/student/${studId}`, { headers: HEADERS });
+        const marks = await res.json();
+        const body = document.getElementById('marksTableBody');
+        
+        // Save marks to a local array so we don't have to pass JSON strings in HTML
+        window.currentMarksList = marks; 
 
-                marks.forEach(m => {
-                    const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
-                    totalPercent += parseFloat(percent);
-                    body.innerHTML += `
-                        <tr class="ps-4">
-                            <td class="ps-4 fw-bold text-dark">${m.subject}</td>
-                            <td>${m.testType}</td>
-                            <td class="fw-semibold">${m.obtainedMarks} / ${m.outOf}</td>
-                            <td><span class="badge ${percent >= 40 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3">${percent}%</span></td>
-                            <td class="text-end pe-4">
-                                <button onclick='editMarkRecord(${JSON.stringify(m)})' class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil-square"></i></button>
-                                <button onclick="deleteMarkRecord(${m.marksId})" class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>`;
-                });
-                document.getElementById('avgScore').innerText = (marks.length ? (totalPercent / marks.length).toFixed(1) : 0) + "%";
-            } catch (err) { console.error(err); }
-        }
+        let totalPercent = 0;
+        body.innerHTML = marks.length ? '' : '<tr><td colspan="5" class="text-center py-5 text-muted">No academic records available.</td></tr>';
 
-        document.getElementById('marksForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                subject: document.getElementById('m_subject').value,
-                testType: document.getElementById('m_testType').value,
-                obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
-                outOf: parseFloat(document.getElementById('m_outOf').value)
-            };
-            const method = currentMarksEditId ? 'PUT' : 'POST';
-            const url = currentMarksEditId ? `/college/marks/${currentMarksEditId}` : `/college/marks/${activeStudentId}`;
-
-            try {
-                const res = await fetch(url, { method: method, headers: HEADERS, body: JSON.stringify(data) });
-                if (res.ok) {
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById('marksModal')).hide();
-                    document.getElementById('marksForm').reset();
-                    currentMarksEditId = null;
-                    loadStudentMarks(activeStudentId);
-                } else { alert("Operation failed: " + await res.text()); }
-            } catch (err) { console.error("Save Error:", err); }
+        marks.forEach((m, index) => {
+            const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+            totalPercent += parseFloat(percent);
+            body.innerHTML += `
+                <tr class="ps-4">
+                    <td class="ps-4 fw-bold text-dark">${m.subject}</td>
+                    <td>${m.testType}</td>
+                    <td class="fw-semibold">${m.obtainedMarks} / ${m.outOf}</td>
+                    <td><span class="badge ${percent >= 40 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3">${percent}%</span></td>
+                    <td class="text-end pe-4">
+                        <button onclick="editMarkRecordByIndex(${index})" class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil-square"></i></button>
+                        <button onclick="deleteMarkRecord(${m.marksId})" class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>`;
         });
+        document.getElementById('avgScore').innerText = (marks.length ? (totalPercent / marks.length).toFixed(1) : 0) + "%";
+    } catch (err) { console.error("Load Error:", err); }
+}
 
-        function openAddMarksModal() {
-            currentMarksEditId = null;
-            document.getElementById('marksForm').reset();
-            document.getElementById('marksModalTitle').innerText = "New Grade Record";
-            new bootstrap.Modal(document.getElementById('marksModal')).show();
-        }
-
-        function editMarkRecord(m) {
-            currentMarksEditId = m.marksId;
-            document.getElementById('m_subject').value = m.subject;
-            document.getElementById('m_testType').value = m.testType;
-            document.getElementById('m_obtained').value = m.obtainedMarks;
-            document.getElementById('m_outOf').value = m.outOf;
-            document.getElementById('marksModalTitle').innerText = "Edit Grade Record";
-            new bootstrap.Modal(document.getElementById('marksModal')).show();
-        }
-
+// 3. New Helper to avoid JSON quote errors
+function editMarkRecordByIndex(index) {
+    const m = window.currentMarksList[index];
+    currentMarksEditId = m.marksId;
+    document.getElementById('m_subject').value = m.subject;
+    document.getElementById('m_testType').value = m.testType;
+    document.getElementById('m_obtained').value = m.obtainedMarks;
+    document.getElementById('m_outOf').value = m.outOf;
+    document.getElementById('marksModalTitle').innerText = "Edit Grade Record";
+    
+    const modalInstance = bootstrap.Modal.getOrCreateInstance(document.getElementById('marksModal'));
+    modalInstance.show();
+}
         async function deleteMarkRecord(id) {
             if(confirm("Permanently delete this record?")) {
                 await fetch(`/college/marks/${id}`, { method: 'DELETE', headers: HEADERS });
@@ -1664,3 +1643,4 @@ function handleLogout() {
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
+
