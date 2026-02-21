@@ -673,6 +673,15 @@ let activeStudentId = null;
             </tr>`;
     });
 }
+
+		// MARKS MANAGEMENT
+function openMarksManagement(studId, name) {
+    activeStudentId = studId;
+    document.getElementById('currentStudentName').innerText = name;
+    showSection('none'); 
+    document.getElementById('marksSection').classList.remove('d-none');
+    loadStudentMarks(studId);
+}
         // FETCH ALL (MASTER DB)
       // Add this at the top of your script
 window.studentCache = {}; 
@@ -1180,42 +1189,60 @@ async function fetchMasterStudents() {
 
         // NAVIGATION LOGIC
 function showSection(section) {
-    const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection', 'attendance-section'];
+    // 1. Define all possible section IDs in your HTML
+    const sections = [
+        'dashboard-main-section', 
+        'profile-section', 
+        'student-db-section', 
+        'marksSection', 
+        'attendance-section'
+    ];
 
-    // Hide all sections first
+    // 2. Hide all sections first
     sections.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.classList.add('d-none');
     });
 
-    // Remove active class from all nav items
-    document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
+    // 3. Reset all navigation links (sidebar and mobile)
+    document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => {
+        el.classList.remove('active');
+    });
 
-    // Map section names to Element IDs
-    const mapping = {
-        'dash': 'dashboard-main-section',
-        'profile': 'profile-section',
-        'students': 'student-db-section',
-        'attendance': 'attendance-section',
-        'marks': 'marksSection' // Added this mapping
-    };
-
-    const targetId = mapping[section];
-    if (targetId && document.getElementById(targetId)) {
-        document.getElementById(targetId).classList.remove('d-none');
-        
-        // Handle nav highlighting
-        const sideNav = document.getElementById(`side-${section}`);
-        const mobNav = document.getElementById(`mob-${section}`);
-        if(sideNav) sideNav.classList.add('active');
-        if(mobNav) mobNav.classList.add('active');
+    // 4. Show the specific section and trigger data loading
+    if (section === 'profile') {
+        document.getElementById('profile-section').classList.remove('d-none');
+        setActiveNav('profile');
+        loadProfileForEditing();
+    } 
+    else if (section === 'students') {
+        document.getElementById('student-db-section').classList.remove('d-none');
+        setActiveNav('students');
+        fetchMasterStudents();
+    } 
+    else if (section === 'attendance') {
+        document.getElementById('attendance-section').classList.remove('d-none');
+        setActiveNav('attendance');
+        fetchAttendanceAll(); 
+    } 
+    else if (section === 'dash') {
+        document.getElementById('dashboard-main-section').classList.remove('d-none');
+        setActiveNav('dash');
+        fetchStudents();
     }
+    else if (section === 'marks') {
+        // This solves your Academic Marks button problem!
+        const marksEl = document.getElementById('marksSection');
+        if (marksEl) marksEl.classList.remove('d-none');
+    }
+}
 
-    // Trigger specific data loads
-    if (section === 'profile') loadProfileForEditing();
-    if (section === 'students') fetchMasterStudents();
-    if (section === 'attendance') fetchAttendanceAll();
-    if (section === 'dash') fetchStudents();
+// Helper function to keep nav UI in sync
+function setActiveNav(id) {
+    const side = document.getElementById(`side-${id}`);
+    const mob = document.getElementById(`mob-${id}`);
+    if (side) side.classList.add('active');
+    if (mob) mob.classList.add('active');
 }
         // MARKS MANAGEMENT
      // 1. Corrected Modal Opening
@@ -1643,4 +1670,5 @@ function handleLogout() {
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
+
 
