@@ -595,7 +595,6 @@ const BASE_URL = "https://smart-college.onrender.com";
         let activeStudentId = null;
         let currentMarksEditId = null;
 		window.studentCache = {}; 
-let activeStudentId = null;
 
         // AUTH CHECK
         if (!facultyId) { window.location.href = "faculty-auth.html"; }
@@ -678,8 +677,7 @@ let activeStudentId = null;
 function openMarksManagement(studId, name) {
     activeStudentId = studId;
     document.getElementById('currentStudentName').innerText = name;
-    showSection('none'); 
-    document.getElementById('marksSection').classList.remove('d-none');
+    showSection('marks'); // Matches the 'marks' logic in showSection
     loadStudentMarks(studId);
 }
         // FETCH ALL (MASTER DB)
@@ -1670,5 +1668,6 @@ function handleLogout() {
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
+
 
 
