@@ -1212,26 +1212,95 @@ async function fetchMasterStudents() {
     }
 
         // MARKS MANAGEMENT
-        function openMarksManagement(studId, name) {
-            activeStudentId = studId;
-            document.getElementById('currentStudentName').innerText = name;
-            showSection('none'); 
-            document.getElementById('marksSection').classList.remove('d-none');
-            loadStudentMarks(studId);
-        }
-        function openAddMarksModal() {
-            currentMarksEditId = null; // Reset edit ID for a fresh entry
-            const form = document.getElementById('marksForm');
-            if (form) form.reset(); // Clear previous inputs
-            
-            document.getElementById('marksModalTitle').innerText = "New Grade Record";
-            
-            // Explicitly initialize and show the modal
-            const modalElement = document.getElementById('marksModal');
-            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modalInstance.show();
-        }
+        /**
+ * 6. ACADEMIC MARKS MANAGEMENT
+ */
+async function openMarksManagement(studId, name) {
+    activeStudentId = studId;
+    const modalTitle = document.getElementById('formModalTitle');
+    const modalBody = document.getElementById('formModalBody');
 
+    modalTitle.innerText = `Academic Marks: ${name}`;
+    
+    // Show a loader while fetching
+    modalBody.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('formModal')).show();
+
+    try {
+        // Updated to your Render API structure
+        const res = await fetch(`https://smart-college.onrender.com/college/marks/student/${studId}`, { headers: HEADERS });
+        const marks = await res.json();
+
+        let html = `
+            <div class="mb-3 p-3 bg-light rounded">
+                <div class="row g-2">
+                    <div class="col-5"><input type="text" id="subjectInput" class="form-control form-control-sm" placeholder="Subject"></div>
+                    <div class="col-4"><input type="number" id="marksInput" class="form-control form-control-sm" placeholder="Marks"></div>
+                    <div class="col-3"><button class="btn btn-sm btn-primary w-100" onclick="saveNewGrade(${studId})">Add Grade</button></div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr class="small text-muted"><th>Subject</th><th>Marks</th><th class="text-end">Action</th></tr></thead>
+                    <tbody id="marks-list-body">
+                        ${marks.map(m => `
+                            <tr>
+                                <td>${m.subject}</td>
+                                <td class="fw-bold">${m.marks}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm text-danger" onclick="deleteMark(${m.id}, ${studId})"><i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        `).join('') || '<tr><td colspan="3" class="text-center text-muted">No marks recorded yet.</td></tr>'}
+                    </tbody>
+                </table>
+            </div>`;
+        modalBody.innerHTML = html;
+    } catch (err) {
+        modalBody.innerHTML = '<div class="alert alert-warning">No marks found. Use the form above to add one.</div>';
+    }
+}
+
+async function saveNewGrade(studId) {
+    const subject = document.getElementById('subjectInput').value;
+    const marks = document.getElementById('marksInput').value;
+
+    if (!subject || !marks) return alert("Please fill both fields");
+
+    try {
+        const res = await fetch(`https://smart-college.onrender.com/college/marks/add`, {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify({ student: { studId: studId }, subject: subject, marks: marks })
+        });
+        if (res.ok) {
+            alert("Grade Added!");
+            openMarksManagement(studId, window.studentCache[studId]); // Refresh
+        }
+    } catch (err) { alert("Failed to save grade"); }
+}
+function openAddMarksModal() {
+    currentMarksEditId = null; // Reset edit ID for a fresh entry
+    
+    const form = document.getElementById('marksForm');
+    if (form) {
+        form.reset(); // Clear previous inputs
+    } else {
+        console.error("Form 'marksForm' not found in the HTML.");
+    }
+    
+    const title = document.getElementById('marksModalTitle');
+    if (title) title.innerText = "New Grade Record";
+    
+    // Best practice for Bootstrap 5+
+    const modalElement = document.getElementById('marksModal');
+    if (modalElement) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modalInstance.show();
+    } else {
+        alert("Error: Marks Modal element missing!");
+    }
+}
         async function loadStudentMarks(studId) {
             try {
                 const res = await fetch(`/college/marks/student/${studId}`, { headers: HEADERS });
@@ -1281,12 +1350,7 @@ async function fetchMasterStudents() {
             } catch (err) { console.error("Save Error:", err); }
         });
 
-        function openAddMarksModal() {
-            currentMarksEditId = null;
-            document.getElementById('marksForm').reset();
-            document.getElementById('marksModalTitle').innerText = "New Grade Record";
-            new bootstrap.Modal(document.getElementById('marksModal')).show();
-        }
+
 
         function editMarkRecord(m) {
             currentMarksEditId = m.marksId;
@@ -1384,135 +1448,7 @@ async function fetchMasterStudents() {
  * 1. FETCH DAILY ATTENDANCE (Main Session Table)
  * Linked to: On Page Load & Date Filter Change
  */
-async function fetchAttendanceAll() {
-    const tableBody = document.getElementById('attendance-table-body');
-    const dateInput = document.getElementById('attendance-date-filter');
-    const selectedDate = dateInput.value || new Date().toISOString().split('T')[0];
-    
-    try {
-        const response = await fetch(`${ATTENDANCE_API}/all?date=${selectedDate}`, { headers: HEADERS });
-        if (!response.ok) throw new Error("Fetch failed");
-        
-        const list = await response.json();
-        tableBody.innerHTML = '';
-        let counts = { PRESENT: 0, ABSENT: 0, LATE: 0, TOTAL: 0 };
-
-        if (!list || list.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No records found for this date.</td></tr>';
-            updateAttendanceStats(counts);
-            return;
-        }
-
-        list.forEach(att => {
-            const student = att.student || {}; 
-            const sName = student.fullName || "Unknown Student";
-            const sId = student.studId || "N/A";
-
-            // Update Counters
-            if (counts.hasOwnProperty(att.status)) counts[att.status]++;
-            counts.TOTAL++;
-
-            const mapsUrl = `https://www.google.com/maps?q=${att.latitude},${att.longitude}`;
-
-            tableBody.innerHTML += `
-                <tr class="attendance-row">
-                    <td class="ps-4">
-                        <div class="fw-bold text-dark s-name">${sName}</div>
-                        <div class="text-muted small s-id">ID: #${sId}</div>
-                    </td>
-                    <td class="text-secondary">${att.time || '--:--'}</td>
-                    <td><span class="badge ${getStatusBadge(att.status)} rounded-pill px-3">${att.status}</span></td>
-                    <td class="small text-muted text-truncate" style="max-width: 150px;">${att.address || 'N/A'}</td>
-                    <td class="text-center">
-                        ${(att.latitude && att.latitude !== 0) ? 
-                          `<a href="${mapsUrl}" target="_blank" class="btn btn-sm btn-light border shadow-sm"><i class="bi bi-pin-map-fill"></i></a>` : 
-                          '<span class="text-muted small">No GPS</span>'}
-                    </td>
-                    <td class="text-center pe-4">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-primary" onclick="editAttendanceStatus(${att.attendId}, '${att.status}')">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAttendance(${att.attendId})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
-        });
-        updateAttendanceStats(counts);
-    } catch (err) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">Error connecting to server.</td></tr>';
-    }
-}
-
-/**
- * 2. GENERATE MONTHLY REPORT (The Attendance Modal)
- */
- async function generateMonthlyReport() {
-	    // 1. Get DOM elements
-	    const dateInput = document.getElementById('attendance-date-filter');
-	    const reportBody = document.getElementById('monthly-report-body');
-	    
-	    // 2. Validate inputs
-	    if (!dateInput || !reportBody) {
-	        console.error("Missing required HTML elements.");
-	        return;
-	    }
-
-	    const [year, month] = (dateInput.value || new Date().toISOString().split('T')[0]).split('-');
-	    
-	    // 3. Show Modal and Loader
-	    const modalElem = document.getElementById('attendanceReportModal');
-	    let modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
-	    
-	    // Clear previous data and show spinner
-	    reportBody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
-	    modal.show();
-
-	    try {
-	        const res = await fetch(`${ATTENDANCE_API}/stats/monthly?month=${month}&year=${year}`, { headers: HEADERS });
-	        if (!res.ok) throw new Error("API Error");
-	        
-	        const stats = await res.json();
-	        reportBody.innerHTML = '';
-	        
-	        const totalDays = new Date(year, month, 0).getDate();
-
-	        Object.entries(stats).forEach(([sId, percentage]) => {
-	            // Get name from window.studentCache (filled by fetchMasterStudents)
-	            const studentName = (window.studentCache && window.studentCache[sId]) ? window.studentCache[sId] : `ID: #${sId}`;
-	            
-	            // Calculate Present Days
-	            const presentDays = Math.round((percentage * totalDays) / 100);
-	            const isEligible = percentage >= 75;
-
-	            // Generate the row in your specific format
-	            reportBody.innerHTML += `
-	                <tr class="modal-row" data-id="${sId}" data-name="${studentName}">
-	                    <td class="ps-4"><strong>#${sId}</strong></td>
-	                    <td class="fw-bold text-dark">${studentName}</td>
-	                    <td><span class="text-primary fw-bold">${presentDays}</span> / ${totalDays} Days</td>
-	                    <td>
-	                        <div class="d-flex align-items-center">
-	                            <span class="me-2 fw-bold">${percentage}%</span>
-	                            <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;">
-	                                <div class="progress-bar ${isEligible ? 'bg-success' : 'bg-danger'}" style="width: ${percentage}%"></div>
-	                            </div>
-	                        </div>
-	                    </td>
-	                    <td>
-	                        <span class="badge ${isEligible ? 'bg-success' : 'bg-danger'} rounded-pill">
-	                            ${isEligible ? 'ELIGIBLE' : 'DEBARRED'}
-	                        </span>
-	                    </td>
-	                </tr>`;
-	        });
-	    } catch (err) {
-	        console.error("Monthly Report Error:", err);
-	        reportBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Error: Could not load data. Check console for details.</td></tr>';
-	    }
-	}
+Manage Records
 /**
  * 3. UPDATE/EDIT STATUS
  */
