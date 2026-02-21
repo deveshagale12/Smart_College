@@ -1178,37 +1178,60 @@ async function fetchMasterStudents() {
 
         // NAVIGATION LOGIC
    function showSection(section) {
-    const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection', 'attendance-section'];
+    // 1. Define all possible section IDs in your HTML
+    const sections = [
+        'dashboard-main-section', 
+        'profile-section', 
+        'student-db-section', 
+        'marksSection', 
+        'attendance-section'
+    ];
 
+    // 2. Hide all sections first
     sections.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.classList.add('d-none');
     });
 
-    document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
+    // 3. Reset all navigation links (sidebar and mobile)
+    document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => {
+        el.classList.remove('active');
+    });
 
+    // 4. Show the specific section and trigger data loading
     if (section === 'profile') {
         document.getElementById('profile-section').classList.remove('d-none');
-        document.getElementById('side-profile').classList.add('active');
-        document.getElementById('mob-profile').classList.add('active');
+        setActiveNav('profile');
         loadProfileForEditing();
-    } else if (section === 'students') {
+    } 
+    else if (section === 'students') {
         document.getElementById('student-db-section').classList.remove('d-none');
-        document.getElementById('side-students').classList.add('active');
-        document.getElementById('mob-students').classList.add('active');
+        setActiveNav('students');
         fetchMasterStudents();
-    } else if (section === 'attendance') {
+    } 
+    else if (section === 'attendance') {
         document.getElementById('attendance-section').classList.remove('d-none');
-        document.getElementById('side-attendance').classList.add('active');
-        document.getElementById('mob-attendance').classList.add('active');
-        // RE-FETCH DATA ON TAB SWITCH
+        setActiveNav('attendance');
         fetchAttendanceAll(); 
-    } else if (section === 'dash') {
+    } 
+    else if (section === 'dash') {
         document.getElementById('dashboard-main-section').classList.remove('d-none');
-        document.getElementById('side-dash').classList.add('active');
-        document.getElementById('mob-dash').classList.add('active');
+        setActiveNav('dash');
         fetchStudents();
     }
+    else if (section === 'marks') {
+        // This solves your Academic Marks button problem!
+        const marksEl = document.getElementById('marksSection');
+        if (marksEl) marksEl.classList.remove('d-none');
+    }
+}
+
+// Helper function to keep nav UI in sync
+function setActiveNav(id) {
+    const side = document.getElementById(`side-${id}`);
+    const mob = document.getElementById(`mob-${id}`);
+    if (side) side.classList.add('active');
+    if (mob) mob.classList.add('active');
 }
         // MARKS MANAGEMENT
         function openMarksManagement(studId, name) {
