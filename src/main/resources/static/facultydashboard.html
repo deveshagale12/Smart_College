@@ -591,6 +591,7 @@
 const BASE_URL = "https://smart-college.onrender.com";
         const ATTENDANCE_API = `https://smart-college.onrender.com/college/attendance`;
         const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
+		const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS }); // This fails because it's missing BASE_URL
         const facultyId = localStorage.getItem('facultyId');
         let activeStudentId = null;
         let currentMarksEditId = null;
@@ -609,9 +610,8 @@ window.onload = () => {
 
         async function loadDashboard() {
     try {
-        const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS });
-        if (!res.ok) throw new Error("Faculty profile not found");
-        
+const res = await fetch(`${BASE_URL}/api/faculty/${facultyId}`, { headers: HEADERS });
+if (!res.ok) throw new Error("Faculty profile not found");        
         const faculty = await res.json();
         document.getElementById('faculty-name-header').innerText = faculty.name;
         document.getElementById('faculty-subject').innerText = faculty.subject;
@@ -1683,6 +1683,7 @@ function handleLogout() {
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
+
 
 
 
