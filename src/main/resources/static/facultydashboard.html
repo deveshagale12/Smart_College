@@ -27,6 +27,7 @@
             overflow-x: hidden;
         }
 
+        /* Desktop Sidebar Styles */
         /* Sidebar */
         #sidebar { 
             width: var(--sidebar-width); 
@@ -62,6 +63,7 @@
             transition: 0.3s; 
         }
 
+        /* Mobile Responsive Bottom Nav */
         /* Mobile Nav */
         .mobile-nav {
             display: none;
@@ -88,25 +90,29 @@
         .mobile-nav-item i { font-size: 1.4rem; display: block; margin-bottom: 2px; }
         .mobile-nav-item.active { color: var(--primary); }
 
+        /* Card Customization */
         /* General UI */
         .card { 
             border: none; 
             border-radius: 12px; 
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1); 
-            margin-bottom: 24px;
-        }
-
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #e3e6f0;
-            font-weight: 700;
-            color: var(--primary);
-            padding: 15px 20px;
-        }
-
+@@ -107,586 +107,1496 @@
         .stat-card { border-left: 5px solid var(--primary); transition: transform 0.2s; }
         .stat-card:hover { transform: translateY(-5px); }
 
+        /* Tables */
+        .table thead th {
+            background-color: #f8f9fc;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            color: var(--secondary);
+            border-top: none;
+        }
+
+        .table-responsive { border-radius: 10px; }
+
+        /* Section Animations */
+        section, .section-fade { animation: fadeIn 0.4s ease-in-out; }
         .section-fade { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -115,77 +121,45 @@
             #content { margin-left: 0; padding: 20px; padding-bottom: 100px; }
             .mobile-nav { display: flex; }
             .desktop-only { display: none; }
+            .h3 { font-size: 1.3rem; }
         }
 
-        #sidebar {
-    min-width: 250px;
-    max-width: 250px;
-    background: #fff;
-    height: 100vh;
-    border-right: 1px solid rgba(0,0,0,0.05);
-}
-
-.nav-link {
-    padding: 12px 15px;
-    border-radius: 10px;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #64748b;
-}
-
-.nav-link:hover {
-    background: #f1f5f9;
-}
+        .btn-primary { background-color: var(--primary); border: none; padding: 10px 20px; font-weight: 600; border-radius: 8px; }
+        .btn-primary:hover { background-color: #2e59d9; }
+        
+        .badge-avg { font-size: 1.1rem; padding: 12px 25px; }
     </style>
 </head>
 <body>
 
-    <nav id="sidebar" class="d-none d-md-block" style="height: 100vh; position: sticky; top: 0;">
-    <div class="py-4 px-3 d-flex flex-column h-100">
-
-        <div class="d-flex align-items-center mb-4 px-3">
-            <div class="bg-primary text-white rounded-3 p-2 me-2">
-                <i class="bi bi-mortarboard-fill"></i>
+    <nav id="sidebar" class="d-none d-md-block">
+        <div class="py-4 px-3">
+            <div class="d-flex align-items-center mb-4 px-3">
+                <div class="bg-primary text-white rounded-3 p-2 me-2">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <h5 class="mb-0 fw-bold text-dark">Faculty Hub</h5>
             </div>
-            <h5 class="mb-0 fw-bold text-dark">Faculty Hub</h5>
+            <hr class="mx-3 text-muted opacity-25">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a href="#" id="side-dash" onclick="showSection('dash')" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                <li class="nav-item"><a href="#" id="side-students" onclick="showSection('students')" class="nav-link"><i class="bi bi-people-fill"></i> Student Database</a></li>
+                <li class="nav-item"><a href="#" id="side-attendance" onclick="showSection('attendance')" class="nav-link"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
+                <li class="nav-item"><a href="#" id="side-profile" onclick="showSection('profile')" class="nav-link"><i class="bi bi-person-badge-fill"></i> Profile</a></li>
+            </ul>
+            <div style="position: absolute; bottom: 30px; width: 88%;">
+                <a href="#" onclick="logout()" class="nav-link text-danger"><i class="bi bi-box-arrow-left"></i> Logout</a>
+            </div>
         </div>
+    </nav>
 
-        <hr class="mx-3 text-muted opacity-25">
-
-        <ul class="nav flex-column mb-auto"> <li class="nav-item"><a href="#" id="side-dash" onclick="showSection('dash')" class="nav-link active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
-            <li class="nav-item"><a href="#" id="side-students" onclick="showSection('students')" class="nav-link"><i class="bi bi-people-fill"></i> Student Database</a></li>
-            <li class="nav-item"><a href="#" id="side-attendance" onclick="showSection('attendance')" class="nav-link"><i class="bi bi-calendar-check-fill"></i> Attendance</a></li>
-            <li class="nav-item"><a href="#" id="side-profile" onclick="showSection('profile')" class="nav-link"><i class="bi bi-person-badge-fill"></i> Profile</a></li>
-        </ul>
-
-        <div class="px-3 pt-3 border-t dark:border-slate-700">
-            <a href="#" onclick="handleLogout()" class="nav-link text-danger fw-bold d-flex align-items-center gap-2">
-                <i class="bi bi-box-arrow-left"></i> Logout
-            </a>
-        </div>
-
+    <div class="mobile-nav d-md-none d-flex">
+        <a href="#" onclick="showSection('dash')" class="mobile-nav-item active" id="mob-dash"><i class="bi bi-grid-1x2-fill"></i>Dash</a>
+        <a href="#" onclick="showSection('students')" class="mobile-nav-item" id="mob-students"><i class="bi bi-people-fill"></i>Students</a>
+        <a href="#" onclick="showSection('attendance')" class="mobile-nav-item" id="mob-attendance"><i class="bi bi-calendar-check-fill"></i>Attendance</a>
+        <a href="#" onclick="showSection('profile')" class="mobile-nav-item" id="mob-profile"><i class="bi bi-person-badge-fill"></i>Profile</a>
+        <a href="#" onclick="logout()" class="mobile-nav-item text-danger"><i class="bi bi-box-arrow-left"></i>Logout</a>
     </div>
-</nav>
-
-   <div class="mobile-nav d-md-none d-flex justify-content-around align-items-center bg-white dark:bg-darkCard border-t dark:border-slate-700">
-    <a href="#" onclick="showSection('dash')" class="mobile-nav-item active" id="mob-dash">
-        <i class="bi bi-grid-1x2-fill"></i><span class="text-[10px]">Dash</span>
-    </a>
-    <a href="#" onclick="showSection('students')" class="mobile-nav-item" id="mob-students">
-        <i class="bi bi-people-fill"></i><span class="text-[10px]">Students</span>
-    </a>
-    <a href="#" onclick="showSection('attendance')" class="mobile-nav-item" id="mob-attendance">
-        <i class="bi bi-calendar-check-fill"></i><span class="text-[10px]">Attnd</span>
-    </a>
-    <a href="#" onclick="showSection('profile')" class="mobile-nav-item" id="mob-profile">
-        <i class="bi bi-person-badge-fill"></i><span class="text-[10px]">Profile</span>
-    </a>
-    <a href="#" onclick="handleLogout()" class="mobile-nav-item text-red-500">
-        <i class="bi bi-box-arrow-right"></i><span class="text-[10px]">Exit</span>
-    </a>
-</div>
 
     <div id="content">
         <header class="d-flex justify-content-between align-items-center mb-4">
@@ -200,6 +174,35 @@
             </div>
         </header>
 
+        <div id="dashboard-main-section" class="section-fade">
+            <div class="row">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card h-100 py-2 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Assigned</div>
+                                    <div class="h4 mb-0 font-weight-bold" id="student-count">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-people fs-2 text-gray-300 opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card stat-card h-100 py-2 border-0 shadow-sm" style="border-left-color: var(--success);">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Subject</div>
+                                    <div class="h4 mb-0 font-weight-bold" id="faculty-subject">N/A</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-journal-bookmark fs-2 text-gray-300 opacity-25"></i>
+                                </div>
+                            </div>
        <div id="dashboard-main-section" class="section-fade">
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
@@ -214,10 +217,42 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>My Assigned Students</span>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="fetchStudents()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Sync
+                    </button>
+                </div>
+                <div class="p-3 border-bottom bg-light">
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="studentSearchInput" class="form-control border-start-0 ps-0" placeholder="Search by name or email..." onkeyup="filterTable('student-table-body', 'studentSearchInput')">
+                    </div>
+                </div>
         </div>
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card stat-card h-100 py-2 border-0 shadow-sm" style="border-left-color: #1cc88a;">
                 <div class="card-body">
+                    <div class="d-flex mb-3">
+                        <button class="btn btn-success btn-sm rounded-pill px-3" onclick="exportTableToExcel('student-table-body')">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-table-body">
+                                <tr><td colspan="3" class="text-center py-4 text-muted">Initialize data...</td></tr>
+                            </tbody>
+                        </table>
                     <div class="row align-items-center">
                         <div class="col mr-2">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Current Subject</div>
@@ -230,6 +265,11 @@
         </div>
     </div>
 
+      <div id="profile-section" class="d-none section-fade">
+    <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-person-lines-fill me-2"></i>
+            <h5 class="mb-0">Faculty Profile Settings</h5>
     <div class="card shadow-sm border-0">
         <div class="card-header d-flex justify-content-between align-items-center bg-white py-3 border-bottom">
             <h6 class="m-0 fw-bold text-primary">My Assigned Students</h6>
@@ -242,6 +282,20 @@
                 </button>
             </div>
         </div>
+        <div class="card-body p-4">
+            <form id="profile-edit-form" onsubmit="handleProfileUpdate(event)">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">System Index ID</label>
+                        <input type="text" id="edit-id" class="form-control bg-light-subtle" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Faculty ID Card No.</label>
+                        <input type="text" id="edit-faculty-id-alt" class="form-control bg-light-subtle" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Email (Fixed)</label>
+                        <input type="email" id="edit-email" class="form-control bg-light-subtle" readonly>
         <div class="p-3 bg-light">
             <div class="input-group shadow-sm">
                 <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
@@ -296,8 +350,9 @@
                         </button>
                     </div>
 
+                    <hr class="my-3 opacity-25">
                     <div class="tab-content flex-grow-1 p-4" id="v-pills-tabContent">
-
+                        
                         <div class="tab-pane fade show active" id="tab-parent">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h5 class="mb-0">Parental Records</h5>
@@ -306,6 +361,11 @@
                             <div id="parent-container" class="row g-3"></div>
                         </div>
 
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-person text-primary"></i></span>
+                            <input type="text" id="edit-name" class="form-control" required>
                         <div class="tab-pane fade" id="tab-marks">
                             <div class="d-flex justify-content-between mb-4">
                                 <h5>Exam & Test Performance</h5>
@@ -320,6 +380,12 @@
                                 </table>
                             </div>
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Primary Subject</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-book text-primary"></i></span>
+                            <input type="text" id="edit-subject" class="form-control" required>
 
                         <div class="tab-pane fade" id="tab-academic">
                             <div class="d-flex justify-content-between mb-4">
@@ -328,6 +394,16 @@
                             </div>
                             <div id="academic-timeline" class="list-group list-group-flush"></div>
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Occupation / Designation</label>
+                        <input type="text" id="edit-occupation" class="form-control" placeholder="e.g. Senior Professor">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold">Salary (Annual/Monthly)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-currency-dollar text-success"></i></span>
+                            <input type="text" id="edit-salary" class="form-control" placeholder="0.00">
 
                         <div class="tab-pane fade" id="tab-attendance">
                             <h5>Attendance Log</h5>
@@ -368,9 +444,17 @@
                             </div>
                             <div id="payment-history-list"></div>
                         </div>
-
                     </div>
                 </div>
+
+                <div class="mt-4 pt-3 border-top d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light px-4" onclick="showSection('dash')">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1"></i> Update Profile
+                    </button>
+                    </div>
+                </div>
+            </form>
             </div>
         </div>
     </div>
@@ -378,14 +462,28 @@
 
         <div id="student-db-section" class="d-none section-fade">
             <div class="card shadow-sm">
+                <div class="card-header">
+                    <span>Master Student Database</span>
+                </div>
                 <div class="card-header">Master Student Database</div>
                 <div class="p-3 border-bottom bg-light">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="masterSearchInput" class="form-control border-start-0 ps-0" placeholder="Search entire registry..." onkeyup="filterTable('master-table-body', 'masterSearchInput')">
+                    </div>
                     <input type="text" id="masterSearchInput" class="form-control" placeholder="Search registry..." onkeyup="filterTable('master-table-body', 'masterSearchInput')">
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Full Name</th>
+                                    <th class="desktop-only">Email</th>
+                                    <th>Course</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
                                 <tr><th>ID</th><th>Full Name</th><th class="desktop-only">Email</th><th>Course</th><th class="text-center">Action</th></tr>
                             </thead>
                             <tbody id="master-table-body"></tbody>
@@ -397,15 +495,37 @@
 
         <section id="marksSection" class="d-none section-fade">
             <div class="row mb-4 align-items-center">
+                <div class="col">
+                    <button onclick="showSection('students')" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Registry
+                    </button>
+                </div>
                 <div class="col"><button onclick="showSection('students')" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="bi bi-arrow-left"></i> Back</button></div>
                 <div class="col-auto">
+                    <div class="bg-white rounded-pill px-4 py-3 shadow-sm d-flex align-items-center border border-success">
+                        <div class="me-3">
+                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Cumulative Avg</small>
+                            <h4 id="avgScore" class="fw-bold mb-0 text-success">0%</h4>
+                        </div>
+                        <i class="bi bi-graph-up-arrow text-success fs-4"></i>
                     <div class="bg-white rounded-pill px-4 py-2 shadow-sm border border-success d-flex align-items-center">
                         <div class="me-2"><small class="d-block text-muted small fw-bold">AVG</small><h4 id="avgScore" class="fw-bold mb-0 text-success">0%</h4></div>
                         <i class="bi bi-graph-up-arrow text-success"></i>
                     </div>
                 </div>
             </div>
+
             <div class="card shadow-sm overflow-hidden">
+                <div class="bg-primary p-4 text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-bold mb-0" id="currentStudentName">Student Name</h3>
+                            <p class="mb-0 opacity-75">Detailed Grade History</p>
+                        </div>
+                        <button onclick="openAddMarksModal()" class="btn btn-white bg-white text-primary fw-bold px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Add Record
+                        </button>
+                    </div>
                 <div class="bg-primary p-4 text-white d-flex justify-content-between align-items-center">
                     <h3 class="fw-bold mb-0" id="currentStudentName">Student Name</h3>
 <button class="btn btn-success btn-sm" onclick="openAddMarksModal()">
@@ -422,6 +542,20 @@
             </div>
         </section>
 
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Subject</th>
+                                    <th>Exam</th>
+                                    <th>Raw Score</th>
+                                    <th>Percentage</th>
+                                    <th class="text-end pe-4">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marksTableBody" class="small"></tbody>
+                        </table>
         <section id="attendance-section" class="d-none section-fade">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                 <div>
@@ -478,7 +612,20 @@
                 </div>
             </div>
         </section>
+    </div>
 
+    <div class="modal fade" id="marksModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="marksModalTitle">Grade Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="marksForm">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Course / Subject Name</label>
+                            <input type="text" id="m_subject" class="form-control rounded-3" required>
         <div id="profile-section" class="d-none section-fade">
             <div class="card shadow-sm mx-auto" style="max-width: 800px;">
                 <div class="card-header bg-primary text-white">Faculty Profile Settings</div>
@@ -493,6 +640,19 @@
                             <input type="hidden" id="edit-email">
                             <input type="hidden" id="edit-faculty-id-alt">
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Evaluation Type</label>
+                            <input type="text" id="m_testType" class="form-control rounded-3" placeholder="Midterm, Final, Quiz..." required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Marks Obtained</label>
+                                <input type="number" id="m_obtained" class="form-control rounded-3" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label small fw-bold">Total Scale</label>
+                                <input type="number" id="m_outOf" class="form-control rounded-3" required>
+                            </div>
                         <div class="mt-4 text-end">
                             <button type="button" class="btn btn-light" onclick="showSection('dash')">Cancel</button>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -510,6 +670,8 @@
                         <h5 class="modal-title fw-bold">Monthly Performance</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm">Commit Record</button>
                     <input type="text" id="modalSearchInput" class="form-control border-0" placeholder="Search by ID..." onkeyup="filterModalTable()">
                 </div>
                 <div class="modal-body p-0">
@@ -526,6 +688,7 @@
                             <tbody id="monthly-report-body"></tbody>
                         </table>
                     </div>
+                </form>
                 </div>
                 <div class="modal-footer"><button class="btn btn-success w-100" onclick="downloadMonthlyExcel()">Download .csv</button></div>
             </div>
@@ -586,248 +749,1130 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-   <script>
-/* ================= GLOBAL SETUP ================= */
-const BASE_URL = "https://smart-college.onrender.com";
-const HEADERS = { "Content-Type": "application/json" };
+    <script>
+        // CORE CONFIG & STATE
+        
+        const ATTENDANCE_API = `https://smart-college.onrender.com/college/attendance`;
+        const HEADERS = { 'X-API-KEY': 'StudentApiKey123', 'Content-Type': 'application/json' };
+        const facultyId = localStorage.getItem('facultyId');
+        let activeStudentId = null;
+        let currentMarksEditId = null;
 
-let activeStudentId = null;
-let activeStudentName = "";
-let studentCache = [];
-let attendanceCache = [];
+        // AUTH CHECK
+        if (!facultyId) { window.location.href = "faculty-auth.html"; }
 
-/* ================= INITIAL LOAD ================= */
-document.addEventListener("DOMContentLoaded", () => {
-    showSection('dash');
-    loadDashboard();
-    fetchStudents();
-});
+        // INITIALIZE
+        window.onload = function() { loadDashboard(); };
+       window.onload = () => {
+    loadDashboard();    // This calls fetchStudents() internally
+    fetchMasterStudents(); 
+    fetchAttendanceAll();   
+};
 
-/* ================= SECTION NAVIGATION ================= */
-function showSection(section) {
-    document.getElementById("dashboard-main-section").classList.add("d-none");
-    document.getElementById("student-db-section").classList.add("d-none");
-    document.getElementById("attendance-section").classList.add("d-none");
-    document.getElementById("profile-section").classList.add("d-none");
+        async function loadDashboard() {
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS });
+                const faculty = await res.json();
+                document.getElementById('faculty-name-header').innerText = faculty.name;
+                document.getElementById('faculty-subject').innerText = faculty.subject;
+                fetchStudents();
+            } catch (err) { console.error("Session Error:", err); }
+        }
 
-    document.querySelectorAll(".nav-link").forEach(el => el.classList.remove("active"));
-    document.querySelectorAll(".mobile-nav-item").forEach(el => el.classList.remove("active"));
-
-    if (section === "dash") {
-        document.getElementById("dashboard-main-section").classList.remove("d-none");
-        document.getElementById("side-dash")?.classList.add("active");
-        document.getElementById("mob-dash")?.classList.add("active");
-    }
-
-    if (section === "students") {
-        document.getElementById("student-db-section").classList.remove("d-none");
-        fetchMasterStudents();
-    }
-
-    if (section === "attendance") {
-        document.getElementById("attendance-section").classList.remove("d-none");
-        fetchAttendanceAll();
-    }
-
-    if (section === "profile") {
-        document.getElementById("profile-section").classList.remove("d-none");
-    }
-}
-
-/* ================= DASHBOARD ================= */
-async function loadDashboard() {
-    document.getElementById("faculty-name-header").innerText = "Professor";
-    document.getElementById("faculty-subject").innerText = "Computer Science";
-}
-
-/* ================= STUDENTS ================= */
-async function fetchStudents() {
+        // FETCH ASSIGNED
+        async function fetchStudents() {
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}/students`, { headers: HEADERS });            
+                if (!res.ok) throw new Error("Failed to fetch");
+                const students = await res.json();
+                document.getElementById('student-count').innerText = students.length;
+                renderTable('student-table-body', students);
+            } catch (err) { console.error("Data Fetch Error:", err); }
+        }
+       async function fetchStudents() {
     try {
-        const res = await fetch(`${BASE_URL}/college/students`);
-        const data = await res.json();
-        studentCache = data;
-        renderStudentTable(data);
-        document.getElementById("student-count").innerText = data.length;
-    } catch (e) {
-        console.error(e);
-    }
+        const res = await fetch(`/api/faculty/${facultyId}/students`, { headers: HEADERS });            
+        if (!res.ok) throw new Error("Failed to fetch");
+        const students = await res.json();
+        document.getElementById('student-count').innerText = students.length;
+        
+        // FIX: Change 'renderTable' to 'renderMainTable'
+        renderMainTable(students); 
+    } catch (err) { console.error("Data Fetch Error:", err); }
 }
 
-function renderStudentTable(data) {
-    const body = document.getElementById("student-table-body");
-    body.innerHTML = "";
+        // RENDER ASSIGNED TABLE
+        function renderTable(targetId, data) {
+            const tableBody = document.getElementById(targetId);
+            tableBody.innerHTML = ''; 
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted py-4">No records found.</td></tr>';
+                return;
+            }
+            data.forEach(s => {
+                const displayId = s.studId || s.id || 'N/A';
+                tableBody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">#${displayId}</td>
+                        <td class="fw-semibold text-dark">${s.fullName || s.studentName || 'Unknown'}</td>
+                        <td class="text-muted">${s.email}</td>
+                    </tr>`;
+            });
+        }
+       function renderMainTable(data) {
+    const tableBody = document.getElementById('student-table-body');
+    tableBody.innerHTML = '';
 
-    data.forEach(st => {
-        body.innerHTML += `
-        <tr>
-            <td class="ps-4">${st.id}</td>
-            <td>${st.fullName}</td>
-            <td>${st.email}</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-primary"
-                    onclick="openStudentConsole(${st.id}, '${st.fullName}')">
-                    Manage
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-muted">No assigned students found.</td></tr>';
+        return;
+    }
+
+    data.forEach(s => {
+        const sId = s.studId || s.id;
+        const sName = s.fullName || s.studentName;
+        
+        // Populate global cache for other lookups
+        window.studentCache[sId] = sName;
+
+        tableBody.innerHTML += `
+            <tr>
+                <td class="ps-4 fw-bold">#${sId}</td>
+                <td class="fw-bold text-dark">${sName}</td>
+                <td class="text-muted small">${s.email}</td>
+                <td class="text-center">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu shadow border-0">
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="openMarksManagement(${sId}, '${sName}')">
+                                <i class="bi bi-graph-up me-2 text-primary"></i> Academic Marks</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="loadAttendanceHistory(${sId})">
+                                <i class="bi bi-calendar-check me-2 text-success"></i> Attendance</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="openParentView(${sId})">
+                                <i class="bi bi-people me-2 text-info"></i> Parent Details</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="javascript:void(0)" onclick="openFeesManagement(${sId})">
+                                <i class="bi bi-currency-dollar me-2 text-warning"></i> Fees & Dues</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>`;
+    });
+}
+        // FETCH ALL (MASTER DB)
+        async function fetchMasterStudents() {
+            const tableBody = document.getElementById('master-table-body');
+            try {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+                const res = await fetch(`/college/students`, { headers: HEADERS }); 
+                const students = await res.json();
+                tableBody.innerHTML = '';
+                students.forEach(s => {
+                    const sId = s.studId || s.id;
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td class="small fw-bold">#${sId}</td>
+                            <td class="fw-bold text-dark">${s.fullName}</td>
+                            <td class="desktop-only text-muted">${s.email}</td>
+                            <td><span class="badge bg-light text-primary border border-primary-subtle">${s.course || 'N/A'}</span></td>
+                            <td class="text-center">
+                                <button onclick="openMarksManagement(${sId}, '${s.fullName}')" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <i class="bi bi-graph-up me-1"></i> Marks
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (err) { console.error("Master List Error:", err); }
+      // Add this at the top of your script
+window.studentCache = {}; 
+
+async function openParentManagement(studId, name) {
+    activeStudentId = studId;
+    alert("Fetching Parents for: " + name); // Debug check
+    try {
+        const res = await fetch(`/college/parents/student/${studId}`, { headers: HEADERS });
+        const parents = await res.json();
+        
+        // You can use a Modal to show this
+        const parentContent = parents.map(p => `
+            <div class="border-bottom p-2">
+                <strong>${p.parentName}</strong> (${p.occupation})<br>
+                <span class="text-primary">${p.phone}</span>
+            </div>
+        `).join('') || "No parent records found.";
+        
+        document.getElementById('formModalTitle').innerText = "Parent Details: " + name;
+        document.getElementById('formModalBody').innerHTML = parentContent;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('formModal')).show();
+    } catch (err) { console.error("Parent Fetch Error:", err); }
+}
+async function openAttendanceManagement(studId, name) {
+    activeStudentId = studId;
+    // Switch to the Attendance Section
+    showSection('attendance');
+    // Set the search filter to this student's name automatically
+    const searchInput = document.getElementById('attendanceSearch');
+    if(searchInput) {
+        searchInput.value = name;
+        filterAttendanceTable();
+    }
+}
+async function loadAttendanceHistory(sId) {
+    const sName = window.studentCache[sId] || "Student";
+    
+    try {
+        // MATCHED TO YOUR JAVA: @GetMapping("/history/{studId}")
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/history/${sId}`, { headers: HEADERS });
+        
+        if (!res.ok) throw new Error("Not Found");
+        const data = await res.json();
+        
+        if (data.length === 0) {
+            showGenericModal(`Attendance: ${sName}`, `
+                <div class="text-center py-4">
+                    <i class="bi bi-calendar-x fs-2 text-muted"></i>
+                    <p class="mt-2 text-muted">No records found for this student.</p>
+                </div>
+            `);
+            return;
+        }
+
+        // NAVIGATION LOGIC
+        function showSection(section) {
+            const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection'];
+            sections.forEach(id => document.getElementById(id).classList.add('d-none'));
+            
+            // Sidebar/Mobile nav active states
+            document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
+
+            if (section === 'profile') {
+                document.getElementById('profile-section').classList.remove('d-none');
+                document.getElementById('side-profile').classList.add('active');
+                document.getElementById('mob-profile').classList.add('active');
+                loadProfileForEditing();
+            } else if (section === 'students') {
+                document.getElementById('student-db-section').classList.remove('d-none');
+                document.getElementById('side-students').classList.add('active');
+                document.getElementById('mob-students').classList.add('active');
+                fetchMasterStudents();
+            } else if (section === 'dash') {
+                document.getElementById('dashboard-main-section').classList.remove('d-none');
+                document.getElementById('side-dash').classList.add('active');
+                document.getElementById('mob-dash').classList.add('active');
+                fetchStudents();
+            }
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr class="small text-muted">
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(a => `
+                            <tr>
+                                <td>${new Date(a.date).toLocaleDateString()}</td>
+                                <td><span class="badge ${getStatusBadge(a.status)}">${a.status}</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm text-primary" onclick="quickUpdateStatus(${a.attendId}, '${a.status}', ${sId})">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm text-danger" onclick="deleteAttendanceRecord(${a.attendId}, ${sId})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        
+        showGenericModal(`Attendance History: ${sName}`, html);
+    } catch (err) {
+        console.error("Attendance Fetch Error:", err);
+    }
+}
+//MATCHES: @PutMapping("/update/{id}")
+async function quickUpdateStatus(attendId, current, sId) {
+    const newStatus = prompt("Enter new status (PRESENT, ABSENT, LATE):", current);
+    if (!newStatus) return;
+
+    try {
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/update/${attendId}?status=${newStatus}`, {
+            method: 'PUT',
+            headers: HEADERS
+        });
+        if (res.ok) loadAttendanceHistory(sId); // Refresh history modal
+    } catch (err) { alert("Update failed"); }
+}
+
+// MATCHES: @DeleteMapping("/delete/{attendId}")
+async function deleteAttendanceRecord(attendId, sId) {
+    if (!confirm("Delete this attendance record?")) return;
+    try {
+        const res = await fetch(`https://smart-college.onrender.com/college/attendance/delete/${attendId}`, {
+            method: 'DELETE',
+            headers: HEADERS
+        });
+        if (res.ok) loadAttendanceHistory(sId); // Refresh history modal
+    } catch (err) { alert("Delete failed"); }
+}
+async function openFeesManagement(studId, name) {
+    activeStudentId = studId;
+    try {
+        const res = await fetch(`/college/fees/student/${studId}`, { headers: HEADERS });
+        const fee = await res.json();
+        
+        const feeHtml = `
+            <div class="row text-center">
+                <div class="col-4"><h6>Total</h6><p>₹${fee.totalAmount}</p></div>
+                <div class="col-4 text-success"><h6>Paid</h6><p>₹${fee.paidAmount}</p></div>
+                <div class="col-4 text-danger"><h6>Due</h6><p>₹${fee.dueAmount}</p></div>
+            </div>
+            <hr>
+            <h6>Recent Transactions</h6>
+            <ul class="list-group list-group-flush">
+                ${fee.paymentHistory.map(ph => `<li class="list-group-item d-flex justify-content-between small">
+                    <span>${ph.paymentDate}</span> <strong>₹${ph.amountPaid}</strong>
+                </li>`).join('')}
+            </ul>
+        `;
+        document.getElementById('formModalTitle').innerText = "Fee Status: " + name;
+        document.getElementById('formModalBody').innerHTML = feeHtml;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('formModal')).show();
+    } catch (err) { alert("Fee record not found for this student."); }
+}
+//--- 1. ATTENDANCE HISTORY ---
+async function loadAttendanceHistory(sId) {
+    const sName = window.studentCache[sId] || "Student";
+    
+    try {
+        // FIX: Ensure the path is /college/attendance/history/{sId}
+        const res = await fetch(`${ATTENDANCE_API}/history/${sId}`, { headers: HEADERS });
+        
+        if (!res.ok) throw new Error("API Path Incorrect");
+        
+        const data = await res.json();
+        
+        if (data.length === 0) {
+            showGenericModal(`Attendance: ${sName}`, `
+                <div class="text-center py-5">
+                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                    <p class="mt-2 text-muted">No records found for this student.</p>
+                </div>
+            `);
+            return;
+        }
+
+        // Generate the table
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr class="small text-muted">
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(a => `
+                            <tr>
+                                <td>${new Date(a.date).toLocaleDateString()}</td>
+                                <td><span class="badge ${getStatusBadge(a.status)}">${a.status}</span></td>
+                                <td class="text-muted small">${a.time || '--:--'}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm text-danger" onclick="deleteHistoryItem(${a.attendId}, ${sId})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+        
+        showGenericModal(`Attendance History: ${sName}`, html);
+    } catch (err) {
+        console.error("Attendance History Error:", err);
+        alert("Failed to load student history. Check console for path errors.");
+    }
+}
+// --- 2. PARENT DETAILS ---
+async function openParentView(sId) {
+    const sName = window.studentCache[sId] || "Student";
+    try {
+        const res = await fetch(`/college/parents/student/${sId}`, { headers: HEADERS });
+        const parents = await res.json();
+        
+        let html = parents.map(p => `
+            <div class="card mb-2 border-0 bg-light">
+                <div class="card-body p-3">
+                    <h6 class="mb-1">${p.parentName} <small class="text-muted">(${p.occupation})</small></h6>
+                    <div class="text-primary fw-bold"><i class="bi bi-telephone"></i> ${p.phone}</div>
+                </div>
+            </div>
+        `).join('') || '<p class="text-center text-muted">No parent records found.</p>';
+        
+        showGenericModal(`Parent Info: ${sName}`, html);
+    } catch (err) { console.error(err); }
+}
+
+// --- 3. FEES MANAGEMENT ---
+// --- 1. FEES MANAGEMENT WITH PAYMENT RECORDING ---
+async function openFeesManagement(sId) {
+    activeStudentId = sId;
+    const sName = window.studentCache[sId] || "Student";
+    
+    try {
+        const res = await fetch(`/college/fees/student/${sId}`, { headers: HEADERS });
+        
+        if (res.status === 404) {
+            renderNewBillingUI(sId, sName);
+            return;
+        }
+
+        const fee = await res.json();
+        
+        let html = `
+            <div class="row text-center mb-4 p-3 bg-light rounded mx-1 shadow-sm">
+                <div class="col-4 border-end">
+                    <div class="text-xs text-muted small">Total/Exam</div>
+                    <div class="h6 mb-0 fw-bold">₹${fee.totalAmount} / ₹${fee.examFees}</div>
+                </div>
+                <div class="col-4 border-end text-success">
+                    <div class="text-xs small">Paid</div>
+                    <div class="h6 mb-0 fw-bold">₹${fee.paidAmount}</div>
+                </div>
+                <div class="col-4 text-danger">
+                    <div class="text-xs small">Due</div>
+                    <div class="h6 mb-0 fw-bold">₹${fee.dueAmount}</div>
+                </div>
+            </div>
+
+            <ul class="nav nav-pills nav-fill mb-3 bg-light rounded p-1" id="feeTabs">
+                <li class="nav-item"><a class="nav-link active py-1 small" data-bs-toggle="pill" href="#payTab">Payment</a></li>
+                <li class="nav-item"><a class="nav-link py-1 small" data-bs-toggle="pill" href="#configTab">Billing Setup</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="payTab">
+                    <div class="input-group input-group-sm mb-3">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" id="payAmount" class="form-control" placeholder="Enter Amount">
+                        <button class="btn btn-primary px-3" onclick="postPayment(${sId})">Pay Now</button>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="configTab">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="small text-muted">Course Fee</label>
+                            <input type="number" id="baseTotal" class="form-control form-control-sm" value="${fee.totalAmount}">
+                        </div>
+                        <div class="col-6">
+                            <label class="small text-muted">Exam Fee</label>
+                            <input type="number" id="baseExam" class="form-control form-control-sm" value="${fee.examFees}">
+                        </div>
+                        <div class="col-12 mt-2">
+                            <button class="btn btn-sm btn-outline-secondary w-100" onclick="updateBillingConfig(${sId})">
+                                <i class="bi bi-save me-1"></i> Update Base Fees
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Transaction History</h6>
+                <button class="btn btn-sm btn-outline-success border-0" onclick='exportFeeStatement("${sName}", ${JSON.stringify(fee)})'>
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
                 </button>
-            </td>
-        </tr>`;
+            </div>
+            <div class="list-group list-group-flush small" style="max-height: 180px; overflow-y: auto;">
+                ${fee.paymentHistory.map(ph => `
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <div>
+                            <div class="fw-bold text-success">₹${ph.amountPaid}</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">${new Date(ph.paymentDate).toLocaleDateString()}</div>
+                        </div>
+                        <div class="btn-group">
+                             <button class="btn btn-sm btn-link text-dark" onclick="printReceipt('${sName}', ${ph.amountPaid}, '${ph.paymentDate}')"><i class="bi bi-printer"></i></button>
+                             <button class="btn btn-sm btn-link text-danger" onclick="deletePaymentRecord(${ph.id}, ${sId})"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-center text-muted py-2">No history.</p>'}
+            </div>
+        `;
+        showGenericModal(`Fees: ${sName}`, html);
+    } catch (err) { console.error(err); }
+}
+async function initializeBilling(sId) {
+    // We send a 0 payment just to trigger the creation logic in your @PostMapping
+    const res = await fetch(`/college/fees/${sId}/pay?amount=0`, {
+        method: 'POST',
+        headers: HEADERS
     });
+    if (res.ok) {
+        openFeesManagement(sId);
+    }
 }
 
-async function fetchMasterStudents() {
-    renderStudentTable(studentCache);
+function renderNewBillingUI(sId, sName) {
+    let html = `
+        <div class="text-center p-3">
+            <i class="bi bi-wallet2 fs-1 text-muted"></i>
+            <h6 class="mt-3 text-dark">Setup Student Billing</h6>
+            <p class="small text-muted">This student has no fee record yet. Set the base fees to start.</p>
+            <div class="row g-2 text-start">
+                <div class="col-6">
+                    <label class="small fw-bold">Total Course Fee</label>
+                    <input type="number" id="initTotal" class="form-control" placeholder="100000">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Exam Fees</label>
+                    <input type="number" id="initExam" class="form-control" placeholder="5000">
+                </div>
+                <button class="btn btn-primary mt-3" onclick="initializeWithConfig(${sId})">Initialize Account</button>
+            </div>
+        </div>`;
+    showGenericModal(`Setup: ${sName}`, html);
 }
 
-/* ================= STUDENT CONSOLE ================= */
-function openStudentConsole(id, name) {
-    activeStudentId = id;
-    activeStudentName = name;
-    document.getElementById("consoleStudentName").innerText = name;
-    new bootstrap.Modal(document.getElementById("studentConsoleModal")).show();
+async function initializeWithConfig(sId) {
+    // We can use your POST payment logic with a 0 amount to create the record, 
+    // then immediately trigger the PUT update to set the fees.
+    const total = document.getElementById('initTotal').value;
+    const exam = document.getElementById('initExam').value;
+    
+    // 1. Create record via POST
+    await fetch(`/college/fees/${sId}/pay?amount=0`, { method: 'POST', headers: HEADERS });
+    
+    // 2. Set Fees via PUT
+    const res = await fetch(`/college/fees/update-billing/${sId}`, {
+        method: 'PUT',
+        headers: HEADERS,
+        body: JSON.stringify({ totalAmount: total, examFees: exam, paidAmount: 0 })
+    });
+
+    if(res.ok) openFeesManagement(sId);
 }
 
-/* ================= MARKS ================= */
-function openAddMarksModal() {
-    new bootstrap.Modal(document.getElementById("marksModal")).show();
+/**
+ * EXPORT STUDENT FEE STATEMENT
+ */
+function exportFeeStatement(studentName, feeData) {
+    if (!feeData.paymentHistory || feeData.paymentHistory.length === 0) {
+        alert("No transaction history available to export.");
+        return;
+    }
+
+    let csvContent = `Statement for: ${studentName}\n`;
+    csvContent += `Total Course Fee,${feeData.totalAmount}\n`;
+    csvContent += `Exam Fees,${feeData.examFees}\n`;
+    csvContent += `Total Paid,${feeData.paidAmount}\n`;
+    csvContent += `Remaining Due,${feeData.dueAmount}\n\n`;
+    
+    csvContent += "Date,Transaction ID,Amount Paid\n";
+
+    feeData.paymentHistory.forEach(ph => {
+        const date = new Date(ph.paymentDate).toLocaleDateString();
+        csvContent += `${date},#${ph.id},${ph.amountPaid}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Statement_${studentName.replace(/\s+/g, '_')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
+async function updateBillingConfig(sId) {
+    const payload = {
+        totalAmount: parseFloat(document.getElementById('baseTotal').value),
+        examFees: parseFloat(document.getElementById('baseExam').value),
+        paidAmount: 0 // Controller handles recalculation, usually we keep paidAmount tracking history
+    };
 
-document.getElementById("marksForm").addEventListener("submit", function(e){
-    e.preventDefault();
-
-    const subject = document.getElementById("m_subject").value;
-    const type = document.getElementById("m_testType").value;
-    const obtained = parseInt(document.getElementById("m_obtained").value);
-    const outOf = parseInt(document.getElementById("m_outOf").value);
-
-    const percent = ((obtained/outOf)*100).toFixed(2);
-
-    document.getElementById("marks-table-body").innerHTML += `
-        <tr>
-            <td>${subject}</td>
-            <td>${type}</td>
-            <td>${obtained}/${outOf}</td>
-            <td><span class="badge bg-success">${percent}%</span></td>
-        </tr>`;
-
-    bootstrap.Modal.getInstance(document.getElementById("marksModal")).hide();
-    this.reset();
-});
-
-/* ================= ATTENDANCE ================= */
-async function fetchAttendanceAll() {
     try {
-        const res = await fetch(`${BASE_URL}/college/attendance`);
-        const data = await res.json();
-        attendanceCache = data;
-        renderAttendanceTable(data);
-    } catch (e) {
-        console.error(e);
+        const res = await fetch(`/college/fees/update-billing/${sId}`, {
+            method: 'PUT',
+            headers: HEADERS,
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            alert("Billing Configuration Updated!");
+            openFeesManagement(sId); // Refresh UI
+        } else {
+            alert("Failed to update billing details.");
+        }
+    } catch (err) {
+        console.error("Update Error:", err);
+    }
+}
+// --- 2. SUBMIT PAYMENT TO BACKEND ---
+// --- SUBMIT PAYMENT ---
+async function postPayment(sId, overrideAmount = null) {
+    const input = document.getElementById('payAmount');
+    const amount = overrideAmount !== null ? overrideAmount : input.value;
+
+    if (amount === "" || (overrideAmount === null && amount < 0)) {
+        alert("Please enter a valid amount");
+        return;
+    }
+
+    try {
+        // Matches Java: @PostMapping("/{studId}/pay")
+        const res = await fetch(`/college/fees/${sId}/pay?amount=${amount}`, {
+            method: 'POST',
+            headers: HEADERS
+        });
+
+        if (res.ok) {
+            openFeesManagement(sId); // Refresh UI
+        } else {
+            alert("Error recording payment");
+        }
+    } catch (err) {
+        console.error("Payment Error:", err);
     }
 }
 
-function renderAttendanceTable(data) {
-    const body = document.getElementById("attendance-table-body");
-    body.innerHTML = "";
+async function deletePaymentRecord(paymentId, sId) {
+    if (!confirm("Are you sure you want to delete this payment record? This will increase the student's due amount.")) return;
 
-    let present=0, absent=0, late=0;
+    try {
+        const res = await fetch(`/college/fees/payment/${paymentId}`, {
+            method: 'DELETE',
+            headers: HEADERS
+        });
 
-    data.forEach(a => {
-        if(a.status==="Present") present++;
-        if(a.status==="Absent") absent++;
-        if(a.status==="Late") late++;
-
-        body.innerHTML += `
-        <tr>
-            <td class="ps-4">${a.studentName}</td>
-            <td>${a.time || "-"}</td>
-            <td>${a.status}</td>
-            <td>${a.location || "-"}</td>
-            <td class="text-center">
-                <button class="btn btn-sm btn-danger"
-                    onclick="deleteAttendance(${a.id})">Delete</button>
-            </td>
-        </tr>`;
-    });
-
-    document.getElementById("stat-present").innerText = present;
-    document.getElementById("stat-absent").innerText = absent;
-    document.getElementById("stat-late").innerText = late;
-    document.getElementById("stat-total").innerText = data.length;
-}
-
-function deleteAttendance(id){
-    attendanceCache = attendanceCache.filter(a=>a.id!==id);
-    renderAttendanceTable(attendanceCache);
-}
-
-/* ================= FILTER FUNCTIONS ================= */
-function filterTable(bodyId, inputId){
-    const input = document.getElementById(inputId).value.toLowerCase();
-    const rows = document.getElementById(bodyId).getElementsByTagName("tr");
-
-    for(let i=0;i<rows.length;i++){
-        rows[i].style.display =
-            rows[i].innerText.toLowerCase().includes(input) ? "" : "none";
+        if (res.ok) {
+            openFeesManagement(sId); // Refresh UI
+        } else {
+            alert("Failed to delete record.");
+        }
+    } catch (err) {
+        console.error("Delete Error:", err);
     }
 }
 
-function filterAttendanceTable(){
-    const input = document.getElementById("attendanceSearch").value.toLowerCase();
-    renderAttendanceTable(attendanceCache.filter(a =>
-        a.studentName.toLowerCase().includes(input)
-    ));
+// --- 3. HELPER: GENERIC MODAL SHOW ---
+function showGenericModal(title, bodyHtml) {
+    const modalTitle = document.getElementById('formModalTitle');
+    const modalBody = document.getElementById('formModalBody');
+    
+    if (modalTitle && modalBody) {
+        modalTitle.innerText = title;
+        modalBody.innerHTML = bodyHtml;
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('formModal')).show();
+    }
+}
+async function fetchMasterStudents() {
+    const tableBody = document.getElementById('master-table-body');
+    try {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+        const res = await fetch(`/college/students`, { headers: HEADERS }); 
+        const students = await res.json();
+        tableBody.innerHTML = '';
+
+        students.forEach(s => {
+            const sId = s.studId || s.id;
+            
+            // CRITICAL: Save name to cache for Monthly/Daily reports
+            window.studentCache[sId] = s.fullName;
+
+            tableBody.innerHTML += `
+                <tr data-id="${sId}">
+                    <td class="small fw-bold">#${sId}</td>
+                    <td class="fw-bold text-dark s-name">${s.fullName}</td>
+                    <td class="desktop-only text-muted">${s.email}</td>
+                    <td><span class="badge bg-light text-primary border border-primary-subtle">${s.course || 'N/A'}</span></td>
+                    <td class="text-center">
+                        <button onclick="openMarksManagement(${sId}, '${s.fullName}')" class="btn btn-sm btn-primary rounded-pill px-3">
+                            <i class="bi bi-graph-up me-1"></i> Marks
+                        </button>
+                    </td>
+                </tr>`;
+        });
+    } catch (err) { 
+        console.error("Master List Error:", err); 
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading students.</td></tr>';
+    }
 }
 
-/* ================= EXPORT ================= */
-function exportTableToExcel(bodyId){
-    const table = document.getElementById(bodyId).closest("table");
-    const wb = XLSX.utils.table_to_book(table);
-    XLSX.writeFile(wb, "students.xlsx");
-}
-
-function downloadAttendanceExcel(){
-    exportTableToExcel("attendance-table-body");
-}
-
-/* ================= MONTHLY REPORT ================= */
-function generateMonthlyReport(){
-    const body = document.getElementById("monthly-report-body");
-    body.innerHTML="";
-    studentCache.forEach(s=>{
-        body.innerHTML+=`
-        <tr>
-            <td class="ps-4">${s.id}</td>
-            <td>${s.fullName}</td>
-            <td>20/22</td>
-            <td>91%</td>
-            <td class="text-center text-success">Eligible</td>
-        </tr>`;
+        // NAVIGATION LOGIC
+   function showSection(section) {
+    const sections = ['dashboard-main-section', 'profile-section', 'student-db-section', 'marksSection', 'attendance-section'];
+    
+    sections.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.classList.add('d-none');
     });
-    new bootstrap.Modal(document.getElementById("attendanceReportModal")).show();
+    
+    document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(el => el.classList.remove('active'));
+
+    if (section === 'profile') {
+        document.getElementById('profile-section').classList.remove('d-none');
+        document.getElementById('side-profile').classList.add('active');
+        document.getElementById('mob-profile').classList.add('active');
+        loadProfileForEditing();
+    } else if (section === 'students') {
+        document.getElementById('student-db-section').classList.remove('d-none');
+        document.getElementById('side-students').classList.add('active');
+        document.getElementById('mob-students').classList.add('active');
+        fetchMasterStudents();
+    } else if (section === 'attendance') {
+        document.getElementById('attendance-section').classList.remove('d-none');
+        document.getElementById('side-attendance').classList.add('active');
+        document.getElementById('mob-attendance').classList.add('active');
+        // RE-FETCH DATA ON TAB SWITCH
+        fetchAttendanceAll(); 
+    } else if (section === 'dash') {
+        document.getElementById('dashboard-main-section').classList.remove('d-none');
+        document.getElementById('side-dash').classList.add('active');
+        document.getElementById('mob-dash').classList.add('active');
+        fetchStudents();
+    }
+}
+        // MARKS MANAGEMENT
+        function openMarksManagement(studId, name) {
+            activeStudentId = studId;
+            document.getElementById('currentStudentName').innerText = name;
+            showSection('none'); 
+            document.getElementById('marksSection').classList.remove('d-none');
+            loadStudentMarks(studId);
+        }
+        function openAddMarksModal() {
+            currentMarksEditId = null; // Reset edit ID for a fresh entry
+            const form = document.getElementById('marksForm');
+            if (form) form.reset(); // Clear previous inputs
+            
+            document.getElementById('marksModalTitle').innerText = "New Grade Record";
+            
+            // Explicitly initialize and show the modal
+            const modalElement = document.getElementById('marksModal');
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modalInstance.show();
+        }
+
+        async function loadStudentMarks(studId) {
+            try {
+                const res = await fetch(`/college/marks/student/${studId}`, { headers: HEADERS });
+                const marks = await res.json();
+                const body = document.getElementById('marksTableBody');
+                let totalPercent = 0;
+                body.innerHTML = marks.length ? '' : '<tr><td colspan="5" class="text-center py-5 text-muted">No academic records available.</td></tr>';
+
+                marks.forEach(m => {
+                    const percent = ((m.obtainedMarks / m.outOf) * 100).toFixed(1);
+                    totalPercent += parseFloat(percent);
+                    body.innerHTML += `
+                        <tr class="ps-4">
+                            <td class="ps-4 fw-bold text-dark">${m.subject}</td>
+                            <td>${m.testType}</td>
+                            <td class="fw-semibold">${m.obtainedMarks} / ${m.outOf}</td>
+                            <td><span class="badge ${percent >= 40 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3">${percent}%</span></td>
+                            <td class="text-end pe-4">
+                                <button onclick='editMarkRecord(${JSON.stringify(m)})' class="btn btn-sm btn-link text-primary"><i class="bi bi-pencil-square"></i></button>
+                                <button onclick="deleteMarkRecord(${m.marksId})" class="btn btn-sm btn-link text-danger"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+                document.getElementById('avgScore').innerText = (marks.length ? (totalPercent / marks.length).toFixed(1) : 0) + "%";
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('marksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                subject: document.getElementById('m_subject').value,
+                testType: document.getElementById('m_testType').value,
+                obtainedMarks: parseFloat(document.getElementById('m_obtained').value),
+                outOf: parseFloat(document.getElementById('m_outOf').value)
+            };
+            const method = currentMarksEditId ? 'PUT' : 'POST';
+            const url = currentMarksEditId ? `/college/marks/${currentMarksEditId}` : `/college/marks/${activeStudentId}`;
+
+            try {
+                const res = await fetch(url, { method: method, headers: HEADERS, body: JSON.stringify(data) });
+                if (res.ok) {
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('marksModal')).hide();
+                    document.getElementById('marksForm').reset();
+                    currentMarksEditId = null;
+                    loadStudentMarks(activeStudentId);
+                } else { alert("Operation failed: " + await res.text()); }
+            } catch (err) { console.error("Save Error:", err); }
+        });
+
+        function openAddMarksModal() {
+            currentMarksEditId = null;
+            document.getElementById('marksForm').reset();
+            document.getElementById('marksModalTitle').innerText = "New Grade Record";
+            new bootstrap.Modal(document.getElementById('marksModal')).show();
+        }
+
+        function editMarkRecord(m) {
+            currentMarksEditId = m.marksId;
+            document.getElementById('m_subject').value = m.subject;
+            document.getElementById('m_testType').value = m.testType;
+            document.getElementById('m_obtained').value = m.obtainedMarks;
+            document.getElementById('m_outOf').value = m.outOf;
+            document.getElementById('marksModalTitle').innerText = "Edit Grade Record";
+            new bootstrap.Modal(document.getElementById('marksModal')).show();
+        }
+
+        async function deleteMarkRecord(id) {
+            if(confirm("Permanently delete this record?")) {
+                await fetch(`/college/marks/${id}`, { method: 'DELETE', headers: HEADERS });
+                loadStudentMarks(activeStudentId);
+            }
+        }
+
+        // UTILITY FUNCTIONS
+        function filterTable(tableId, inputId) {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.getElementById(tableId).getElementsByTagName("tr");
+            for (let row of rows) {
+                row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+            }
+        }
+
+        function exportTableToExcel(tableId) {
+            const table = document.getElementById(tableId).parentElement;
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Students" });
+            XLSX.writeFile(wb, "Faculty_Student_List.xlsx");
+        }
+
+        async function loadProfileForEditing() {
+            try {
+                // Show a spinner or loading state if you have one
+                const res = await fetch(`/api/faculty/${facultyId}`, { headers: HEADERS });
+                if (!res.ok) throw new Error("Could not fetch profile");
+
+                const faculty = await res.json();
+
+                // Mapping all data to the form fields
+                // Note: Field names (like faculty.salary) must match your Backend API response keys
+                document.getElementById('edit-id').value = faculty.id || 'N/A';
+                document.getElementById('edit-faculty-id-alt').value = faculty.faculty_id || faculty.facultyId || 'N/A';
+                document.getElementById('edit-email').value = faculty.email || '';
+                document.getElementById('edit-name').value = faculty.name || '';
+                document.getElementById('edit-subject').value = faculty.subject || '';
+                document.getElementById('edit-occupation').value = faculty.occupation || '';
+                document.getElementById('edit-salary').value = faculty.salary || '0';
+
+            } catch (err) {
+                console.error("Profile Load Error:", err);
+                alert("Failed to load profile data.");
+            }
+        }
+
+        async function handleProfileUpdate(event) {
+            event.preventDefault();
+
+            // Prepare the payload including the new fields
+            const payload = {
+                name: document.getElementById('edit-name').value,
+                subject: document.getElementById('edit-subject').value,
+                occupation: document.getElementById('edit-occupation').value,
+                salary: document.getElementById('edit-salary').value
+            };
+
+            try {
+                const res = await fetch(`/api/faculty/${facultyId}/update-profile`, {
+                    method: 'PUT',
+                    headers: HEADERS,
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Profile Updated Successfully!");
+                    location.reload(); 
+                } else {
+                    const error = await res.text();
+                    alert("Update failed: " + error);
+                }
+            } catch (err) {
+                console.error("Update Error:", err);
+                alert("Server error during update.");
+            }
+        }
+        
+
+      ///Attendance swession
+// --- CONFIGURATION ---
+
+
+/**
+ * 1. FETCH DAILY ATTENDANCE (Main Session Table)
+ * Linked to: On Page Load & Date Filter Change
+ */
+async function fetchAttendanceAll() {
+    const tableBody = document.getElementById('attendance-table-body');
+    const dateInput = document.getElementById('attendance-date-filter');
+    const selectedDate = dateInput.value || new Date().toISOString().split('T')[0];
+    
+    try {
+        const response = await fetch(`${ATTENDANCE_API}/all?date=${selectedDate}`, { headers: HEADERS });
+        if (!response.ok) throw new Error("Fetch failed");
+        
+        const list = await response.json();
+        tableBody.innerHTML = '';
+        let counts = { PRESENT: 0, ABSENT: 0, LATE: 0, TOTAL: 0 };
+
+        if (!list || list.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No records found for this date.</td></tr>';
+            updateAttendanceStats(counts);
+            return;
+        }
+
+        list.forEach(att => {
+            const student = att.student || {}; 
+            const sName = student.fullName || "Unknown Student";
+            const sId = student.studId || "N/A";
+
+            // Update Counters
+            if (counts.hasOwnProperty(att.status)) counts[att.status]++;
+            counts.TOTAL++;
+
+            const mapsUrl = `https://www.google.com/maps?q=${att.latitude},${att.longitude}`;
+
+            tableBody.innerHTML += `
+                <tr class="attendance-row">
+                    <td class="ps-4">
+                        <div class="fw-bold text-dark s-name">${sName}</div>
+                        <div class="text-muted small s-id">ID: #${sId}</div>
+                    </td>
+                    <td class="text-secondary">${att.time || '--:--'}</td>
+                    <td><span class="badge ${getStatusBadge(att.status)} rounded-pill px-3">${att.status}</span></td>
+                    <td class="small text-muted text-truncate" style="max-width: 150px;">${att.address || 'N/A'}</td>
+                    <td class="text-center">
+                        ${(att.latitude && att.latitude !== 0) ? 
+                          `<a href="${mapsUrl}" target="_blank" class="btn btn-sm btn-light border shadow-sm"><i class="bi bi-pin-map-fill"></i></a>` : 
+                          '<span class="text-muted small">No GPS</span>'}
+                    </td>
+                    <td class="text-center pe-4">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editAttendanceStatus(${att.attendId}, '${att.status}')">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAttendance(${att.attendId})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+        updateAttendanceStats(counts);
+    } catch (err) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-danger">Error connecting to server.</td></tr>';
+    }
 }
 
-function downloadMonthlyExcel(){
-    exportTableToExcel("monthly-report-body");
+/**
+ * 2. GENERATE MONTHLY REPORT (The Attendance Modal)
+ */
+ async function generateMonthlyReport() {
+	    // 1. Get DOM elements
+	    const dateInput = document.getElementById('attendance-date-filter');
+	    const reportBody = document.getElementById('monthly-report-body');
+	    
+	    // 2. Validate inputs
+	    if (!dateInput || !reportBody) {
+	        console.error("Missing required HTML elements.");
+	        return;
+	    }
+
+	    const [year, month] = (dateInput.value || new Date().toISOString().split('T')[0]).split('-');
+	    
+	    // 3. Show Modal and Loader
+	    const modalElem = document.getElementById('attendanceReportModal');
+	    let modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
+	    
+	    // Clear previous data and show spinner
+	    reportBody.innerHTML = '<tr><td colspan="5" class="text-center py-5"><div class="spinner-border text-primary"></div></td></tr>';
+	    modal.show();
+
+	    try {
+	        const res = await fetch(`${ATTENDANCE_API}/stats/monthly?month=${month}&year=${year}`, { headers: HEADERS });
+	        if (!res.ok) throw new Error("API Error");
+	        
+	        const stats = await res.json();
+	        reportBody.innerHTML = '';
+	        
+	        const totalDays = new Date(year, month, 0).getDate();
+
+	        Object.entries(stats).forEach(([sId, percentage]) => {
+	            // Get name from window.studentCache (filled by fetchMasterStudents)
+	            const studentName = (window.studentCache && window.studentCache[sId]) ? window.studentCache[sId] : `ID: #${sId}`;
+	            
+	            // Calculate Present Days
+	            const presentDays = Math.round((percentage * totalDays) / 100);
+	            const isEligible = percentage >= 75;
+
+	            // Generate the row in your specific format
+	            reportBody.innerHTML += `
+	                <tr class="modal-row" data-id="${sId}" data-name="${studentName}">
+	                    <td class="ps-4"><strong>#${sId}</strong></td>
+	                    <td class="fw-bold text-dark">${studentName}</td>
+	                    <td><span class="text-primary fw-bold">${presentDays}</span> / ${totalDays} Days</td>
+	                    <td>
+	                        <div class="d-flex align-items-center">
+	                            <span class="me-2 fw-bold">${percentage}%</span>
+	                            <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;">
+	                                <div class="progress-bar ${isEligible ? 'bg-success' : 'bg-danger'}" style="width: ${percentage}%"></div>
+	                            </div>
+	                        </div>
+	                    </td>
+	                    <td>
+	                        <span class="badge ${isEligible ? 'bg-success' : 'bg-danger'} rounded-pill">
+	                            ${isEligible ? 'ELIGIBLE' : 'DEBARRED'}
+	                        </span>
+	                    </td>
+	                </tr>`;
+	        });
+	    } catch (err) {
+	        console.error("Monthly Report Error:", err);
+	        reportBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Error: Could not load data. Check console for details.</td></tr>';
+	    }
+	}
+/**
+ * 3. UPDATE/EDIT STATUS
+ */
+async function editAttendanceStatus(id, currentStatus) {
+    const newStatus = prompt("Change status to (PRESENT, ABSENT, LATE):", currentStatus);
+    if (newStatus && ["PRESENT", "ABSENT", "LATE"].includes(newStatus.toUpperCase())) {
+        try {
+            const res = await fetch(`${ATTENDANCE_API}/update/${id}?status=${newStatus.toUpperCase()}`, {
+                method: 'PUT',
+                headers: HEADERS
+            });
+            if (res.ok) { alert("Status Updated!"); fetchAttendanceAll(); }
+        } catch (err) { alert("Update failed"); }
+    }
 }
 
-/* ================= PROFILE ================= */
-function handleProfileUpdate(e){
-    e.preventDefault();
-    alert("Profile Updated Successfully");
-    showSection('dash');
+/**
+ * 4. DELETE RECORD
+ */
+async function deleteAttendance(id) {
+    if (!confirm("Are you sure you want to delete this record?")) return;
+    try {
+        const res = await fetch(`${ATTENDANCE_API}/delete/${id}`, { method: 'DELETE', headers: HEADERS });
+        if (res.ok) fetchAttendanceAll();
+    } catch (err) { alert("Delete failed"); }
 }
 
-/* ================= LOGOUT ================= */
-function handleLogout(){
-    localStorage.clear();
-    window.location.reload();
+/**
+ * 5. SEARCH & EXPORT HELPERS
+ */
+ function filterAttendanceTable() {
+	    const searchTerm = document.getElementById("attendanceSearch").value.toLowerCase();
+	    const rows = document.querySelectorAll("#attendance-table-body .attendance-row");
+
+	    rows.forEach(row => {
+	        const name = row.querySelector('.s-name').innerText.toLowerCase();
+	        const id = row.querySelector('.s-id').innerText.toLowerCase();
+	        
+	        // If the name or ID matches, show the row; otherwise, hide it
+	        if (name.includes(searchTerm) || id.includes(searchTerm)) {
+	            row.style.display = "";
+	        } else {
+	            row.style.display = "none";
+	        }
+	    });
+	}
+function filterModalTable() {
+    const input = document.getElementById('modalSearchInput').value.toLowerCase();
+    document.querySelectorAll('.modal-row').forEach(row => {
+        row.style.display = row.getAttribute('data-searchable').includes(input) ? "" : "none";
+    });
+}
+function downloadAttendanceExcel() {
+    const rows = document.querySelectorAll("#attendance-table-body .attendance-row");
+    
+    if (rows.length === 0) {
+        alert("No attendance records to export.");
+        return;
+    }
+
+    let csvContent = "Student ID,Student Name,Time,Status,Address\n";
+
+    rows.forEach(row => {
+        const name = row.querySelector('.s-name').innerText.trim();
+        const id = row.querySelector('.s-id').innerText.replace('ID: #', '').trim();
+        const time = row.cells[1].innerText.trim();
+        const status = row.cells[2].innerText.trim();
+        const address = row.cells[3].innerText.replace(/,/g, "").trim(); // Remove commas
+
+        csvContent += `${id},"${name}",${time},${status},"${address}"\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Daily_Report_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+}
+
+function downloadMonthlyExcel() {
+    const rows = document.querySelectorAll("#monthly-report-body .modal-row");
+    
+    if (rows.length === 0) {
+        alert("Please generate the report first.");
+        return;
+    }
+
+    let csvContent = "ID,Student Name,Present Days,Total Days,Percentage,Eligibility\n";
+
+    rows.forEach(row => {
+        const id = row.getAttribute('data-id');
+        const name = row.getAttribute('data-name');
+        
+        // Extracting numbers from the "Present / Total" cell string
+        const ratioText = row.cells[2].innerText.replace(" Days", ""); // e.g. "28 / 28"
+        const [present, total] = ratioText.split(" / ");
+        
+        const percentage = row.cells[3].querySelector('.fw-bold').innerText;
+        const eligibility = row.cells[4].innerText.trim();
+        
+        csvContent += `${id},"${name}",${present},${total},${percentage},${eligibility}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Monthly_Report_${new Date().toLocaleDateString()}.csv`;
+    link.click();
+}
+function updateAttendanceStats(counts) {
+    document.getElementById('stat-present').innerText = counts.PRESENT;
+    document.getElementById('stat-absent').innerText = counts.ABSENT;
+    document.getElementById('stat-late').innerText = counts.LATE;
+    if(document.getElementById('stat-total')) document.getElementById('stat-total').innerText = counts.TOTAL;
+}
+
+function getStatusBadge(status) {
+    switch(status.toUpperCase()) {
+        case 'PRESENT': return 'bg-success-subtle text-success';
+        case 'LATE': return 'bg-warning-subtle text-warning';
+        case 'ABSENT': return 'bg-danger-subtle text-danger';
+        default: return 'bg-secondary-subtle';
+    }
 }
         function logout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
-
-
-
-
-
-
-
