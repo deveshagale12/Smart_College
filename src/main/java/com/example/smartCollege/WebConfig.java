@@ -13,10 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // Updated path pattern to match your new "/college" prefix
-        registry.addInterceptor(apiKeyInterceptor)
-                .addPathPatterns("/college/students/**")
-                .addPathPatterns("/college/academic/**"); // Also protect academic records
+		/* registry.addInterceptor(apiKeyInterceptor) */
+                //.addPathPatterns("/college/students/**"); 
+                // REMOVE .addPathPatterns("/college/academic/**")
     }
 
     @Override
@@ -25,4 +24,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/user-photos/**")
                 .addResourceLocations("file:user-photos/");
     }
+    
+    
 }
