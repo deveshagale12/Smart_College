@@ -30,6 +30,10 @@ public class AcademicController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+    @GetMapping("/all")
+    public ResponseEntity<List<AcademicRecord>> getAllAcademicRecords() {
+        return ResponseEntity.ok(academicService.getAllRecords());
+    }
 
     // PUT: Update record by Record ID
     @PutMapping("/update/{recordId}")

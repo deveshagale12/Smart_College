@@ -44,4 +44,7 @@ public class AcademicService {
         }
         academicRepository.deleteById(recordId);
     }
+    public List<AcademicRecord> getAllRecords() {
+        return academicRepository.findAll();
+    }
 }

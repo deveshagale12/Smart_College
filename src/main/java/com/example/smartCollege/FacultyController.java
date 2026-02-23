@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Map;
 
 import java.util.List;
 import java.util.Optional;
@@ -121,5 +122,16 @@ public class FacultyController {
             facultyRepo.delete(faculty);
             return ResponseEntity.ok().build();
         }).orElse(ResponseEntity.notFound().build());
+    }
+    @PutMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> resetData) {
+        String email = resetData.get("email");
+        String newPassword = resetData.get("password");
+
+        return facultyRepo.findByEmail(email).map(faculty -> {
+            faculty.setPassword(newPassword); // Reminder: Use password encoding in production!
+            facultyRepo.save(faculty);
+            return ResponseEntity.ok("Password updated successfully");
+        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("No faculty found with this email."));
     }
 }
