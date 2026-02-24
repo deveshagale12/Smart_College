@@ -42,50 +42,58 @@ public class AttendanceController {
  private final double COLLEGE_LON = 74.0431; // Your current Lon
  private final double MAX_DISTANCE_METERS = 500.0; // Keep it tight for testing
  
-    @PostMapping("/mark/{studId}")
-    public ResponseEntity<?> markAttendance(@PathVariable Long studId, @RequestBody Attendance record) {
-        return studentRepo.findById(studId).map(student -> {
-            LocalDate today = LocalDate.now();
-            LocalTime now = LocalTime.now();
+ @PostMapping("/mark/{studId}")
+ public ResponseEntity<?> markAttendance(@PathVariable Long studId, @RequestBody Attendance record) {
+     return studentRepo.findById(studId).map(student -> {
+         LocalDate today = LocalDate.now();
+         LocalTime now = LocalTime.now();
 
-            // 1. Geofencing Verification
-            double distance = calculateDistance(record.getLatitude(), record.getLongitude(), COLLEGE_LAT, COLLEGE_LON);
-            if (distance > MAX_DISTANCE_METERS) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                     .body("Out of range. You must be on campus.");
-            }
+         // 1. Safe Geofencing Verification
+         // Only check distance if coordinates are actually provided
+         if (record.getLatitude() != null && record.getLongitude() != null) {
+             double distance = calculateDistance(record.getLatitude(), record.getLongitude(), COLLEGE_LAT, COLLEGE_LON);
+             if (distance > MAX_DISTANCE_METERS) {
+                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                      .body("Out of range. You must be on campus.");
+             }
+         } else {
+             // Log that this was a manual/faculty entry without GPS
+             System.out.println("Manual entry for student: " + studId);
+         }
 
-            // 2. Duplicate Check
-            if (attendanceRepo.existsByStudentStudIdAndDate(studId, today)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                     .body("Attendance already marked for today.");
-            }
+         // 2. Duplicate Check
+         if (attendanceRepo.existsByStudentStudIdAndDate(studId, today)) {
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                  .body("Attendance already marked for today.");
+         }
 
-            // 3. New Time-Based Logic
-            LocalTime startPresent = LocalTime.of(8, 0);
-            LocalTime startLate = LocalTime.of(10, 30);
-            LocalTime endDay = LocalTime.of(16, 0);
+         // 3. Status Logic
+         // If the faculty already sent a status (like ABSENT), use it. 
+         // Otherwise, use the time-based logic.
+         if (record.getStatus() == null || record.getStatus().isEmpty()) {
+             LocalTime startPresent = LocalTime.of(8, 0);
+             LocalTime startLate = LocalTime.of(10, 30);
+             LocalTime endDay = LocalTime.of(16, 0);
 
-            if (now.isBefore(startPresent)) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                     .body("Attendance hasn't started yet. Starts at 8:00 AM.");
-            } else if (now.isBefore(startLate)) {
-                record.setStatus("PRESENT");
-            } else if (now.isBefore(endDay)) {
-                record.setStatus("LATE");
-            } else {
-                // After 4:00 PM, we don't let them press the button; the scheduler handles "ABSENT"
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                     .body("Too late to mark attendance. You are marked as ABSENT.");
-            }
+             if (now.isBefore(startPresent)) {
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                      .body("Attendance hasn't started yet.");
+             } else if (now.isBefore(startLate)) {
+                 record.setStatus("PRESENT");
+             } else if (now.isBefore(endDay)) {
+                 record.setStatus("LATE");
+             } else {
+                 record.setStatus("ABSENT");
+             }
+         }
 
-            record.setDate(today);
-            record.setTime(now);
-            record.setStudent(student);
-            
-            return ResponseEntity.ok(attendanceRepo.save(record)); 
-        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
+         record.setDate(today);
+         record.setTime(now);
+         record.setStudent(student);
+         
+         return ResponseEntity.ok(attendanceRepo.save(record)); 
+     }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+ }
 
     /**
      * 2. GET ATTENDANCE HISTORY
