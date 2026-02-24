@@ -128,33 +128,33 @@
             <div id="view-students" class="content-view grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 </div>
 
-            <div id="view-assign" class="content-view hidden">
-                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-8 border-b flex justify-between items-center bg-slate-50/50">
-                        <div class="mt-8">
-    <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-4">Unassigned Students</h3>
-    <div id="unassigned-container">
-        <p class="text-slate-300 animate-pulse">Scanning database...</p>
+          <div id="view-assign" class="content-view hidden">
+    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-8 border-b flex justify-between items-center bg-slate-50/50">
+            <div>
+                <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Unassigned Students</h3>
+                <p class="text-xs text-slate-500 font-bold">Select students to assign to your department</p>
+            </div>
+            <button onclick="processAssignment()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95">
+                Confirm Assignment
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+                    <tr>
+                        <th class="px-8 py-5">Select</th>
+                        <th class="px-8 py-5">Full Name</th>
+                        <th class="px-8 py-5">Course / Department</th>
+                    </tr>
+                </thead>
+                <tbody id="unassignedList" class="divide-y divide-slate-100 font-medium">
+                    </tbody>
+            </table>
+        </div>
     </div>
 </div>
-                        <button onclick="processAssignment()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95">
-                            Confirm Assignment
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-widest font-black">
-                                <tr>
-                                    <th class="px-8 py-5">Select</th>
-                                    <th class="px-8 py-5">Full Name</th>
-                                    <th class="px-8 py-5">Course</th>
-                                </tr>
-                            </thead>
-                            <tbody id="unassignedList" class="divide-y divide-slate-100 font-medium"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
 
             <div id="view-profile" class="content-view hidden">
                 <div class="max-w-3xl glass-card rounded-[2.5rem] p-10 shadow-2xl">
@@ -360,49 +360,56 @@
         );
         renderStudentCards(filtered);
     }
-    
     async function loadUnassignedStudents() {
+        const container = document.getElementById('unassignedList');
+        if (!container) return console.error("Could not find table body 'unassignedList'");
+
+        container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400 animate-pulse">Scanning database...</td></tr>`;
+
         try {
-            // 1. Get both lists from your backend
+            console.log("Fetching students and fees...");
             const [studRes, feeRes] = await Promise.all([
                 fetch(`${API}/college/students/all`),
                 fetch(`${API}/college/fees/all`)
             ]);
 
+            if (!studRes.ok || !feeRes.ok) throw new Error("API Response Error");
+
             const students = await studRes.json();
             const fees = await feeRes.json();
 
-            // 2. Identify IDs that ALREADY have fees
-            // Check if your Fees object uses 'student.studId' or just 'studentId'
+            // Check if student has a record in the fees table
             const assignedIds = fees.map(f => f.student ? f.student.studId : null);
-
-            // 3. Filter for students NOT in that ID list
             const unassigned = students.filter(s => !assignedIds.includes(s.studId));
 
-            const container = document.getElementById('unassigned-container');
-            if (!container) return;
+            console.log("Unassigned students found:", unassigned.length);
 
-            // 4. Render
             if (unassigned.length === 0) {
-                container.innerHTML = `
-                    <div class="p-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
-                        <p class="text-slate-400 font-bold italic">🎉 All students are assigned!</p>
-                    </div>`;
-            } else {
-                container.innerHTML = unassigned.map(s => `
-                    <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm mb-3 hover:border-blue-200 transition-all">
-                        <div>
-                            <p class="font-black text-slate-800">${s.name}</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase">ID: ${s.studId} • ${s.department}</p>
-                        </div>
-                        <button onclick="initFeeUI(${s.studId})" class="px-4 py-2 bg-blue-600 text-white text-[10px] font-black rounded-xl uppercase tracking-wider">
-                            Assign Fees
-                        </button>
-                    </div>
-                `).join('');
+                container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400 font-bold italic">🎉 All students are assigned!</td></tr>`;
+                return;
             }
+
+            container.innerHTML = unassigned.map(s => `
+                <tr class="hover:bg-slate-50 transition-all border-b border-slate-100">
+                    <td class="px-8 py-4">
+                        <input type="checkbox" name="studentSelect" value="${s.studId}" 
+                               class="stu-check w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500">
+                    </td>
+                    <td class="px-8 py-4">
+                        <p class="font-black text-slate-800">${s.fullName || s.name || 'Unnamed Student'}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">ID: ${s.studId}</p>
+                    </td>
+                    <td class="px-8 py-4">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-wider">
+                            ${s.course || s.department || 'N/A'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
         } catch (err) {
-            console.error("Dashboard Load Error:", err);
+            console.error("Fetch Error:", err);
+            container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-red-500 font-bold">Failed to load. Is the Backend running?</td></tr>`;
         }
     }
     // --- LATEST FUNCTION: ATTENDANCE WIDGET ---
@@ -539,22 +546,57 @@ async function viewAcademicRecords(studId) {
 	    }
 	}
 // --- FORM FOR ADD/EDIT ---
-   function academicFormUI(studId, existingData = null) {
-       const isEdit = !!existingData;
-       let content = `
-           <div class="space-y-3">
-               <input type="text" id="ac-course" placeholder="Course Name (e.g. B.Tech)" class="w-full p-3 bg-slate-100 rounded-xl" value="${isEdit ? existingData.courseName : ''}">
-               <input type="text" id="ac-year" placeholder="Academic Year (e.g. 2023-24)" class="w-full p-3 bg-slate-100 rounded-xl" value="${isEdit ? existingData.academicYear : ''}">
-               <input type="number" id="ac-current" placeholder="Current Year (1, 2, 3...)" class="w-full p-3 bg-slate-100 rounded-xl" value="${isEdit ? existingData.currentYear : ''}">
-               <select id="ac-status" class="w-full p-3 bg-slate-100 rounded-xl font-bold">
-                   <option value="Pass" ${isEdit && existingData.status === 'Pass' ? 'selected' : ''}>Pass</option>
-                   <option value="Fail" ${isEdit && existingData.status === 'Fail' ? 'selected' : ''}>Fail</option>
-               </select>
-           </div>`;
-       
-       openModal(isEdit ? "Edit Record" : "Add Record", content, true, () => submitAcademic(studId, isEdit ? existingData.id : null));
-   }
+  function academicFormUI(studId, existingData = null) {
+    const isEdit = !!existingData;
+    let content = `
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Academic Year</label>
+                    <input type="text" id="acaYear" placeholder="2025-26" value="${isEdit ? existingData.academicYear : ''}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Current Year</label>
+                    <input type="number" id="acaCur" placeholder="1, 2, 3..." value="${isEdit ? existingData.currentYear : ''}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Course Name</label>
+                <input type="text" id="acaCourse" value="${isEdit ? existingData.courseName : ''}" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Status</label>
+                <select id="acaStatus" class="w-full p-3 bg-slate-50 rounded-xl border-none outline-none font-bold">
+                    <option value="ACTIVE" ${isEdit && existingData.status === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+                    <option value="COMPLETED" ${isEdit && existingData.status === 'COMPLETED' ? 'selected' : ''}>COMPLETED</option>
+                </select>
+            </div>
+        </div>`;
 
+    openModal(isEdit ? "Edit Record" : "Add Academic Record", content, true, async () => {
+        const payload = {
+            academicYear: document.getElementById('acaYear').value,
+            currentYear: parseInt(document.getElementById('acaCur').value),
+            courseName: document.getElementById('acaCourse').value,
+            status: document.getElementById('acaStatus').value,
+            student: { studId: studId }
+        };
+
+        const url = isEdit ? `${API}/college/academic/update/${existingData.id}` : `${API}/college/academic/add/${studId}`;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+            method: method,
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            closeModal();
+            viewAcademicRecords(studId);
+        }
+    });
+}
 // --- SUBMIT (POST or PUT) ---
 async function submitAcademic(studId, recordId = null) {
     // 1. Capture the form data
@@ -978,25 +1020,25 @@ async function deletePayment(paymentId, studId) {
         openModal("Full Student Profile", content, false);
     }
 
-    async function loadUnassigned() {
-        const res = await fetch(`${API}/college/students/all`);
-        const all = await res.json();
-        const filtered = all.filter(s => !s.faculty);
-        document.getElementById('unassignedList').innerHTML = filtered.map(s => `
-            <tr>
-                <td class="px-8 py-5"><input type="checkbox" class="stu-check w-6 h-6 rounded-lg text-blue-600" value="${s.studId}"></td>
-                <td class="px-8 py-5 font-bold text-slate-800">${s.fullName}</td>
-                <td class="px-8 py-5 uppercase text-xs tracking-widest font-bold text-slate-400">${s.course}</td>
-            </tr>`).join('');
-    }
+   
 
     async function processAssignment() {
-        const ids = Array.from(document.querySelectorAll('.stu-check:checked')).map(c => parseInt(c.value));
-        if(ids.length === 0) return alert("Select students first.");
-        const res = await fetch(`${API}/api/faculty/${faculty.id}/assign-students`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(ids) });
-        if(res.ok) showTab('students', document.querySelector('.nav-item'));
-    }
+        const selected = document.querySelectorAll('.stu-check:checked');
+        const ids = Array.from(selected).map(c => parseInt(c.value));
+        if (ids.length === 0) return alert("Select students first.");
 
+        try {
+            const res = await fetch(`${API}/api/faculty/${faculty.id}/assign-students`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ids)
+            });
+            if (res.ok) {
+                alert("Assignment Successful!");
+                showTab('students', document.querySelector('[onclick*="students"]'));
+            }
+        } catch (e) { alert("Error assigning students"); }
+    }
     function populateProfile() {
         document.getElementById('profName').value = faculty.name;
         document.getElementById('profId').value = faculty.facultyId;
@@ -1147,18 +1189,39 @@ async function downloadMasterReport() {
             }
         }
 
-        // Tab Switching Logic
-     function showTab(view, btn) {
+function showTab(view, btn) {
+    // 1. Hide all views and remove active state from buttons
     document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
-    document.getElementById(`view-${view}`).classList.remove('hidden');
-    
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    btn.classList.add('active');
-    
+
+    // 2. Show the target view
+    const targetView = document.getElementById(`view-${view}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+    }
+
+    // 3. Mark button as active
+    if (btn) btn.classList.add('active');
+
+    // 4. Update Header Title
     document.getElementById('viewTitle').innerText = view.charAt(0).toUpperCase() + view.slice(1);
 
-    if (view === 'attendance') loadAttendanceHistory();
-    if (view === 'students') loadAssigned();
+    // 5. Toggle visibility of Search/Stats (Only show for students)
+    const stats = document.getElementById('stats-container');
+    const search = document.getElementById('search-section');
+    if (stats) stats.classList.toggle('hidden', view !== 'students');
+    if (search) search.classList.toggle('hidden', view !== 'students');
+
+    // 6. ROUTING LOGIC: Call the correct data loader based on the view
+    if (view === 'students') {
+        loadAssigned();
+    } else if (view === 'attendance') {
+        loadAttendanceHistory();
+    } else if (view === 'assign') {
+        loadUnassignedStudents(); // This must match your function name!
+    } else if (view === 'profile') {
+        populateProfile();
+    }
 }
         
         ///attendance 
