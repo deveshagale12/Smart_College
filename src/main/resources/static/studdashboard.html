@@ -449,7 +449,7 @@
 </div>
     <script>
         const API_KEY = "StudentApiKey123";
-        const BASE_URL = "https://smart-college.onrender.com/college";
+        const BASE_URL = "https://smart-college.onrender.com";
         const student = JSON.parse(localStorage.getItem('student'));
         let currentEditId = null;
 
@@ -569,53 +569,72 @@ async function loadProfile() {
     } catch (err) { console.error("Load Error:", err); }
 }
 
-async function uploadPhoto() {
-    const file = document.getElementById('photoInput').files[0];
+async function uploadPhoto(studId) {
+    // 1. Get the specific input for this student
+    const fileInput = document.getElementById(`photoInput_${studId}`);
+    const file = fileInput.files[0];
     if (!file) return;
 
-    // Show a simple loading state on the image
-    document.getElementById('profileImg').style.opacity = "0.5";
+    // 2. Visual feedback (Optional: find the specific img for this student)
+    const imgElement = document.getElementById(`img_${studId}`);
+    if(imgElement) imgElement.style.opacity = "0.5";
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', file); // 'file' must match @RequestParam("file") in Java
 
     try {
-        const res = await fetch(`${BASE_URL}/students/${student.studId}/upload-photo`, {
+        const res = await fetch(`${API}/college/students/${studId}/upload-photo`, {
             method: 'POST',
-            headers: { 'X-API-KEY': API_KEY },
+            // NOTE: No 'Content-Type' header here!
             body: formData
         });
 
         if (res.ok) {
-            alert("Photo Updated!");
-            loadProfile(); // Refresh image and data
+            alert("Photo saved to database!");
+            
+            // 3. Refresh logic
+            // We add a timestamp to the URL to bypass browser cache
+            if(imgElement) {
+                imgElement.src = `${API}/college/students/${studId}/photo/view?t=${new Date().getTime()}`;
+            }
+            // Also refresh the overall data if needed
+            loadAssigned(); 
         } else {
-            alert("Upload failed. Check if file is too large.");
+            const errorText = await res.text();
+            alert(`Upload failed: ${errorText || 'Check file size (Max 5MB)'}`);
         }
     } catch (err) {
-        console.error("Upload Error:", err);
+        console.error("Network Error:", err);
+        alert("Server unreachable. Is the backend running?");
     } finally {
-        document.getElementById('profileImg').style.opacity = "1";
+        if(imgElement) imgElement.style.opacity = "1";
     }
 }
 
-async function deletePhoto() {
-    if (!confirm("Remove profile photo?")) return;
+async function deletePhoto(studId, fullName) {
+    if (!confirm(`Are you sure you want to remove the photo for ${fullName}?`)) return;
 
     try {
-        const res = await fetch(`${BASE_URL}/students/${student.studId}/photo`, {
-            method: 'DELETE',
-            headers: { 'X-API-KEY': API_KEY }
+        const res = await fetch(`${API}/college/students/${studId}/photo`, {
+            method: 'DELETE'
         });
 
         if (res.ok) {
-            alert("Photo Removed");
-            document.getElementById('profileImg').src = "https://via.placeholder.com/150";
+            alert("Photo removed from database.");
+            
+            // Update the specific image in the list immediately
+            const imgElement = document.getElementById(`img_${studId}`);
+            if (imgElement) {
+                // Use a UI-Avatar based on the student's name as a fallback
+                imgElement.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random`;
+            }
         } else {
-            alert("Failed to delete photo.");
+            const error = await res.text();
+            alert("Delete failed: " + error);
         }
     } catch (err) {
         console.error("Delete Error:", err);
+        alert("Server error during deletion.");
     }
 }
 document.getElementById('profileForm').addEventListener('submit', async (e) => {

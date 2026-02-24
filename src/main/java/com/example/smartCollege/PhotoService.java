@@ -14,69 +14,50 @@ public class PhotoService {
     private PhotoRepository photoRepository;
     @Autowired
     private StudentRepository studentRepository;
-    @Autowired
-    private FileService fileService; // The service we created in the previous step
 
-    public StudentPhoto uploadPhoto(Long studId, MultipartFile file) throws IOException {
+    // Combined Upload/Update Logic
+    public StudentPhoto updatePhoto(Long studId, MultipartFile file) throws IOException {
         // 1. Find the student
         Student student = studentRepository.findById(studId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // 2. Save the physical file
-        String fileName = fileService.saveFile(file, studId);
-
-        // 3. Check if photo record already exists, or create new one
+        // 2. Check if a record already exists, if not, create one
         StudentPhoto photo = photoRepository.findByStudentStudId(studId)
                 .orElse(new StudentPhoto());
 
-        photo.setFileName(fileName);
+        // 3. Set the binary data and metadata
+        photo.setData(file.getBytes()); // This saves directly to Neon DB
         photo.setFileType(file.getContentType());
-        photo.setStudent(student); // Link the photo to the student
+        photo.setStudent(student);
 
         return photoRepository.save(photo);
     }
-    
- // FETCH: Get photo details by Student ID
+
+    public void deletePhoto(Long studId) {
+        StudentPhoto photo = photoRepository.findByStudentStudId(studId)
+                .orElseThrow(() -> new RuntimeException("Photo not found"));
+        
+        // Just delete from DB - no physical file cleanup needed!
+        photoRepository.delete(photo);
+    }
+
     public StudentPhoto getPhotoByStudentId(Long studId) {
         return photoRepository.findByStudentStudId(studId)
-                .orElseThrow(() -> new RuntimeException("Photo not found for Student ID: " + studId));
+                .orElseThrow(() -> new RuntimeException("No photo found for ID: " + studId));
     }
+    public StudentPhoto uploadPhoto(Long studId, MultipartFile file) throws IOException {
+        Student student = studentRepository.findById(studId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-    public StudentPhoto updatePhoto(Long studId, MultipartFile file) throws IOException {
-        // 1. Find the existing database record
-        StudentPhoto existingPhoto = photoRepository.findByStudentStudId(studId)
-                .orElseThrow(() -> new RuntimeException("No existing photo to update."));
-
-        // 2. Delete the OLD physical file from the folder
-        Path oldFilePath = Paths.get("user-photos/" + existingPhoto.getFileName());
-        try {
-            Files.deleteIfExists(oldFilePath);
-        } catch (IOException e) {
-            // We log the error but continue so the user can still upload the new photo
-            System.out.println("Warning: Could not delete old file: " + e.getMessage());
-        }
-
-        // 3. Save the NEW physical file
-        String newFileName = fileService.saveFile(file, studId);
-
-        // 4. Update the database record with the new details
-        existingPhoto.setFileName(newFileName);
-        existingPhoto.setFileType(file.getContentType());
-
-        return photoRepository.save(existingPhoto);
-    }
-    public void deletePhoto(Long studId) throws IOException {
-        // 1. Find the photo record in the database
         StudentPhoto photo = photoRepository.findByStudentStudId(studId)
-                .orElseThrow(() -> new RuntimeException("Photo not found for student ID: " + studId));
+                .orElse(new StudentPhoto());
 
-        // 2. Construct the path to the physical file
-        Path filePath = Paths.get("user-photos/" + photo.getFileName());
+        // These methods are now all defined:
+        photo.setFileName(file.getOriginalFilename()); // This was causing your error
+        photo.setFileType(file.getContentType());
+        photo.setData(file.getBytes());
+        photo.setStudent(student);
 
-        // 3. Delete the file from the folder
-        Files.deleteIfExists(filePath);
-
-        // 4. Delete the record from the database
-        photoRepository.delete(photo);
+        return photoRepository.save(photo);
     }
 }
