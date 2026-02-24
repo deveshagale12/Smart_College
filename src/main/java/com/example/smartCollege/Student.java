@@ -29,7 +29,7 @@ public class Student {
     private Faculty faculty;
     
  // ADD THIS: Link to the Fees entity
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Fees fees;
     
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -38,6 +38,18 @@ public class Student {
     // 2. Link to Student Photo (since you have PhotoService)
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private StudentPhoto photo;
+    
+ // 1. Fixed Attendance mapping (Missing in your code)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendance;
+
+    // 2. Fixed Marks mapping (Missing in your code)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Marks> marks;
+
+    // 3. Fixed Parent mapping (Missing in your code)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Parent> parents;
     
 	public Long getStudId() {
 		return studId;
