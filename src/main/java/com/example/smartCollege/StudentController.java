@@ -2,7 +2,6 @@ package com.smartCollege;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -89,30 +88,42 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
- // 1. GET METADATA (Returns JSON info about the photo, but NOT the bytes)
+    
+ // FETCH PHOTO DATA
     @GetMapping("/{id}/photo")
     public ResponseEntity<StudentPhoto> getPhotoDetails(@PathVariable Long id) {
         return ResponseEntity.ok(photoService.getPhotoByStudentId(id));
     }
 
-    // 2. VIEW IMAGE (This is what you use in <img src="...">)
-    @GetMapping("/{id}/photo/view")
-    public ResponseEntity<byte[]> viewPhoto(@PathVariable Long id) {
-        StudentPhoto photo = photoService.getPhotoByStudentId(id);
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(photo.getFileType()))
-                .body(photo.getData());
-    }
-
-    // 3. UPDATE PHOTO (Logic inside Service changes for DB storage)
-    @PutMapping("/{id}/upload-photo")
+    // UPDATE PHOTO
+    @PutMapping("/{id}/upload-photo") // Using PUT for updates
     public ResponseEntity<?> updateStudentPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         try {
             StudentPhoto updated = photoService.updatePhoto(id, file);
-            return ResponseEntity.ok("Photo updated in database successfully for student ID: " + id);
+            return ResponseEntity.ok("Photo updated successfully: " + updated.getFileName());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
+    }
+    
+    @DeleteMapping("/{id}/photo")
+    public ResponseEntity<String> removePhoto(@PathVariable Long id) {
+        try {
+            photoService.deletePhoto(id);
+            return ResponseEntity.ok("Profile photo deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Error deleting photo: " + e.getMessage());
+        }
+    }
+    @GetMapping("/assigned-to/{facultyId}")
+    public ResponseEntity<List<Student>> getStudentsByFaculty(@PathVariable Long facultyId) {
+        List<Student> students = service.getStudentsByFacultyId(facultyId);
+        return ResponseEntity.ok(students);
+    }
+    @GetMapping("/all")
+    public List<Student> getAllStudents() {
+        return studentRepo.findAll();
     }
     
 }
