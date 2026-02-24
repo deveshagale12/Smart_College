@@ -380,7 +380,8 @@
 
             // Check if student has a record in the fees table
             const assignedIds = fees.map(f => f.student ? f.student.studId : null);
-            const unassigned = students.filter(s => !assignedIds.includes(s.studId));
+           // const unassigned = students.filter(s => !assignedIds.includes(s.studId));
+           const unassigned = students.filter(s => s.faculty === null);
 
             console.log("Unassigned students found:", unassigned.length);
 
