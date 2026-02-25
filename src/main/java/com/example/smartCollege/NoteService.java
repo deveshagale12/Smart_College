@@ -43,4 +43,8 @@ public class NoteService {
         return noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found"));
     }
+ // YOUR MISSING METHOD:
+    public List<Note> getNotesByFaculty(Long facultyId) {
+        return noteRepository.findByFacultyIdOrderByUploadDateDesc(facultyId);
+    }
 }

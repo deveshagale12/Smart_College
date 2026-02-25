@@ -11,4 +11,5 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     // For Faculty: "Show me all notes I have sent"
     List<Note> findByFacultyId(Long facultyId);
+    List<Note> findByFacultyIdOrderByUploadDateDesc(Long facultyId);
 }

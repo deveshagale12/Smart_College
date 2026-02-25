@@ -46,4 +46,9 @@ public class NoteController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + note.getFileName() + "\"")
                 .body(note.getData());
     }
+    @GetMapping("/faculty/{facultyId}")
+    public ResponseEntity<List<Note>> getNotesByFaculty(@PathVariable Long facultyId) {
+        List<Note> notes = noteService.getNotesByFaculty(facultyId);
+        return ResponseEntity.ok(notes);
+    }
 }
