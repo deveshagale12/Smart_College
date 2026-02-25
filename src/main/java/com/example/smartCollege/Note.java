@@ -8,6 +8,8 @@ import jakarta.persistence.*; // Covers @Entity, @Id, @ManyToOne, etc.
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 import java.time.LocalDateTime;
+import  java.sql.Types;
+import org.hibernate.annotations.JdbcTypeCode;
 @Entity
 @Table(name = "faculty_notes")
 public class Note {
