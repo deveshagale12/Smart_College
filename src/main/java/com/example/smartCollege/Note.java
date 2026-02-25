@@ -22,19 +22,19 @@ public class Note {
 
     @Lob
     @Column(name = "note_data")
-    private byte[] data; // Binary storage for Neon DB
+    @com.fasterxml.jackson.annotation.JsonIgnore // 1. Prevents sending raw file bytes in the history list
+    private byte[] data; 
 
-  // Inside Note.java
-// Inside Note.java
-@ManyToOne
-@JoinColumn(name = "stud_id")
-@JsonIgnore // Prevents the infinite loop during JSON conversion
-private Student student;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "stud_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("notes") // 2. Breaks recursion: includes Student info but ignores their note list
+    private Student student;
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(name = "faculty_id")
-private Faculty faculty;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "faculty_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("notes") // 3. Breaks recursion: includes Faculty info but ignores their note list
+    private Faculty faculty;
+    
 	public Long getId() {
 		return id;
 	}
