@@ -40,7 +40,7 @@ public class AttendanceController {
  // Replace these with your current home/office coordinates
  private final double COLLEGE_LAT = 19.2099; // Your current Lat
  private final double COLLEGE_LON = 74.0431; // Your current Lon
- private final double MAX_DISTANCE_METERS = 500.0; // Keep it tight for testing
+ private final double MAX_DISTANCE_METERS = 5000.0; // Keep it tight for testing
  
  @PostMapping("/mark/{studId}")
  public ResponseEntity<?> markAttendance(@PathVariable Long studId, @RequestBody Attendance record) {
