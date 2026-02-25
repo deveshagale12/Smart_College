@@ -50,13 +50,7 @@ public class Student {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnore // Prevent Notes -> Student -> Records loop
-    private List<AcademicRecord> academicRecords;
-
-	// Inside Student.java
-@OneToMany(mappedBy = "student")
-@JsonIgnore // This prevents the Student from trying to list their notes again
-private List<Note> notes;
-    
+    private List<AcademicRecord> academicRecords;   
 	public Long getStudId() {
 		return studId;
 	}
