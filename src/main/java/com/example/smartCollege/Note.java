@@ -20,10 +20,10 @@ public class Note {
     private String fileType;
     private LocalDateTime uploadDate;
 
-    @Lob
-    @Column(name = "note_data")
-    @JsonIgnore // CRITICAL: Prevents the API from sending 5MB+ of raw bytes in a simple list view
-    private byte[] data;
+@Lob
+@JdbcTypeCode(Types.BINARY) // This forces Hibernate to read it as a byte array, not a stream
+@Column(name = "note_data")
+@JsonIgnore
 
 @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stud_id")
