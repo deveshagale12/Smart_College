@@ -31,25 +31,26 @@ public class Student {
  // ADD THIS: Link to the Fees entity
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Fees fees;
-    
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AcademicRecord> academicRecords;
 
     // 2. Link to Student Photo (since you have PhotoService)
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private StudentPhoto photo;
-    
- // 1. Fixed Attendance mapping (Missing in your code)
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore // Prevent Notes -> Student -> Attendance loop
     private List<Attendance> attendance;
 
-    // 2. Fixed Marks mapping (Missing in your code)
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore // Prevent Notes -> Student -> Marks loop
     private List<Marks> marks;
 
-    // 3. Fixed Parent mapping (Missing in your code)
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore // Prevent Notes -> Student -> Parent loop
     private List<Parent> parents;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore // Prevent Notes -> Student -> Records loop
+    private List<AcademicRecord> academicRecords;
     
 	public Long getStudId() {
 		return studId;

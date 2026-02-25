@@ -22,19 +22,21 @@ public class Note {
 
     @Lob
     @Column(name = "note_data")
-    @com.fasterxml.jackson.annotation.JsonIgnore // 1. Prevents sending raw file bytes in the history list
-    private byte[] data; 
+    @JsonIgnore // CRITICAL: Prevents the API from sending 5MB+ of raw bytes in a simple list view
+    private byte[] data;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stud_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("notes") // 2. Breaks recursion: includes Student info but ignores their note list
+    @JsonIgnoreProperties({"attendance", "marks", "parents", "academicRecords", "faculty", "fees"}) 
+    // ^ CRITICAL: Stops the "Note -> Student -> Attendance -> Note" infinite loop
     private Student student;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "faculty_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties("notes") // 3. Breaks recursion: includes Faculty info but ignores their note list
+    @JsonIgnoreProperties({"students", "notes"}) 
+    // ^ Stops the loop back to the faculty's list of notes
     private Faculty faculty;
-    
+
 	public Long getId() {
 		return id;
 	}
