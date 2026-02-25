@@ -1,4 +1,4 @@
-package com.SmartCollege2;
+package com.smartCollege;
 
 import java.util.List;
 import java.util.Map;
