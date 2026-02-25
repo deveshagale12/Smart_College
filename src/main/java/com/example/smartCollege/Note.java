@@ -25,8 +25,10 @@ public class Note {
     private byte[] data; // Binary storage for Neon DB
 
   // Inside Note.java
-@ManyToOne(fetch = FetchType.EAGER) // Ensure it's loaded
+// Inside Note.java
+@ManyToOne
 @JoinColumn(name = "stud_id")
+@JsonIgnore // Prevents the infinite loop during JSON conversion
 private Student student;
 
 @ManyToOne(fetch = FetchType.EAGER)
