@@ -24,13 +24,14 @@ public class Note {
     @Column(name = "note_data")
     private byte[] data; // Binary storage for Neon DB
 
-    @ManyToOne
-    @JoinColumn(name = "faculty_id")
-    private Faculty faculty;
+  // Inside Note.java
+@ManyToOne(fetch = FetchType.EAGER) // Ensure it's loaded
+@JoinColumn(name = "stud_id")
+private Student student;
 
-    @ManyToOne
-    @JoinColumn(name = "stud_id")
-    private Student student;
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(name = "faculty_id")
+private Faculty faculty;
 
 	public Long getId() {
 		return id;
