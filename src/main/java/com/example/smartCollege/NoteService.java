@@ -2,6 +2,8 @@
 package com.smartCollege;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -34,7 +36,7 @@ public class NoteService {
 
         return noteRepository.save(note);
     }
-
+@Transactional(readOnly = true)
     public List<Note> getNotesForStudent(Long studId) {
         return noteRepository.findByStudentStudIdOrderByUploadDateDesc(studId);
     }
@@ -44,6 +46,7 @@ public class NoteService {
                 .orElseThrow(() -> new RuntimeException("Note not found"));
     }
  // YOUR MISSING METHOD:
+ @Transactional(readOnly = true)
     public List<Note> getNotesByFaculty(Long facultyId) {
         return noteRepository.findByFacultyIdOrderByUploadDateDesc(facultyId);
     }
