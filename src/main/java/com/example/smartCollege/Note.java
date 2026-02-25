@@ -26,6 +26,7 @@ public class Note {
 @JdbcTypeCode(Types.BINARY) // This forces Hibernate to read it as a byte array, not a stream
 @Column(name = "note_data")
 @JsonIgnore
+private byte[] data;
 
 @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stud_id")
