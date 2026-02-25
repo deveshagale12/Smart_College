@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import jakarta.persistence.*; // Covers @Entity, @Id, @ManyToOne, etc.
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
+import java.time.LocalDateTime;
 @Entity
 @Table(name = "faculty_notes")
 public class Note {
