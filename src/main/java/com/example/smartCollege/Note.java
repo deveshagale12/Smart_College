@@ -25,16 +25,16 @@ public class Note {
     @JsonIgnore // CRITICAL: Prevents the API from sending 5MB+ of raw bytes in a simple list view
     private byte[] data;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stud_id")
-    @JsonIgnoreProperties({"attendance", "marks", "parents", "academicRecords", "faculty", "fees"}) 
-    // ^ CRITICAL: Stops the "Note -> Student -> Attendance -> Note" infinite loop
+    @JsonIgnoreProperties({"notes", "attendance", "marks", "parents", "faculty"}) 
+    // ^ STOP: This breaks the loop back to the student's other data
     private Student student;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "faculty_id")
-    @JsonIgnoreProperties({"students", "notes"}) 
-    // ^ Stops the loop back to the faculty's list of notes
+    @JsonIgnoreProperties({"notes", "students"}) 
+    // ^ STOP: This breaks the loop back to the faculty's other data
     private Faculty faculty;
 
 	public Long getId() {

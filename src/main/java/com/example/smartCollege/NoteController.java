@@ -32,10 +32,19 @@ public class NoteController {
     }
 
     // 2. GET NOTES LIST (Student uses this to see their inbox)
+  
     @GetMapping("/student/{studId}")
-    public ResponseEntity<List<Note>> getMyNotes(@PathVariable Long studId) {
-        return ResponseEntity.ok(noteService.getNotesForStudent(studId));
+public ResponseEntity<?> getMyNotes(@PathVariable Long studId) {
+    try {
+        List<Note> notes = noteService.getNotesForStudent(studId);
+        // If this succeeds, you'll get your list
+        return ResponseEntity.ok(notes);
+    } catch (Exception e) {
+        // If this fails, it will tell us EXACTLY why (e.g., Infinite Recursion)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body("Backend Error: " + e.getMessage());
     }
+}
 
     // 3. VIEW/DOWNLOAD (Used by Student to open the file)
     @GetMapping("/view/{noteId}")
