@@ -16,10 +16,9 @@ public class Assignment {
     private String title;
     private String description;
     
- @Lob
-@Column(name = "content", columnDefinition = "TEXT")
-private String content;
-
+    @Column(columnDefinition = "TEXT")
+    private String content; // Stores the actual text submission or base64 data
+    
     private String fileUrl; // Stores the link to the file
     private LocalDate dueDate;
     private LocalDateTime submissionDate;
@@ -28,10 +27,10 @@ private String content;
     private String feedback; // New field for teacher's comments
     private Integer marks;   // Optional: score for the assignment
 
-    @ManyToOne(fetch = FetchType.EAGER) // Change LAZY to EAGER
-@JoinColumn(name = "stud_id", nullable = false)
-@JsonIgnoreProperties({"assignments", "faculty", "parents", "attendance", "password", "handler", "hibernateLazyInitializer"})
-private Student student;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stud_id", nullable = false)
+    @JsonIgnoreProperties({"assignments", "faculty", "parents", "attendance", "password"})
+    private Student student;
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -71,5 +70,4 @@ private Student student;
     
     
 }
-    
-    
+  

@@ -54,32 +54,27 @@ public class AssignmentController {
 
     // 5. UPDATE: Edit assignment details or status
  // 5. UPDATE: Safe grading that preserves student work
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Assignment> update(@PathVariable Long id, @RequestBody Assignment details) {
-        return assignmentRepo.findById(id).map(existing -> {
-            
-            // --- FACULTY GRADING FIELDS ---
-            // Only update these if they are present in the request
-            if (details.getStatus() != null) existing.setStatus(details.getStatus());
-            if (details.getFeedback() != null) existing.setFeedback(details.getFeedback());
-            if (details.getMarks() != null) existing.setMarks(details.getMarks());
-            
-            // --- STUDENT CONTENT PROTECTION ---
-            // Only update these IF the request actually contains them. 
-            // This prevents the "null" issue when a teacher just submits a grade.
-            if (details.getTitle() != null && !details.getTitle().isEmpty()) {
-                existing.setTitle(details.getTitle());
-            }
-            if (details.getDescription() != null && !details.getDescription().isEmpty()) {
-                existing.setDescription(details.getDescription());
-            }
-            if (details.getContent() != null && !details.getContent().isEmpty()) {
-                existing.setContent(details.getContent());
-            }
-            
-            return ResponseEntity.ok(assignmentRepo.save(existing));
-        }).orElse(ResponseEntity.notFound().build());
+   @PutMapping("/update/{id}")
+public ResponseEntity<Assignment> update(@PathVariable Long id, @RequestBody Assignment details) {
+    return assignmentRepo.findById(id).map(existing -> {
+        // 1. Only update grading fields if the Faculty sends them
+        if (details.getMarks() != null) existing.setMarks(details.getMarks());
+        if (details.getFeedback() != null) existing.setFeedback(details.getFeedback());
+        if (details.getStatus() != null) existing.setStatus(details.getStatus());
+
+        // 2. Only update Student content IF it's provided (Prevents "null" titles)
+        if (details.getTitle() != null && !details.getTitle().equalsIgnoreCase("null")) {
+            existing.setTitle(details.getTitle());
+        }
+        if (details.getContent() != null && !details.getContent().isEmpty()) {
+            existing.setContent(details.getContent());
+        }
+        
+        return ResponseEntity.ok(assignmentRepo.save(existing));
+    }).orElse(ResponseEntity.notFound().build());
     }
+
+
     // 6. DELETE: Remove from NeonDB
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
