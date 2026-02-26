@@ -1485,18 +1485,34 @@ let activeReviewId = null;
 
 // FETCH ALL SUBMISSIONS
 async function loadAllAssignments() {
+    const tbody = document.getElementById('facultyAssignmentTable');
     try {
         const res = await fetch(`${API}/api/assignments/all`);
-        if (!res.ok) throw new Error("Failed to connect to NeonDB");
+        
+        if (!res.ok) {
+            const errorData = await res.text();
+            throw new Error(`Server Error (${res.status}): ${errorData || 'NeonDB Connection Failed'}`);
+        }
+        
         assignments = await res.json();
         renderAssignmentTable(assignments);
     } catch (e) {
         console.error("Assignment Fetch Error:", e);
-        document.getElementById('facultyAssignmentTable').innerHTML = 
-            `<tr><td colspan="5" class="py-10 text-center text-rose-500 font-bold">API Connection Error</td></tr>`;
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="py-12 text-center">
+                        <div class="flex flex-col items-center gap-2">
+                            <i class="fas fa-exclamation-triangle text-rose-500 text-2xl"></i>
+                            <p class="text-rose-600 font-black uppercase text-xs tracking-widest">NeonDB Connection Failed</p>
+                            <p class="text-slate-400 text-[10px] italic">${e.message}</p>
+                            <button onclick="loadAllAssignments()" class="mt-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition">RETRY CONNECTION</button>
+                        </div>
+                    </td>
+                </tr>`;
+        }
     }
 }
-
 // RENDER THE TABLE
 function renderAssignmentTable(dataToRender) {
     const tbody = document.getElementById('facultyAssignmentTable');
@@ -1545,7 +1561,6 @@ function renderAssignmentTable(dataToRender) {
 }
 
 // OPEN MODAL & POPULATE DATA
-// OPEN MODAL & POPULATE DATA
 function openGradeModal(id) {
     const a = assignments.find(x => x.id === id);
     if (!a) return;
@@ -1553,51 +1568,71 @@ function openGradeModal(id) {
 
     // 1. Text Details
     document.getElementById('revTitle').innerText = a.title || "Untitled Task";
-    
-    // Note: If 'content' contains the PDF Base64, you might not want to show 
-    // the raw code in 'revContent'. Using description instead if available.
     document.getElementById('revContent').innerText = a.description || "No description provided.";
 
-    // 2. Input Values (Added check for existing marks)
+    // 2. Input Values
     document.getElementById('gradeMarks').value = a.marks !== null ? a.marks : "";
     document.getElementById('gradeStatus').value = a.status || "Submitted";
     document.getElementById('gradeFeedback').value = a.feedback || "";
 
-    // 3. File Handling (CRITICAL FIX: Changed fileData to content)
+    // 3. Robust File Download (Blob Method)
     const btn = document.getElementById('downloadBtn');
     
-    // We check if 'content' exists and looks like a Base64 PDF
     if(a.content && a.content.includes("base64")) {
         btn.onclick = () => {
-            const link = document.createElement('a');
-            link.href = a.content; // This is the Base64 string
-            link.download = `Submission_Student_${a.student ? a.student.studId : id}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            try {
+                // Split the base64 string to get the raw data
+                const base64Parts = a.content.split(',');
+                const mimeType = base64Parts[0].match(/:(.*?);/)[1];
+                const rawData = window.atob(base64Parts[1]);
+                
+                // Convert to Uint8Array
+                const n = rawData.length;
+                const u8arr = new Uint8Array(n);
+                for (let i = 0; i < n; i++) {
+                    u8arr[i] = rawData.charCodeAt(i);
+                }
+                
+                const blob = new Blob([u8arr], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Submission_${a.student?.studId || 'Work'}_${a.id}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                
+                // Cleanup
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                alert("Error generating PDF: The file data might be corrupted.");
+                console.error(err);
+            }
         };
-        btn.innerHTML = `<i class="fas fa-file-pdf mr-2"></i> DOWNLOAD PDF`;
-        btn.className = "flex-1 bg-emerald-600 text-white py-5 rounded-2xl font-black text-xs hover:bg-emerald-700 transition shadow-lg";
+        btn.innerHTML = `<i class="fas fa-file-pdf mr-2 text-lg"></i> VIEW SUBMISSION`;
+        btn.className = "flex-1 bg-emerald-600 text-white py-5 rounded-3xl font-black text-xs hover:bg-emerald-700 transition-all shadow-lg flex items-center justify-center";
     } else {
         btn.onclick = () => alert("Student did not upload a PDF file.");
-        btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> NO FILE FOUND`;
-        btn.className = "flex-1 bg-slate-200 text-slate-400 py-5 rounded-2xl font-black text-xs cursor-not-allowed";
+        btn.innerHTML = `<i class="fas fa-file-excel mr-2 text-lg"></i> NO FILE ATTACHED`;
+        btn.className = "flex-1 bg-slate-100 text-slate-400 py-5 rounded-3xl font-black text-xs cursor-not-allowed flex items-center justify-center";
     }
 
     document.getElementById('gradeModal').classList.remove('hidden');
-}
-
-
-// SUBMIT TO SPRING BOOT
+}// SUBMIT TO SPRING BOOT
 async function submitGrade() {
     const marksInput = document.getElementById('gradeMarks').value;
     const statusInput = document.getElementById('gradeStatus').value;
     const feedbackInput = document.getElementById('gradeFeedback').value;
 
+    // Use setBtnLoading if you have it in your faculty script
+    const submitBtn = document.querySelector("#gradeModal button[type='submit']");
+    if(submitBtn) submitBtn.disabled = true;
+
     const payload = {
         status: statusInput,
         feedback: feedbackInput,
-        marks: parseInt(marksInput) || 0 // Ensure it's a number
+        marks: marksInput === "" ? null : parseInt(marksInput)
     };
 
     try {
@@ -1609,15 +1644,18 @@ async function submitGrade() {
 
         if(res.ok) {
             closeGradeModal();
-            loadAllAssignments(); // Refresh table
-            alert("Grade synchronized! Original submission data preserved.");
+            await loadAllAssignments(); 
+            alert("Grade Saved Successfully!");
+        } else {
+            throw new Error("Failed to update grade on server.");
         }
     } catch (err) {
         console.error("Update failed", err);
+        alert("Error: Could not save grade. Check console for details.");
+    } finally {
+        if(submitBtn) submitBtn.disabled = false;
     }
-}
-
-function closeGradeModal() { document.getElementById('gradeModal').classList.add('hidden'); }
+}function closeGradeModal() { document.getElementById('gradeModal').classList.add('hidden'); }
 
 // CSV EXPORT LOGIC
 function exportAssignmentsToExcel() {
@@ -1634,6 +1672,7 @@ function exportAssignmentsToExcel() {
     link.download = `Faculty_Grades_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
 }
+
     function handleLogout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
