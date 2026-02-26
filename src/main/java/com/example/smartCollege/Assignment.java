@@ -17,7 +17,7 @@ public class Assignment {
     private String description;
     
     @Lob
-@Column(name = "content", columnDefinition = "LONGTEXT")
+@Column(name = "content", columnDefinition = "TEXT")
 private String content;
     
     private String fileUrl; // Stores the link to the file
