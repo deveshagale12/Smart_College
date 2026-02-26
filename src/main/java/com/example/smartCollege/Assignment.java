@@ -16,8 +16,9 @@ public class Assignment {
     private String title;
     private String description;
     
-    @Column(columnDefinition = "TEXT")
-    private String content; // Stores the actual text submission or base64 data
+    @Lob
+@Column(name = "content", columnDefinition = "LONGTEXT")
+private String content;
     
     private String fileUrl; // Stores the link to the file
     private LocalDate dueDate;
