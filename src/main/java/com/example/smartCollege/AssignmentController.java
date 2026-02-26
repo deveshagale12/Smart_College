@@ -86,4 +86,11 @@ public class AssignmentController {
         assignmentRepo.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/test-minimal")
+    public List<Object[]> getMinimal() {
+        // This fetches only IDs and Titles, bypassing the PDF and Student objects
+        return assignmentRepo.findAll().stream()
+            .map(a -> new Object[]{a.getId(), a.getTitle()})
+            .collect(Collectors.toList());
+    }
 }
