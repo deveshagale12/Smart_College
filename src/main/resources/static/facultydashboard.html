@@ -52,14 +52,15 @@
         <i class="fas fa-user-plus"></i>
         <span class="text-[10px] md:text-sm font-bold">Assign</span>
     </button>
-    <button onclick="showTab('assignments', this)" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 rounded-2xl transition-all flex-1 md:flex-none">
-    <i class="fas fa-tasks"></i>
-    <span class="text-[10px] md:text-sm font-bold">Assignments</span>
-</button>
+   
     <button onclick="showTab('profile', this)" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 rounded-2xl transition-all flex-1 md:flex-none">
         <i class="fas fa-fingerprint"></i>
         <span class="text-[10px] md:text-sm font-bold">Profile</span>
     </button>
+    <button onclick="showTab('assignments', this)" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 rounded-2xl transition-all flex-1 md:flex-none">
+    <i class="fas fa-tasks"></i>
+    <span class="text-[10px] md:text-sm font-bold">Assignments</span>
+</button>
     <button onclick="handleLogout()" class="flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 text-red-500 rounded-2xl flex-1 md:flex-none md:mt-auto hover:bg-red-50 transition-all">
         <i class="fas fa-power-off"></i>
         <span class="text-[10px] md:text-sm font-bold">Logout</span>
@@ -160,7 +161,6 @@
     </div>
 </div>
 
-
 <div id="view-assignments" class="content-view hidden">
     <div class="glass-card rounded-[2.5rem] p-10 shadow-2xl">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
@@ -195,7 +195,24 @@
         </div>
     </div>
 </div>
-
+<div id="previewModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+<button onclick="printPreview()" class="mr-2 h-10 px-4 bg-slate-900 text-white rounded-full text-[10px] font-black hover:bg-black transition flex items-center gap-2">
+    <i class="fas fa-print"></i> PRINT
+</button>
+    <div class="bg-white w-full max-w-5xl h-[90vh] rounded-[3rem] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+            <div>
+                <h2 id="previewTitle" class="font-black text-slate-800 uppercase tracking-tight">Document Preview</h2>
+                <p id="previewSubtitle" class="text-[10px] font-bold text-slate-400 uppercase italic"></p>
+            </div>
+            <button onclick="closePreview()" class="h-10 w-10 bg-white border border-slate-200 rounded-full flex items-center justify-center hover:bg-rose-50 hover:text-rose-500 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="previewContainer" class="flex-1 overflow-auto bg-slate-200 p-4 flex justify-center">
+            </div>
+    </div>
+</div>
 <div id="gradeModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
     <div class="bg-white rounded-[2.5rem] p-10 w-full max-w-2xl shadow-2xl scale-in-center">
         <div class="flex justify-between items-start mb-6">
@@ -244,8 +261,6 @@
         </div>
     </div>
 </div>
-
-
             <div id="view-profile" class="content-view hidden">
                 <div class="max-w-3xl glass-card rounded-[2.5rem] p-10 shadow-2xl">
                     <div class="mb-10 flex items-center gap-6">
@@ -323,6 +338,8 @@
         </table>
     </div>
 </div>
+
+
         </main>
     </div>
 
@@ -353,7 +370,7 @@
     let faculty = JSON.parse(localStorage.getItem('facultySession'));
     let allAssignedStudents = [];
     let attMasterRecords = [];
-     let currentView = 'students'; 
+    let currentView = 'students'; // Track current tab
 
     window.onload = () => {
         if (!faculty) {
@@ -371,22 +388,6 @@
         document.getElementById('facultyInitial').innerText = faculty.name[0];
     }
 
-    function showTab(view, btn) {
-        document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
-        document.getElementById(`view-${view}`).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        btn.classList.add('active');
-        
-        document.getElementById('viewTitle').innerText = view.charAt(0).toUpperCase() + view.slice(1);
-        
-        // Toggle visibility of Search & Stats bar only for Students tab
-        document.getElementById('stats-container').classList.toggle('hidden', view !== 'students');
-        document.getElementById('search-section').classList.toggle('hidden', view !== 'students');
-
-        if (view === 'students') loadAssigned();
-        if (view === 'assign') loadUnassigned();
-        if (view === 'profile') populateProfile();
-    }
 
     // --- CORE DATA FETCHING ---
     async function loadAssigned() {
@@ -395,6 +396,9 @@
             allAssignedStudents = await res.json();
             renderStudentCards(allAssignedStudents);
             updateAttendanceWidget();
+            if (currentView === 'notes') {
+                populateNoteDropdown(); 
+            }
         } catch (e) { console.error("Error loading students", e); }
     }
     
@@ -433,6 +437,7 @@
                     <button onclick="viewParents(${s.studId})" class="action-btn-styled text-purple-600 hover:bg-purple-50">
                         <i class="fas fa-user-friends text-lg mb-1"></i><span class="text-[9px] font-black uppercase">Parents</span>
                     </button>
+                    
                     <button onclick="studentDetails(${s.studId})" class="action-btn-styled text-slate-500 hover:bg-slate-100">
                         <i class="fas fa-info-circle text-lg mb-1"></i><span class="text-[9px] font-black uppercase">Info</span>
                     </button>
@@ -452,6 +457,60 @@
         renderStudentCards(filtered);
     }
     async function loadUnassignedStudents() {
+        const container = document.getElementById('unassignedList');
+        if (!container) return console.error("Could not find table body 'unassignedList'");
+
+        container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400 animate-pulse">Scanning database...</td></tr>`;
+
+        try {
+            console.log("Fetching students and fees...");
+            const [studRes, feeRes] = await Promise.all([
+                fetch(`${API}/college/students/all`),
+                fetch(`${API}/college/fees/all`)
+            ]);
+
+            if (!studRes.ok || !feeRes.ok) throw new Error("API Response Error");
+
+            const students = await studRes.json();
+            const fees = await feeRes.json();
+
+            // Check if student has a record in the fees table
+            const assignedIds = fees.map(f => f.student ? f.student.studId : null);
+          //  const unassigned = students.filter(s => !assignedIds.includes(s.studId));
+            const unassigned = students.filter(s => s.faculty === null);
+
+            console.log("Unassigned students found:", unassigned.length);
+
+            if (unassigned.length === 0) {
+                container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-slate-400 font-bold italic">🎉 All students are assigned!</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = unassigned.map(s => `
+                <tr class="hover:bg-slate-50 transition-all border-b border-slate-100">
+                    <td class="px-8 py-4">
+                        <input type="checkbox" name="studentSelect" value="${s.studId}" 
+                               class="stu-check w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500">
+                    </td>
+                    <td class="px-8 py-4">
+                        <p class="font-black text-slate-800">${s.fullName || s.name || 'Unnamed Student'}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">ID: ${s.studId}</p>
+                    </td>
+                    <td class="px-8 py-4">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-wider">
+                            ${s.course || s.department || 'N/A'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            container.innerHTML = `<tr><td colspan="3" class="p-10 text-center text-red-500 font-bold">Failed to load. Is the Backend running?</td></tr>`;
+        }
+    }
+
+ async function loadUnassignedStudents() {
         const container = document.getElementById('unassignedList');
         if (!container) return console.error("Could not find table body 'unassignedList'");
 
@@ -1281,40 +1340,6 @@ async function downloadMasterReport() {
             }
         }
 
-function showTab(view, btn) {
-    // 1. Hide all views and remove active state from buttons
-    document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-    // 2. Show the target view
-    const targetView = document.getElementById(`view-${view}`);
-    if (targetView) {
-        targetView.classList.remove('hidden');
-    }
-
-    // 3. Mark button as active
-    if (btn) btn.classList.add('active');
-
-    // 4. Update Header Title
-    document.getElementById('viewTitle').innerText = view.charAt(0).toUpperCase() + view.slice(1);
-
-    // 5. Toggle visibility of Search/Stats (Only show for students)
-    const stats = document.getElementById('stats-container');
-    const search = document.getElementById('search-section');
-    if (stats) stats.classList.toggle('hidden', view !== 'students');
-    if (search) search.classList.toggle('hidden', view !== 'students');
-
-    // 6. ROUTING LOGIC: Call the correct data loader based on the view
-    if (view === 'students') {
-        loadAssigned();
-    } else if (view === 'attendance') {
-        loadAttendanceHistory();
-    } else if (view === 'assign') {
-        loadUnassignedStudents(); // This must match your function name!
-    } else if (view === 'profile') {
-        populateProfile();
-    }
-}
         
         ///attendance 
         async function loadAttendanceHistory() {
@@ -1479,6 +1504,200 @@ async function deleteAttendanceRecord(id) {
     loadAttendanceHistory();
 }
 
+/**
+ * Global Tab Controller
+ * @param {string} view - The ID suffix of the target view (e.g., 'assignments')
+ * @param {HTMLElement} btn - The clicked navigation element
+ */
+function showTab(view, btn) {
+    // 1. VISUAL RESET
+    // Hide all sections and remove the 'active' styling from all nav links
+    document.querySelectorAll('.content-view').forEach(v => v.classList.add('hidden'));
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active', 'bg-slate-900', 'text-white');
+        n.classList.add('text-slate-500');
+    });
+
+    // 2. ACTIVATE TARGET VIEW
+    const targetView = document.getElementById(`view-${view}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        // Add a small entry animation if you have the CSS
+        targetView.classList.add('fade-in-up');
+    }
+
+    // 3. ACTIVATE BUTTON
+    if (btn) {
+        btn.classList.add('active', 'bg-slate-900', 'text-white');
+        btn.classList.remove('text-slate-500');
+    }
+
+    // 4. DYNAMIC HEADER UPDATES
+    const titleMap = {
+        'students': 'Student Management',
+        'assignments': 'Assignment Grading',
+        'attendance': 'Attendance Records',
+        'assign': 'Assign New Students',
+        'profile': 'Faculty Profile'
+    };
+    
+    document.getElementById('viewTitle').innerText = titleMap[view] || view.toUpperCase();
+
+    // 5. COMPONENT TOGGLING
+    // Show stats and search only for relevant data views
+    const stats = document.getElementById('stats-container');
+    const search = document.getElementById('search-section');
+    
+    const isDataView = ['students', 'assignments'].includes(view);
+    if (stats) stats.classList.toggle('hidden', !isDataView);
+    if (search) search.classList.toggle('hidden', !isDataView);
+
+    // 6. DATA ROUTING (The "Engine")
+    // Trigger the specific Fetch function based on the active tab
+    console.log(`--- Routing to: ${view} ---`);
+    
+    switch(view) {
+        case 'students':
+            loadAssigned();
+            break;
+        case 'assignments':
+            loadAllAssignments(); // Critical for your NeonDB grading table
+            break;
+        case 'attendance':
+            loadAttendanceHistory();
+            break;
+        case 'assign':
+            loadUnassignedStudents();
+            break;
+        case 'profile':
+            if (typeof populateProfile === 'function') populateProfile();
+            break;
+        default:
+            console.warn("View data loader not defined for:", view);
+    }
+}///Notes Session
+
+// Add 'notes' to your showTab routing
+// if (view === 'notes') { loadNoteViewData(); }
+
+async function loadNoteViewData() {
+    populateNoteDropdown();
+    fetchSentNotes();
+}
+
+// Fill the dropdown with the faculty's assigned students
+// --- 1. POPULATE DROPDOWN ---
+function populateNoteDropdown() {
+    const select = document.getElementById('noteRecipient');
+    if (!select) return;
+
+    // Uses the global allAssignedStudents from your loadAssigned() call
+    if (allAssignedStudents.length === 0) {
+        select.innerHTML = '<option value="">No assigned students available</option>';
+        return;
+    }
+
+    select.innerHTML = '<option value="">Choose a student...</option>' + 
+        allAssignedStudents.map(s => `
+            <option value="${s.studId}">${s.fullName} (${s.course})</option>
+        `).join('');
+}
+//--- 2. FILE LABEL FEEDBACK ---
+function updateNoteLabel(input) {
+    const label = document.getElementById('noteFileLabel');
+    const icon = document.getElementById('uploadIcon');
+    if (input.files.length > 0) {
+        label.innerText = `SELECTED: ${input.files[0].name}`;
+        label.classList.replace('text-slate-400', 'text-blue-600');
+        icon.classList.replace('text-slate-300', 'text-blue-500');
+    }
+}
+
+//--- 3. HANDLE UPLOAD (POST TO NEON DB) ---
+async function handleNotePost() {
+    const studId = document.getElementById('noteRecipient').value;
+    const title = document.getElementById('noteTitle').value;
+    const fileInput = document.getElementById('noteFile');
+    const file = fileInput.files[0];
+    const btn = document.getElementById('btnPostNote');
+
+    if (!studId || !title || !file) {
+        alert("⚠️ Please fill all fields and select a document.");
+        return;
+    }
+
+    // Prepare Multipart Data
+    const formData = new FormData();
+    formData.append("facultyId", faculty.id); // From current faculty session
+    formData.append("studId", studId);
+    formData.append("title", title);
+    formData.append("file", file);
+
+    btn.disabled = true;
+    btn.innerText = "UPLOADING...";
+
+    try {
+        const res = await fetch(`${API}/api/notes/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (res.ok) {
+            alert("✅ Note shared successfully with student portal!");
+            resetNoteForm();
+            fetchSentNotes(); // Refresh history table
+        } else {
+            alert("❌ Upload failed. Max file size is likely 10MB.");
+        }
+    } catch (err) {
+        console.error("Note Upload Error:", err);
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "POST TO STUDENT PORTAL";
+    }
+}
+
+//--- 4. FETCH HISTORY ---
+async function fetchSentNotes() {
+    const tbody = document.getElementById('notesHistoryTable');
+    try {
+        const res = await fetch(`${API}/api/notes/faculty/${faculty.id}`);
+        const notes = await res.json();
+
+        tbody.innerHTML = notes.map(n => `
+            <tr class="hover:bg-slate-50 transition-all border-l-4 border-transparent hover:border-blue-500">
+                <td class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase">
+                    ${new Date(n.uploadDate).toLocaleDateString()}
+                </td>
+                <td class="px-8 py-5">
+                    <p class="font-bold text-slate-800">${n.student.fullName}</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">${n.student.course}</p>
+                </td>
+                <td class="px-8 py-5">
+                    <p class="text-sm font-black text-slate-800">${n.title}</p>
+                    <p class="text-[10px] text-blue-500 font-bold uppercase tracking-widest">${n.fileName}</p>
+                </td>
+                <td class="px-8 py-5 text-right">
+                    <a href="${API}/api/notes/view/${n.id}" target="_blank" class="w-10 h-10 inline-flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                </td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-300 font-bold">No history available.</td></tr>';
+    }
+}
+
+function resetNoteForm() {
+    document.getElementById('noteTitle').value = "";
+    document.getElementById('noteFile').value = "";
+    const label = document.getElementById('noteFileLabel');
+    label.innerText = "Click to browse files (PDF, DOCX)";
+    label.classList.replace('text-blue-600', 'text-slate-400');
+    document.getElementById('uploadIcon').classList.replace('text-blue-500', 'text-slate-300');
+}
+
 ///assignment
 let assignments = []; 
 let activeReviewId = null;
@@ -1566,58 +1785,31 @@ function openGradeModal(id) {
     if (!a) return;
     activeReviewId = id;
 
-    // 1. Text Details
+    // 1. Fill Text Details
     document.getElementById('revTitle').innerText = a.title || "Untitled Task";
     document.getElementById('revContent').innerText = a.description || "No description provided.";
 
-    // 2. Input Values
+    // 2. Fill Input Values
     document.getElementById('gradeMarks').value = a.marks !== null ? a.marks : "";
     document.getElementById('gradeStatus').value = a.status || "Submitted";
     document.getElementById('gradeFeedback').value = a.feedback || "";
 
-    // 3. Robust File Download (Blob Method)
+    // 3. Setup the Action Button (Now triggers Preview)
     const btn = document.getElementById('downloadBtn');
     
-    if(a.content && a.content.includes("base64")) {
-        btn.onclick = () => {
-            try {
-                // Split the base64 string to get the raw data
-                const base64Parts = a.content.split(',');
-                const mimeType = base64Parts[0].match(/:(.*?);/)[1];
-                const rawData = window.atob(base64Parts[1]);
-                
-                // Convert to Uint8Array
-                const n = rawData.length;
-                const u8arr = new Uint8Array(n);
-                for (let i = 0; i < n; i++) {
-                    u8arr[i] = rawData.charCodeAt(i);
-                }
-                
-                const blob = new Blob([u8arr], { type: mimeType });
-                const url = URL.createObjectURL(blob);
-                
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Submission_${a.student?.studId || 'Work'}_${a.id}.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                
-                // Cleanup
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } catch (err) {
-                alert("Error generating PDF: The file data might be corrupted.");
-                console.error(err);
-            }
-        };
-        btn.innerHTML = `<i class="fas fa-file-pdf mr-2 text-lg"></i> VIEW SUBMISSION`;
-        btn.className = "flex-1 bg-emerald-600 text-white py-5 rounded-3xl font-black text-xs hover:bg-emerald-700 transition-all shadow-lg flex items-center justify-center";
+    if (a.content && a.content.includes("base64")) {
+        // Change: Instead of download logic, we call previewSubmission
+        btn.onclick = () => previewSubmission(a.content, a.title);
+        
+        btn.innerHTML = `<i class="fas fa-eye mr-2 text-lg"></i> PREVIEW SUBMISSION`;
+        btn.className = "flex-1 bg-indigo-600 text-white py-5 rounded-3xl font-black text-xs hover:bg-indigo-700 transition-all shadow-lg flex items-center justify-center";
     } else {
-        btn.onclick = () => alert("Student did not upload a PDF file.");
-        btn.innerHTML = `<i class="fas fa-file-excel mr-2 text-lg"></i> NO FILE ATTACHED`;
+        btn.onclick = () => alert("Student did not upload any file.");
+        btn.innerHTML = `<i class="fas fa-eye-slash mr-2 text-lg"></i> NO FILE ATTACHED`;
         btn.className = "flex-1 bg-slate-100 text-slate-400 py-5 rounded-3xl font-black text-xs cursor-not-allowed flex items-center justify-center";
     }
 
+    // 4. Show the Review Modal
     document.getElementById('gradeModal').classList.remove('hidden');
 }// SUBMIT TO SPRING BOOT
 async function submitGrade() {
@@ -1673,6 +1865,158 @@ function exportAssignmentsToExcel() {
     link.click();
 }
 
+function previewSubmission(base64, title) {
+    const modal = document.getElementById('previewModal');
+    const container = document.getElementById('previewContainer');
+    const subtitle = document.getElementById('previewSubtitle');
+    
+    if (!modal || !container) return console.error("Modal elements not found!");
+
+    document.getElementById('previewTitle').innerText = title || "Submission Preview";
+    container.innerHTML = '<p class="mt-20 font-bold text-slate-400 animate-pulse">GENERATING PREVIEW...</p>'; 
+    modal.classList.remove('hidden');
+
+    try {
+        if (!base64 || base64.length < 50) {
+            throw new Error("No valid file data found.");
+        }
+
+        const mimeType = base64.split(';')[0].split(':')[1];
+        
+        // 1. Handle PDF
+        if (mimeType === "application/pdf") {
+            subtitle.innerText = "Official PDF Document";
+            // Convert Base64 to Blob URL for better browser compatibility
+            const blob = base64ToBlob(base64);
+            const blobUrl = URL.createObjectURL(blob);
+            container.innerHTML = `<iframe src="${blobUrl}" class="w-full h-full rounded-2xl bg-white shadow-2xl"></iframe>`;
+        } 
+        // 2. Handle CSV
+        // Inside previewSubmission function...
+else if (base64.includes("text/csv") || base64.includes("base64,U3R1ZGVud")) {
+    subtitle.innerText = "Spreadsheet / CSV Data";
+    // Extract the base64 string, decode it to raw text (atob), then pass to our helper
+    const rawCSV = atob(base64.split(',')[1]); 
+    container.innerHTML = formatCSVtoTable(rawCSV); // <--- This calls the function above
+}
+        // 3. Handle Images
+        else if (mimeType.startsWith("image/")) {
+            subtitle.innerText = "Image Upload";
+            container.innerHTML = `<img src="${base64}" class="max-w-full h-auto rounded-2xl shadow-2xl">`;
+        }
+    } catch (err) {
+        container.innerHTML = `<div class="bg-white p-10 rounded-3xl text-center"><i class="fas fa-exclamation-circle text-rose-500 text-3xl mb-4"></i><p class="font-bold text-slate-800">${err.message}</p></div>`;
+    }
+}
+
+// Helper: Convert Base64 to Blob
+function base64ToBlob(base64) {
+    try {
+        // Handle strings with or without the 'data:' prefix
+        const parts = base64.includes(';base64,') 
+            ? base64.split(';base64,') 
+            : [null, base64];
+            
+        const contentType = parts[0] ? parts[0].split(':')[1] : 'application/octet-stream';
+        const raw = window.atob(parts[1]);
+        const u8arr = new Uint8Array(raw.length);
+        
+        for (let i = 0; i < raw.length; i++) {
+            u8arr[i] = raw.charCodeAt(i);
+        }
+        
+        return new Blob([u8arr], { type: contentType });
+    } catch (e) {
+        console.error("Blob conversion failed:", e);
+        return null;
+    }
+}// Helper to turn raw CSV text into a beautiful Tailwind table
+function formatCSVtoTable(csvText) {
+    const rows = csvText.split('\n').filter(row => row.trim() !== '');
+    if (rows.length === 0) return '<p class="p-10 text-slate-400 font-bold">The file is empty.</p>';
+
+    let html = `
+        <div class="bg-white rounded-3xl shadow-xl p-6 w-full overflow-hidden border border-slate-100 scale-in-center">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <tr>`;
+    
+    // Process Header Row
+    const headers = rows[0].split(',');
+    headers.forEach(h => {
+        html += `<th class="px-6 py-4 border-b border-slate-100">${h.trim()}</th>`;
+    });
+
+    html += `</tr></thead><tbody class="text-xs font-bold text-slate-600">`;
+
+    // Process Data Rows
+    rows.slice(1).forEach(row => {
+        const cells = row.split(',');
+        html += `<tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors">`;
+        cells.forEach(cell => {
+            html += `<td class="px-6 py-4">${cell.trim()}</td>`;
+        });
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table></div></div>`;
+    return html;
+}
+function closePreview() {
+    document.getElementById('previewModal').classList.add('hidden');
+    document.getElementById('previewContainer').innerHTML = ''; // Memory cleanup
+}
+
+function printPreview() {
+    const container = document.getElementById('previewContainer');
+    const iframe = container.querySelector('iframe');
+    
+    // If it's a PDF already in an iframe, print it directly
+    if (iframe) {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        return;
+    }
+
+    // If it's a CSV Table or Image, we print the specific element
+    // This avoids the 'TrustedScript' block by not using document.write
+    const content = container.innerHTML;
+    const printFrame = document.createElement('iframe');
+    
+    // Style the hidden frame
+    printFrame.style.position = 'fixed';
+    printFrame.style.right = '0';
+    printFrame.style.bottom = '0';
+    printFrame.style.width = '0';
+    printFrame.style.height = '0';
+    printFrame.style.border = '0';
+    
+    document.body.appendChild(printFrame);
+    
+    const doc = printFrame.contentWindow.document;
+    
+    // We use a simple structure that doesn't trigger security blocks
+    doc.open();
+    doc.write(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                <style>@media print { .no-print { display: none; } }</style>
+            </head>
+            <body onload="window.print();">
+                <div class="p-8">${content}</div>
+            </body>
+        </html>
+    `);
+    doc.close();
+
+    // Cleanup after printing
+    setTimeout(() => {
+        document.body.removeChild(printFrame);
+    }, 1000);
+}
     function handleLogout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>
 </body>
