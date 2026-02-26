@@ -52,6 +52,10 @@
         <i class="fas fa-user-plus"></i>
         <span class="text-[10px] md:text-sm font-bold">Assign</span>
     </button>
+    <button onclick="showTab('assignments', this)" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 rounded-2xl transition-all flex-1 md:flex-none">
+    <i class="fas fa-tasks"></i>
+    <span class="text-[10px] md:text-sm font-bold">Assignments</span>
+</button>
     <button onclick="showTab('profile', this)" class="nav-item flex flex-col md:flex-row items-center gap-1 md:gap-4 p-3 rounded-2xl transition-all flex-1 md:flex-none">
         <i class="fas fa-fingerprint"></i>
         <span class="text-[10px] md:text-sm font-bold">Profile</span>
@@ -155,6 +159,92 @@
         </div>
     </div>
 </div>
+
+
+<div id="view-assignments" class="content-view hidden">
+    <div class="glass-card rounded-[2.5rem] p-10 shadow-2xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-emerald-100">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-2xl text-slate-800 tracking-tight">Assignment Grading</h3>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">NeonDB Live Records</p>
+                </div>
+            </div>
+            <button onclick="exportAssignmentsToExcel()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs hover:bg-emerald-600 transition-all flex items-center gap-3 shadow-xl">
+                <i class="fas fa-file-csv text-lg"></i> EXPORT TO EXCEL
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-separate border-spacing-y-3">
+                <thead class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                    <tr>
+                        <th class="px-6 py-2">Student Name</th>
+                        <th class="px-6 py-2">Task Title</th>
+                        <th class="px-6 py-2">Submitted On</th>
+                        <th class="px-6 py-2">Status / Marks</th>
+                        <th class="px-6 py-2 text-right">Review</th>
+                    </tr>
+                </thead>
+                <tbody id="facultyAssignmentTable">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="gradeModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2.5rem] p-10 w-full max-w-2xl shadow-2xl scale-in-center">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Review Submission</h2>
+                <p class="text-blue-600 text-[10px] font-black uppercase tracking-widest mt-1">NeonDB Live Evaluation</p>
+            </div>
+            <button onclick="closeGradeModal()" class="text-slate-300 hover:text-rose-500 transition">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                <h4 id="revTitle" class="font-black text-blue-600 text-sm mb-2 uppercase italic tracking-tight"></h4>
+                <p id="revContent" class="text-slate-600 text-xs leading-relaxed max-h-40 overflow-y-auto custom-scrollbar italic"></p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-tighter">Award Marks (0-100)</label>
+                    <input type="number" id="gradeMarks" min="0" max="100" class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm outline-none focus:ring-4 focus:ring-blue-50">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-tighter">Set Status</label>
+                    <select id="gradeStatus" class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-xs outline-none cursor-pointer">
+                        <option value="Submitted">Submitted</option>
+                        <option value="Graded">Mark as Graded</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-tighter">Faculty Feedback</label>
+                <textarea id="gradeFeedback" rows="3" class="w-full p-5 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-4 focus:ring-blue-50 text-sm" placeholder="Add comments for the student..."></textarea>
+            </div>
+
+            <div class="flex gap-4">
+                <button id="downloadBtn" class="flex-1 bg-slate-900 text-white py-5 rounded-2xl font-black text-xs hover:bg-black transition shadow-xl">
+                    <i class="fas fa-download mr-2"></i> DOWNLOAD FILE
+                </button>
+                <button onclick="submitGrade()" class="flex-[1.5] bg-blue-600 text-white py-5 rounded-2xl font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition">
+                    SAVE & UPDATE NEON
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
             <div id="view-profile" class="content-view hidden">
                 <div class="max-w-3xl glass-card rounded-[2.5rem] p-10 shadow-2xl">
@@ -263,6 +353,7 @@
     let faculty = JSON.parse(localStorage.getItem('facultySession'));
     let allAssignedStudents = [];
     let attMasterRecords = [];
+     let currentView = 'students'; 
 
     window.onload = () => {
         if (!faculty) {
@@ -1386,6 +1477,150 @@ async function deleteAttendanceRecord(id) {
     if(!confirm("Are you sure?")) return;
     await fetch(`${API}/college/attendance/delete/${id}`, { method: 'DELETE' });
     loadAttendanceHistory();
+}
+
+///assignment
+let assignments = []; 
+let activeReviewId = null;
+
+// FETCH ALL SUBMISSIONS
+async function loadAllAssignments() {
+    try {
+        const res = await fetch(`${API}/api/assignments/all`);
+        if (!res.ok) throw new Error("Failed to connect to NeonDB");
+        assignments = await res.json();
+        renderAssignmentTable(assignments);
+    } catch (e) {
+        console.error("Assignment Fetch Error:", e);
+        document.getElementById('facultyAssignmentTable').innerHTML = 
+            `<tr><td colspan="5" class="py-10 text-center text-rose-500 font-bold">API Connection Error</td></tr>`;
+    }
+}
+
+// RENDER THE TABLE
+function renderAssignmentTable(dataToRender) {
+    const tbody = document.getElementById('facultyAssignmentTable');
+    if (!tbody) return;
+
+    if (!dataToRender || dataToRender.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-20 text-center opacity-40 font-black italic">No Submissions Found</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = dataToRender.map(a => {
+        const dateDisplay = a.submissionDate ? new Date(a.submissionDate).toLocaleDateString() : "Pending";
+        const statusClass = a.status === 'Graded' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600';
+
+        return `
+            <tr class="bg-white hover:bg-slate-50 transition-all border-b border-slate-50 shadow-sm group">
+                <td class="px-6 py-5 rounded-l-3xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">
+                            ${a.student ? a.student.fullName[0] : 'S'}
+                        </div>
+                        <div>
+                            <p class="font-black text-slate-800 text-xs uppercase">${a.student ? a.student.fullName : 'Unknown Student'}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">ID: ${a.student ? a.student.studId : 'N/A'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-5 font-bold text-slate-700 text-xs uppercase">${a.title || 'Assignment'}</td>
+                <td class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase italic">${dateDisplay}</td>
+                <td class="px-6 py-5">
+                    <div class="flex flex-col gap-1">
+                        <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase text-center ${statusClass}">
+                            ${a.status || 'Submitted'}
+                        </span>
+                        ${a.marks ? `<span class="text-[10px] font-black text-center text-slate-800 tracking-tighter">${a.marks}/100</span>` : ''}
+                    </div>
+                </td>
+                <td class="px-6 py-5 text-right rounded-r-3xl">
+                    <button onclick="openGradeModal(${a.id})" class="h-10 w-10 bg-slate-900 text-white rounded-xl hover:bg-blue-600 hover:shadow-lg transition-all flex items-center justify-center ml-auto shadow-md">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// OPEN MODAL & POPULATE DATA
+function openGradeModal(id) {
+    const a = assignments.find(x => x.id === id);
+    if (!a) return;
+    activeReviewId = id;
+
+    // Safety assignments for elements
+    document.getElementById('revTitle').innerText = a.title || "Untitled Task";
+    document.getElementById('revContent').innerText = a.content || "No text description provided by student.";
+ // Good
+    marks: parseInt(document.getElementById('gradeMarks').value)
+    document.getElementById('gradeStatus').value = a.status || "Submitted";
+    document.getElementById('gradeFeedback').value = a.feedback || "";
+
+    // File Handling
+    const btn = document.getElementById('downloadBtn');
+    if(a.fileData && btn) {
+        btn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = a.fileData;
+            link.download = `Student_${a.student ? a.student.studId : 'Work'}.pdf`;
+            link.click();
+        };
+        btn.className = "flex-1 bg-slate-900 text-white py-5 rounded-2xl font-black text-xs hover:bg-black transition";
+    } else if (btn) {
+        btn.onclick = () => alert("No file attached!");
+        btn.className = "flex-1 bg-slate-200 text-slate-400 py-5 rounded-2xl font-black text-xs cursor-not-allowed";
+    }
+
+    document.getElementById('gradeModal').classList.remove('hidden');
+}
+
+// SUBMIT TO SPRING BOOT
+async function submitGrade() {
+    const marksInput = document.getElementById('gradeMarks').value;
+    const statusInput = document.getElementById('gradeStatus').value;
+    const feedbackInput = document.getElementById('gradeFeedback').value;
+
+    const payload = {
+        status: statusInput,
+        feedback: feedbackInput,
+        marks: parseInt(marksInput) || 0 // Ensure it's a number
+    };
+
+    try {
+        const res = await fetch(`${API}/api/assignments/update/${activeReviewId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            closeGradeModal();
+            loadAllAssignments(); // Refresh table
+            alert("Grade synchronized! Original submission data preserved.");
+        }
+    } catch (err) {
+        console.error("Update failed", err);
+    }
+}
+
+function closeGradeModal() { document.getElementById('gradeModal').classList.add('hidden'); }
+
+// CSV EXPORT LOGIC
+function exportAssignmentsToExcel() {
+    if (assignments.length === 0) return alert("No data to export.");
+    const headers = ["Student", "ID", "Title", "Date", "Status", "Marks", "Feedback"];
+    const rows = assignments.map(a => [
+        a.student?.fullName || "N/A", a.student?.studId || "N/A",
+        `"${a.title}"`, new Date(a.submissionDate).toLocaleDateString(),
+        a.status, a.marks || 0, `"${a.feedback || ''}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+    const link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = `Faculty_Grades_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
 }
     function handleLogout() { localStorage.clear(); window.location.href = "faculty-auth.html"; }
     </script>

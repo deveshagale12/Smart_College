@@ -41,6 +41,9 @@
 <button onclick="showSection('attendance', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
     <i class="fas fa-calendar-check mr-3 text-lg"></i> Attendance
 </button>
+<button onclick="showSection('assignments', this)" class="nav-item w-full flex items-center p-4 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+    <i class="fas fa-tasks mr-3 text-lg"></i> Assignments
+</button>
         </nav>
         <div class="p-4 border-t border-slate-100">
             <button onclick="logout()" class="w-full flex items-center p-4 text-red-500 hover:bg-red-50 rounded-xl transition">
@@ -69,6 +72,9 @@
         <i class="fas fa-calendar-check text-xl"></i>
         <span class="text-[10px] font-bold mt-1">Attendance</span>
     </button>
+    <button onclick="showSection('assignments', this)" class="nav-item-mobile flex flex-col items-center text-slate-400">
+    <i class="fas fa-tasks text-xl"></i><span class="text-[10px] font-bold">Tasks</span>
+</button>
         <button onclick="logout()" class="flex flex-col items-center text-red-400">
             <i class="fas fa-sign-out-alt text-xl"></i><span class="text-[10px] font-bold">Logout</span>
         </button>
@@ -176,6 +182,68 @@
             <button type="submit" id="saveParentBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
                 <span class="btn-text">Save Details</span>
                 <div class="hidden ml-2 w-5 h-5 border-2 border-white loader rounded-full"></div>
+            </button>
+        </form>
+    </div>
+</div>
+
+
+<section id="assignmentsSection" class="hidden animate-in slide-in-from-bottom-4 duration-500">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div>
+            <h3 class="text-xl font-bold">Assignment Hub</h3>
+            <p class="text-sm text-slate-500">Submit and track your academic tasks</p>
+        </div>
+        <div class="flex gap-3 w-full md:w-auto">
+             <div class="relative flex-1 md:w-64">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="assignmentSearch" onkeyup="filterAssignments()" placeholder="Search tasks..." 
+                    class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition">
+            </div>
+            <button onclick="toggleAssignmentModal(true)" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-indigo-700 transition shadow-lg whitespace-nowrap">
+                + SUBMIT WORK
+            </button>
+        </div>
+    </div>
+
+    <div id="assignmentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+        </div>
+</section>
+
+<div id="assignmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all duration-300">
+    <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 transform scale-95 transition-transform">
+        <div class="flex justify-between items-center mb-6">
+            <h4 class="text-2xl font-bold">Upload Assignment</h4>
+            <button onclick="toggleAssignmentModal(false)" class="text-slate-400 hover:text-rose-500 transition"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        
+        <form id="assignmentForm" class="space-y-4">
+            <input type="text" id="title" placeholder="Assignment Title" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" required>
+            <textarea id="description" placeholder="Brief Description" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" required></textarea>
+            
+            <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 p-6 rounded-2xl text-center">
+                <i class="fas fa-file-pdf text-indigo-400 text-2xl mb-2"></i>
+                <p class="text-[10px] font-bold text-indigo-600 uppercase mb-2">Select Document (PDF/Doc)</p>
+                <input type="file" id="fileInput" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Deadline</label>
+                    <input type="date" id="dueDate" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" required>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Initial Status</label>
+                    <select id="status" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none">
+                        <option value="Submitted">Submitted</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" id="submitAssignmentBtn" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-lg hover:bg-indigo-700 transition flex items-center justify-center">
+                <span class="btn-text">PUSH TO NEON</span>
+                <div class="hidden ml-2 w-5 h-5 border-2 border-white loader border-t-transparent animate-spin rounded-full"></div>
             </button>
         </form>
     </div>
@@ -450,6 +518,8 @@
     <script>
         const API_KEY = "StudentApiKey123";
         const BASE_URL = "https://smart-college.onrender.com/college";
+         const ASSIGNMENT_API = "http://localhost:8080/api/assignments";
+        let allAssignments = [];
         const student = JSON.parse(localStorage.getItem('student'));
         let currentEditId = null;
 
@@ -457,7 +527,7 @@
 
         function showSection(id, btn) {
             // 1. CLEAR ALL MODALS (Added confirmDeleteModal and any others)
-            const modals = ['recordModal', 'marksModal', 'paymentModal', 'updateBillingModal', 'confirmDeleteModal'];
+            const modals = ['recordModal', 'marksModal', 'paymentModal', 'updateBillingModal', 'confirmDeleteModal','assignmentModal'];
             modals.forEach(mId => {
                 const modal = document.getElementById(mId);
                 if (modal) {
@@ -483,7 +553,9 @@
                 'profile': 'My Profile',
                 'academic': 'Academic Records',
                 'fees': 'Fees & Billing',
-                'attendance': 'Attendance Tracker' // <--- Added this
+                'attendance': 'Attendance Tracker',
+                    'assignments': 'Assignment Hub'
+
             };
             document.getElementById('pageTitle').innerText = titles[id] || 'Dashboard';
 
@@ -495,7 +567,7 @@
             if (id === 'attendance') {
                 loadAttendance(); // <--- Added this
             }
-
+if (id === 'assignments') loadAssignments();
             // 6. ACTIVE STATE STYLING
             document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => {
                 el.classList.remove('nav-active', 'text-indigo-600', 'bg-slate-50');
@@ -897,7 +969,8 @@ function showSection(id, btn) {
         'parent': 'Parent Details',
         'marks': 'Performance Analysis',
         'fees': 'Fees & Billing',
-        'attendance': 'Attendance Tracker'
+        'attendance': 'Attendance Tracker',
+        'assignments': 'Assignment Hub'
     };
     document.getElementById('pageTitle').innerText = titles[id] || 'Dashboard';
 
@@ -907,6 +980,7 @@ function showSection(id, btn) {
     if (id === 'marks') loadMarks();
     if (id === 'fees') loadFees();
     if (id === 'attendance') loadAttendance();
+    if (id === 'assignments') loadAssignments();
 
     // 5. Active Nav Styling
     document.querySelectorAll('.nav-item, .nav-item-mobile').forEach(el => {
@@ -1297,6 +1371,139 @@ async function confirmDeleteAttendance(id) {
     } catch (err) {
         console.error("Delete Error:", err);
     }
+}
+
+////Assignment
+
+async function loadAssignments() {
+    try {
+        // Use student.studId from your existing session
+        const studId = student.studId || student.id || 16;
+        const res = await fetch(`${ASSIGNMENT_API}/student/${studId}`);
+        allAssignments = await res.json();
+        renderAssignmentCards(allAssignments);
+    } catch (e) {
+        console.error("Fetch Error:", e);
+    }
+}
+
+function renderAssignmentCards(dataList) {
+    const grid = document.getElementById('assignmentGrid');
+    const today = new Date().toISOString().split('T')[0];
+    if (!grid) return;
+
+    if (dataList.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-20 text-center opacity-40 font-bold italic">No submissions found.</div>`;
+        return;
+    }
+
+    grid.innerHTML = dataList.map(a => {
+        const isOverdue = a.dueDate <= today && a.status !== 'Graded';
+        const dateColor = isOverdue ? 'text-rose-500 animate-pulse' : 'text-slate-400';
+
+        return `
+            <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${a.status === 'Graded' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}">
+                        ${a.status}
+                    </span>
+                    <button onclick="deleteAssignment(${a.id})" class="text-rose-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 leading-tight uppercase mb-1">${a.title}</h3>
+                <p class="text-xs text-slate-500 mb-6 font-medium line-clamp-2">${a.description}</p>
+                
+                <div class="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <div>
+                        <p class="text-[9px] font-black text-slate-300 uppercase">Deadline</p>
+                        <p class="text-xs font-black ${dateColor}">${a.dueDate} ${isOverdue ? '⚠️' : ''}</p>
+                    </div>
+                    <button onclick="downloadFile('${a.content}', '${a.title}')" class="h-10 w-10 rounded-xl bg-slate-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition flex items-center justify-center">
+                        <i class="fas fa-download text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// FORM SUBMISSION
+document.getElementById('assignmentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setBtnLoading('submitAssignmentBtn', true);
+
+    const fileInput = document.getElementById('fileInput');
+    let base64File = "";
+
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        base64File = await new Promise((resolve) => {
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    const payload = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        dueDate: document.getElementById('dueDate').value,
+        status: document.getElementById('status').value,
+        content: base64File 
+    };
+
+    const studId = student.studId || student.id || 16;
+
+    try {
+        const res = await fetch(`${ASSIGNMENT_API}/submit/${studId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            toggleAssignmentModal(false);
+            loadAssignments();
+            e.target.reset();
+        }
+    } catch (err) {
+        alert("Server Error: Check connection.");
+    } finally {
+        setBtnLoading('submitAssignmentBtn', false);
+    }
+});
+
+// UTILS
+function toggleAssignmentModal(show) {
+    const modal = document.getElementById('assignmentModal');
+    if (show) {
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.querySelector('.bg-white').classList.add('scale-100'), 10);
+    } else {
+        modal.querySelector('.bg-white').classList.remove('scale-100');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+}
+
+function filterAssignments() {
+    const term = document.getElementById('assignmentSearch').value.toLowerCase();
+    renderAssignmentCards(allAssignments.filter(a => a.title.toLowerCase().includes(term)));
+}
+
+async function deleteAssignment(id) {
+    if(confirm("Permanently delete this submission?")) {
+        await fetch(`${ASSIGNMENT_API}/delete/${id}`, { method: 'DELETE' });
+        loadAssignments();
+    }
+}
+
+function downloadFile(base64, name) {
+    if(!base64 || base64 === "null") return alert("No file found!");
+    const link = document.createElement("a");
+    link.href = base64;
+    link.download = `Submission_${name.replace(/\s+/g, '_')}.pdf`;
+    link.click();
 }
         function logout() { localStorage.clear(); window.location.href = "stud-auth.html"; }
 
