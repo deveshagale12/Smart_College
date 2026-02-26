@@ -1545,36 +1545,48 @@ function renderAssignmentTable(dataToRender) {
 }
 
 // OPEN MODAL & POPULATE DATA
+// OPEN MODAL & POPULATE DATA
 function openGradeModal(id) {
     const a = assignments.find(x => x.id === id);
     if (!a) return;
     activeReviewId = id;
 
-    // Safety assignments for elements
+    // 1. Text Details
     document.getElementById('revTitle').innerText = a.title || "Untitled Task";
-    document.getElementById('revContent').innerText = a.content || "No text description provided by student.";
- // Good
-    marks: parseInt(document.getElementById('gradeMarks').value)
+    
+    // Note: If 'content' contains the PDF Base64, you might not want to show 
+    // the raw code in 'revContent'. Using description instead if available.
+    document.getElementById('revContent').innerText = a.description || "No description provided.";
+
+    // 2. Input Values (Added check for existing marks)
+    document.getElementById('gradeMarks').value = a.marks !== null ? a.marks : "";
     document.getElementById('gradeStatus').value = a.status || "Submitted";
     document.getElementById('gradeFeedback').value = a.feedback || "";
 
-    // File Handling
+    // 3. File Handling (CRITICAL FIX: Changed fileData to content)
     const btn = document.getElementById('downloadBtn');
-    if(a.fileData && btn) {
+    
+    // We check if 'content' exists and looks like a Base64 PDF
+    if(a.content && a.content.includes("base64")) {
         btn.onclick = () => {
             const link = document.createElement('a');
-            link.href = a.fileData;
-            link.download = `Student_${a.student ? a.student.studId : 'Work'}.pdf`;
+            link.href = a.content; // This is the Base64 string
+            link.download = `Submission_Student_${a.student ? a.student.studId : id}.pdf`;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         };
-        btn.className = "flex-1 bg-slate-900 text-white py-5 rounded-2xl font-black text-xs hover:bg-black transition";
-    } else if (btn) {
-        btn.onclick = () => alert("No file attached!");
+        btn.innerHTML = `<i class="fas fa-file-pdf mr-2"></i> DOWNLOAD PDF`;
+        btn.className = "flex-1 bg-emerald-600 text-white py-5 rounded-2xl font-black text-xs hover:bg-emerald-700 transition shadow-lg";
+    } else {
+        btn.onclick = () => alert("Student did not upload a PDF file.");
+        btn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> NO FILE FOUND`;
         btn.className = "flex-1 bg-slate-200 text-slate-400 py-5 rounded-2xl font-black text-xs cursor-not-allowed";
     }
 
     document.getElementById('gradeModal').classList.remove('hidden');
 }
+
 
 // SUBMIT TO SPRING BOOT
 async function submitGrade() {
