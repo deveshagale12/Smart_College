@@ -11,13 +11,26 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0;
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin: 0;
+            padding: 20px;
         }
         .auth-card {
-            background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 100%; max-width: 500px; padding: 30px; position: relative;
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%; 
+            max-width: 500px; 
+            padding: 40px; 
+            position: relative;
+            transition: all 0.3s ease;
         }
         .hidden { display: none !important; }
+        
+        /* Loader Styles */
         #loader-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.95);
@@ -25,8 +38,29 @@
         }
         #loader-overlay.active { display: flex; }
         .success-checkmark { font-size: 5rem; color: #198754; display: none; animation: scaleIn 0.3s ease-out; }
+        
         @keyframes scaleIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        .btn-link { color: #667eea; font-size: 0.85rem; text-decoration: none; font-weight: 600; }
+        
+        /* Design Improvements */
+        .btn-link { 
+            color: #667eea; 
+            font-size: 0.85rem; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: 0.2s;
+        }
+        .btn-link:hover { color: #764ba2; text-decoration: underline; }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary { background: #667eea; border: none; }
+        .btn-primary:hover { background: #5a6fd6; }
+        
+        .back-nav {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -35,24 +69,24 @@
         <div id="spinner-icon" class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem;"></div>
         <div id="success-icon" class="success-checkmark">✓</div>
         <h4 id="loader-text" class="mt-4 text-primary">Processing...</h4>
+        <p id="loader-subtext" class="text-muted small">This may take a moment if the server is waking up.</p>
     </div>
 
-   <div class="auth-card">
-    <div class="mb-3">
-        <a href="home.html" class="btn-link d-inline-flex align-items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-            </svg>
-            Back to Home
-        </a>
-    </div>
+    <div class="auth-card">
+        <div class="back-nav">
+            <a href="home.html" class="btn-link d-inline-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                Back to Home
+            </a>
+        </div>
 
-    <div class="text-center mb-4">
-        <h2 id="form-title" class="fw-bold text-dark">Faculty Login</h2>
-        <p class="text-muted" id="form-subtitle">Access your dashboard</p>
-    </div>
-    
-    </div>
+        <div class="text-center mb-4">
+            <h2 id="form-title" class="fw-bold text-dark">Faculty Login</h2>
+            <p class="text-muted" id="form-subtitle">Access your dashboard</p>
+        </div>
+
         <form id="login-form" onsubmit="handleAuth(event, 'login')">
             <div class="form-floating mb-3">
                 <input type="email" class="form-control" id="login-email" placeholder="name@university.edu" required>
@@ -71,21 +105,39 @@
 
         <form id="register-form" class="hidden" onsubmit="handleAuth(event, 'register')">
             <div class="row g-2">
-                <div class="col-md-6 mb-3"><input type="text" id="reg-id" class="form-control" placeholder="ID (FAC-01)" required></div>
-                <div class="col-md-6 mb-3"><input type="text" id="reg-name" class="form-control" placeholder="Full Name" required></div>
+                <div class="col-md-6 mb-3">
+                    <label class="small fw-bold text-muted">Faculty ID</label>
+                    <input type="text" id="reg-id" class="form-control" placeholder="FAC-01" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="small fw-bold text-muted">Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="Dr. Smith" required>
+                </div>
             </div>
-            <input type="email" id="reg-email" class="form-control mb-3" placeholder="Official Email" required>
-            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Password" required>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">Email</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="official@university.edu" required>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted">Password</label>
+                <input type="password" id="reg-pass" class="form-control" placeholder="••••••••" required>
+            </div>
             <div class="row g-2 mb-3">
-                <div class="col-6"><input type="text" id="reg-sub" class="form-control" placeholder="Subject"></div>
-                <div class="col-6"><input type="text" id="reg-occ" class="form-control" placeholder="Occupation"></div>
+                <div class="col-6">
+                    <label class="small fw-bold text-muted">Subject</label>
+                    <input type="text" id="reg-sub" class="form-control" placeholder="Physics">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold text-muted">Occupation</label>
+                    <input type="text" id="reg-occ" class="form-control" placeholder="Professor">
+                </div>
             </div>
             <button type="submit" class="btn btn-success btn-lg w-100 shadow-sm">Register</button>
             <p class="text-center mt-4 text-muted small">Already registered? <a href="javascript:void(0)" onclick="toggleSection('login')" class="btn-link">Login</a></p>
         </form>
 
         <form id="forgot-form" class="hidden" onsubmit="handleReset(event)">
-            <p class="text-sm text-center mb-4">Enter your registered email to reset your password.</p>
+            <p class="text-sm text-center mb-4 text-muted">Enter your registered email to reset your password.</p>
             <div class="form-floating mb-3">
                 <input type="email" id="reset-email" class="form-control" placeholder="name@example.com" required>
                 <label>Email Address</label>
@@ -108,13 +160,24 @@
             document.getElementById(`${view}-form`).classList.remove('hidden');
             
             const titles = { login: "Faculty Login", register: "Faculty Registration", forgot: "Reset Password" };
+            const subtitles = { login: "Access your dashboard", register: "Join the faculty network", forgot: "Secure your account" };
+            
             document.getElementById('form-title').innerText = titles[view];
+            document.getElementById('form-subtitle').innerText = subtitles[view];
         }
 
         async function handleAuth(event, type) {
             event.preventDefault();
             const loader = document.getElementById('loader-overlay');
+            const spinner = document.getElementById('spinner-icon');
+            const success = document.getElementById('success-icon');
+            const statusText = document.getElementById('loader-text');
+            
+            // Show Loader
             loader.classList.add('active');
+            spinner.classList.remove('d-none');
+            success.style.display = 'none';
+            statusText.innerText = type === 'login' ? "Authenticating..." : "Creating Account...";
             
             const url = `${BASE_URL}/api/faculty/${type}`;
             const payload = type === 'login' ? {
@@ -139,12 +202,16 @@
                 if (response.ok) {
                     const data = await response.json();
                     localStorage.setItem('facultySession', JSON.stringify(data));
-                    document.getElementById('spinner-icon').classList.add('d-none');
-                    document.getElementById('success-icon').style.display = 'block';
-                    document.getElementById('loader-text').innerText = "Redirecting...";
-                    setTimeout(() => window.location.href = "facultydashboard.html", 1500);
+                    
+                    // Show Success UI
+                    spinner.classList.add('d-none');
+                    success.style.display = 'block';
+                    statusText.innerText = type === 'login' ? "Welcome Back!" : "Account Created!";
+                    
+                    setTimeout(() => window.location.href = "facultydashboard.html", 1200);
                 } else {
-                    throw new Error(await response.text());
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Authentication Failed");
                 }
             } catch (error) {
                 loader.classList.remove('active');
@@ -156,35 +223,36 @@
             event.preventDefault();
             const loader = document.getElementById('loader-overlay');
             const statusText = document.getElementById('loader-text');
+            const spinner = document.getElementById('spinner-icon');
+            const success = document.getElementById('success-icon');
             
-            const email = document.getElementById('reset-email').value;
-            const newPassword = document.getElementById('new-pass').value;
-
             loader.classList.add('active');
+            spinner.classList.remove('d-none');
+            success.style.display = 'none';
             statusText.innerText = "Updating Password...";
 
             try {
                 const response = await fetch(`${BASE_URL}/api/faculty/reset-password`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, password: newPassword })
+                    body: JSON.stringify({ 
+                        email: document.getElementById('reset-email').value, 
+                        password: document.getElementById('new-pass').value 
+                    })
                 });
 
                 if (response.ok) {
-                    document.getElementById('spinner-icon').classList.add('d-none');
-                    document.getElementById('success-icon').style.display = 'block';
-                    statusText.innerText = "Success! Please Login.";
+                    spinner.classList.add('d-none');
+                    success.style.display = 'block';
+                    statusText.innerText = "Password Updated!";
                     
                     setTimeout(() => {
                         loader.classList.remove('active');
                         toggleSection('login');
-                        // Reset loader for next use
-                        document.getElementById('spinner-icon').classList.remove('d-none');
-                        document.getElementById('success-icon').style.display = 'none';
                     }, 2000);
                 } else {
                     const errorMsg = await response.text();
-                    throw new Error(errorMsg);
+                    throw new Error(errorMsg || "Reset Failed");
                 }
             } catch (error) {
                 loader.classList.remove('active');
