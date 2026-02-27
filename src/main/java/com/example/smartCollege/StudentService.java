@@ -2,7 +2,7 @@ package com.smartCollege;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.scheduling.annotation.Async;
+
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 	    
 	    @Autowired
 	    private EmailService emailService;
-	@Async
+
 	    public Student registerStudent(Student student) {
 	        // 1. Check if the email is already in the database
 	        Optional<Student> existingStudent = repository.findByEmail(student.getEmail());
