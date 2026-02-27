@@ -38,8 +38,8 @@ public class AttendanceController {
     
  // --- TEMPORARY TESTING CONFIGURATION ---
  // Replace these with your current home/office coordinates
- private final double COLLEGE_LAT = 19.129892; // Your current Lat
- private final double COLLEGE_LON = 74.190626; // Your current Lon
+ private final double COLLEGE_LAT = 18.5616;  //19.129892; // Your current Lat
+ private final double COLLEGE_LON = 73.9143;  ////74.190626; // Your current Lon
  private final double MAX_DISTANCE_METERS = 5000.0; // Keep it tight for testing
  
  @PostMapping("/mark/{studId}")
