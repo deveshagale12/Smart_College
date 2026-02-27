@@ -17,26 +17,41 @@
             background: white; border-radius: 12px;
             width: 100%; max-width: 450px; padding: 40px;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
         .btn-admin { background: #4f46e5; color: white; border: none; }
         .btn-admin:hover { background: #4338ca; color: white; }
         .hidden { display: none; }
+        
+        /* Back button styling */
+        .back-link {
+            text-decoration: none;
+            color: #9ca3af;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover {
+            color: #4f46e5;
+        }
     </style>
 </head>
 <body>
 
     <div class="admin-card">
+        <a href="home.html" class="back-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+            </svg>
+            Back to Home
+        </a>
+
         <div class="text-center mb-4">
             <h2 id="title" class="fw-bold text-dark">Admin Login</h2>
             <p id="subtitle" class="text-muted">Access the master control panel</p>
-            <div class="px-8 pt-6">
-    <a href="home.html" class="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors group">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Home
-    </a>
-</div>
         </div>
 
         <form id="login-form" onsubmit="handleAdminAuth(event, 'login')">
@@ -81,13 +96,12 @@
     </div>
 
     <script>
-        function toggleForms() {
+       function toggleForms() {
             document.getElementById('login-form').classList.toggle('hidden');
             document.getElementById('reg-form').classList.toggle('hidden');
             const isLogin = !document.getElementById('login-form').classList.contains('hidden');
             document.getElementById('title').innerText = isLogin ? "Admin Login" : "Admin Registration";
         }
-
         async function handleAdminAuth(event, type) {
             event.preventDefault();
             const url = type === 'login' ? 'https://smart-college.onrender.com/api/admin/login' : 'https://smart-college.onrender.com/api/admin/register';
