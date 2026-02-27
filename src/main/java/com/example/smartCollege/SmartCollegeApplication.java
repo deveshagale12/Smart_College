@@ -4,8 +4,10 @@ package com.smartCollege;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Async;
 @SpringBootApplication
 @EnableScheduling
+@EnableAsync
 public class SmartCollegeApplication {
 
 	public static void main(String[] args) {
