@@ -1294,67 +1294,91 @@ async function deletePayment(paymentId, studId) {
     
  // Ensure this is outside any other curly braces { }
 async function downloadMasterReport() {
-            const btn = document.getElementById('masterBtn');
-            const icon = document.getElementById('masterIcon');
-            const text = document.getElementById('masterText');
+    const btn = document.getElementById('masterBtn');
+    const icon = document.getElementById('masterIcon');
+    const text = document.getElementById('masterText');
+    const API = "https://smart-college.onrender.com"; // Double-check this base URL
 
-            // Check if XLSX is ready
-            if (typeof XLSX === 'undefined') {
-                alert("Excel library blocked. Please refresh or check browser settings.");
-                return;
+    if (typeof XLSX === 'undefined') {
+        alert("Excel library blocked. Please refresh.");
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        icon.className = "fas fa-spinner fa-spin text-blue-400";
+        text.innerText = "COLLECTING DATA...";
+
+        // Improved Fetch with detailed logging
+        const fetchResource = async (endpoint) => {
+            console.log(`Fetching: ${API}${endpoint}`);
+            const response = await fetch(`${API}${endpoint}`, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!response.ok) {
+                console.warn(`Failed to fetch ${endpoint}: ${response.status}`);
+                return []; // Return empty array so the report doesn't crash
             }
+            return await response.json();
+        };
 
-            try {
-                // UI Loading State
-                btn.disabled = true;
-                icon.className = "fas fa-spinner fa-spin text-blue-400";
-                text.innerText = "GENERATING...";
+        // Fetching in parallel
+        const [students, fees, academics] = await Promise.all([
+            fetchResource('/college/students/all'),
+            fetchResource('/college/fees/all'),
+            fetchResource('/college/academic/all')
+        ]);
 
-                // Fetching all data in parallel
-                const [sRes, fRes, aRes] = await Promise.all([
-                    fetch(`${API}/college/students/all`),
-                    fetch(`${API}/college/fees/all`),
-                    fetch(`${API}/college/academic/all`)
-                ]);
-
-                // Map results or empty array if failed
-                const students = sRes.ok ? await sRes.json() : [];
-                const fees = fRes.ok ? await fRes.json() : [];
-                const academics = aRes.ok ? await aRes.json() : [];
-
-                const wb = XLSX.utils.book_new();
-
-                // 1. Students Sheet
-                const wsStud = XLSX.utils.json_to_sheet(students.map(s => ({
-                    ID: s.studId, Name: s.name, Dept: s.department, Email: s.email
-                })));
-                XLSX.utils.book_append_sheet(wb, wsStud, "Students");
-
-                // 2. Fees Sheet (with nested data mapping)
-                const wsFees = XLSX.utils.json_to_sheet(fees.map(f => ({
-                    ID: f.student?.studId || "N/A", Name: f.student?.name || "N/A", 
-                    Total: f.totalAmount, Paid: f.paidAmount, Due: f.dueAmount
-                })));
-                XLSX.utils.book_append_sheet(wb, wsFees, "Finance");
-
-                // 3. Academic Sheet
-                const wsAcad = XLSX.utils.json_to_sheet(academics.map(a => ({
-                    ID: a.student?.studId || "N/A", Course: a.courseName, Year: a.currentYear, Status: a.status
-                })));
-                XLSX.utils.book_append_sheet(wb, wsAcad, "Academics");
-
-                XLSX.writeFile(wb, "College_Master_Backup.xlsx");
-
-            } catch (err) {
-                console.error(err);
-                alert("Master Export Failed: One or more server endpoints failed.");
-            } finally {
-                // Reset UI
-                btn.disabled = false;
-                icon.className = "fas fa-database text-blue-400";
-                text.innerText = "MASTER EXCEL BACKUP";
-            }
+        // Check if we actually got data
+        if (students.length === 0 && fees.length === 0 && academics.length === 0) {
+            throw new Error("No data found on server.");
         }
+
+        const wb = XLSX.utils.book_new();
+
+        // 1. Students Sheet
+        const wsStud = XLSX.utils.json_to_sheet(students.map(s => ({
+            ID: s.studId || s.id || "N/A", 
+            Name: s.fullName || s.name || "N/A", 
+            Dept: s.department || s.course || "N/A", 
+            Email: s.email 
+        })));
+        XLSX.utils.book_append_sheet(wb, wsStud, "Students");
+
+        // 2. Finance Sheet
+        const wsFees = XLSX.utils.json_to_sheet(fees.map(f => ({
+            Student_ID: f.student?.studId || "N/A", 
+            Total: f.totalAmount || 0, 
+            Paid: f.paidAmount || 0, 
+            Due: (f.totalAmount - f.paidAmount) || 0
+        })));
+        XLSX.utils.book_append_sheet(wb, wsFees, "Finance");
+
+        // 3. Academic Sheet
+        const wsAcad = XLSX.utils.json_to_sheet(academics.map(a => ({
+            ID: a.student?.studId || "N/A", 
+            Course: a.courseName || "N/A", 
+            Year: a.currentYear || "N/A", 
+            Status: a.status || "N/A"
+        })));
+        XLSX.utils.book_append_sheet(wb, wsAcad, "Academics");
+
+        XLSX.writeFile(wb, "College_Master_Backup.xlsx");
+        text.innerText = "DOWNLOADED!";
+
+    } catch (err) {
+        console.error("Master Export Error:", err);
+        alert("Export Failed: " + err.message);
+    } finally {
+        setTimeout(() => {
+            btn.disabled = false;
+            icon.className = "fas fa-database text-blue-400";
+            text.innerText = "MASTER EXCEL BACKUP";
+        }, 2000);
+    }
+}
+
 
         
         ///attendance 
