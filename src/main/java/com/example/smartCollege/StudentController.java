@@ -22,20 +22,46 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepo;
     
-    @PostMapping("/register")
-    public ResponseEntity<?> createStudent(@RequestBody Student student) {
-        try {
-            Student savedStudent = service.registerStudent(student);
+   //** */ @PostMapping("/register")
+   // public ResponseEntity<?> createStudent(@RequestBody Student student) {
+       // try {
+        //    Student savedStudent = service.registerStudent(student);
             // Returns 201 Created status, which is more REST-compliant for registration
-            return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
-        } catch (EmailAlreadyExistsException e) {
+         //   return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
+       // } catch (EmailAlreadyExistsException e) {
             // Returns 409 Conflict with the custom error message
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
+           // return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+      //  } catch (Exception e) {
             // Catches any other unexpected errors
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
-        }
+        //    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+      //  }
+    //}
+
+    @PostMapping("/register")
+public ResponseEntity<?> createStudent(@RequestBody Student student) {
+    try {
+        // Log the attempt
+        System.out.println("Attempting to register student: " + student.getEmail());
+        
+        Student savedStudent = service.registerStudent(student);
+        
+        // Log the success
+        System.out.println("Student registered successfully: " + savedStudent.getStudId());
+        
+        // Return 201 Created
+        return new ResponseEntity<>(savedStudent, HttpStatus.CREATED);
+    } catch (EmailAlreadyExistsException e) {
+        // Return 409 Conflict
+        System.err.println("Registration failed: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    } catch (Exception e) {
+        // Return 500 Internal Server Error with specific details
+        System.err.println("Unexpected error: " + e.getMessage());
+        e.printStackTrace(); // Log full stack trace for debugging
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body("Registration failed due to a server error.");
     }
+}
     public class EmailAlreadyExistsException extends RuntimeException {
         public EmailAlreadyExistsException(String message) {
             super(message);
